@@ -2,6 +2,11 @@
   <v-container fluid>
     <Headerestudiantes />
 
+ <v-col cols="12" align="center">
+
+<v-col cols="6">
+
+
     <v-card color="grey darken-3" dark style="padding:30px"> 
     
    
@@ -60,7 +65,8 @@
       <v-btn rounded color="primary" dark>siguiente</v-btn>
 </div>
     </v-card> 
- 
+</v-col>
+</v-col>
   </v-container>
 </template>
 

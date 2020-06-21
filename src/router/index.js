@@ -10,6 +10,7 @@ import editUser from "../views/editUser.vue";
 import editProfile from "../views/editProfile.vue";
 import Home1 from "../views/Home1.vue";
 import reservaEstudiante from "../views/reservaEstudiante.vue";
+import Addnewsala from "../views/Addnewsala.vue";
 
 
 Vue.use(VueRouter);
@@ -98,6 +99,14 @@ const routes = [
     path: "/reservaestudiante",
     name: "reservaestudiante",
     component: reservaEstudiante,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/addnewsala",
+    name: "addnewsala",
+    component: Addnewsala,
     meta: {
       requiresAuth: false
     },

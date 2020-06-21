@@ -1,5 +1,6 @@
 <template>
-  <v-container>
+  <v-container fluid>
+    <Headerhome/>
     <v-row>
       <v-col>
         <v-card color="#424242" style="padding-left:30px">
@@ -141,7 +142,11 @@
 </template>
 
 <script>
+import Headerhome from "@/components/Headerhome.vue";
 export default {
+    components: {
+    Headerhome
+  },
   data: () => ({
     today: "2019-01-08",
     numeroRules: [
