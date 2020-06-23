@@ -22,7 +22,7 @@
     <v-navigation-drawer v-model="drawer" absolute temporary dark>
       <v-list nav dense>
         <v-list-item-group
-          v-model="group"
+     
           active-class="red darken-4--text text--accent-4"
         >
           <div class="text-center">

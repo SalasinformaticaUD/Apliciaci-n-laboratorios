@@ -32,12 +32,9 @@
 
       <v-list nav dense>
         <v-card color="red darken-4" dark>
-          <v-list-item-group
-            v-model="group"
-            active-class="white--text text--accent-4"
-          >
+          <v-list-item-group active-class="white--text text--accent-4">
             <v-card color="red darken-4">
-              <v-list-item to= '/consultalabo'>
+              <v-list-item to="/consultalabo">
                 <v-list-item-icon>
                   <v-icon>mdi-home</v-icon>
                 </v-list-item-icon>
@@ -57,11 +54,7 @@
                   </v-list-item-content>
                 </template>
 
-                <v-list-item
-                  v-for="(consulta, i) in Consultainvs"
-                  :key="i"
-                  link
-                >
+                <v-list-item v-for="(consulta, i) in Consultainvs" :key="i" link>
                   <v-list-item-title v-text="consulta[0]"></v-list-item-title>
                   <v-list-item-icon>
                     <v-icon v-text="consulta[1]"></v-icon>
@@ -109,8 +102,8 @@
                   v-for="(Gestion, i) in GestionProfiles"
                   :key="i"
                   link
-                  router :to = Gestion[1]
-                 
+                  router
+                  :to="Gestion[1]"
                 >
                   <v-list-item-title v-text="Gestion[0]"></v-list-item-title>
 
@@ -122,9 +115,7 @@
             </v-card>
 
             <v-card color="red darken-4">
-              <v-list-item
-              to= "/home"
-              >
+              <v-list-item to="/home">
                 <v-list-item-icon>
                   <v-icon></v-icon>
                 </v-list-item-icon>
@@ -148,9 +139,7 @@ export default {
       ["Modificación de Articulo", ""]
     ],
     Reports: [["Generación de infromes", ""]],
-    GestionProfiles: [
-      ["Editar perfil", '/editprofile']
-    ],
+    GestionProfiles: [["Editar perfil", "/editprofile"]],
     drawer: false
   })
 };

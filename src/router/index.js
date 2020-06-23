@@ -5,13 +5,14 @@ import HomeLaboratorista from "../views/HomeLaboratorista.vue";
 import consultayCancelacion from "../views/consultayCancelacion.vue";
 import consultasycancelacionlabo from "../views/consultasycancelacionlabo.vue";
 import registroUser from "../views/registroUser.vue";
-import prueba from "../views/prueba.vue";
 import editUser from "../views/editUser.vue";
 import editProfile from "../views/editProfile.vue";
 import Home1 from "../views/Home1.vue";
 import reservaEstudiante from "../views/reservaEstudiante.vue";
 import Addnewsala from "../views/Addnewsala.vue";
-
+import studentpass from "../views/studentpass.vue";
+import editprofilelab from "../views/editprofilelab.vue";
+import consultareslabo from "../views/consultareslabo.vue";
 
 Vue.use(VueRouter);
 
@@ -25,6 +26,11 @@ const routes = [
     path: "/homel",
     name: "HomeLaboratorista",
     component: HomeLaboratorista
+  },
+  {
+    path: "/studentpass",
+    name: "studentpass",
+    component: studentpass
   },
   {
     path: "/homea",
@@ -53,15 +59,7 @@ const routes = [
     component: registroUser,
     meta: {
       requiresAuth: false
-    },
-  },
-  {
-    path: "/prueba",
-    name: "prueba",
-    component: prueba,
-    meta: {
-      requiresAuth: false
-    },
+    }
   },
   {
     path: "/edituser",
@@ -99,6 +97,23 @@ const routes = [
     path: "/reservaestudiante",
     name: "reservaestudiante",
     component: reservaEstudiante,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/consultalabo",
+    name: "consultalabo",
+    component: consultareslabo,
+    meta: {
+      requiresAuth: false
+    }
+  },
+
+  {
+    path: "/editprofilelab",
+    name: "editprofilelab",
+    component: editprofilelab,
     meta: {
       requiresAuth: false
     },

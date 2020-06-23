@@ -33,7 +33,6 @@
       <v-list nav dense>
         <v-card color="red darken-4" dark>
           <v-list-item-group
-            v-model="group"
             active-class="white--text text--accent-4"
           >
             <v-card color="red darken-4">

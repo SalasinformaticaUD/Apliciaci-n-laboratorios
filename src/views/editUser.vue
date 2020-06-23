@@ -16,7 +16,7 @@
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark class="mb-2" v-on="on">Nuevo usuario</v-btn>
+              <v-btn color="primary" dark class="mb-2" to='/registrouser'>Nuevo usuario</v-btn>
             </template>
             <v-card>
               <v-card-title>
@@ -27,19 +27,13 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.name" label="Nombre Laboratorista"></v-text-field>
+                      <v-text-field v-model="editedItem.usuario" label="Nombre Laboratorista"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.calories" label="Correo"></v-text-field>
+                      <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.fat" label="Telefono"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.carbs" label="Identificación"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.protein" label="Clave"></v-text-field>
+                      <v-text-field v-model="contraseña" label="Clave"></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -47,8 +41,8 @@
 
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+                <v-btn color="blue darken-1" text @click="close">Cancelar</v-btn>
+                <v-btn color="blue darken-1" text @click="save(item)">Guardar</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -56,7 +50,8 @@
       </template>
       <template v-slot:item.actions="{ item }">
         <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
-        <v-icon small @click="deleteItem(item)">fas fa-trash</v-icon>
+        <v-icon small class="mr-2" @click="activeItem(item)">fas fa-check-circle</v-icon>
+        <v-icon small class="mr-2" @click="desactiveItem(item)">fas fa-times-circle</v-icon>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -72,6 +67,9 @@ export default {
     HeaderAdmin
   },
   data: () => ({
+    return: {
+      contraseña:""      
+    },
     dialog: false,
     headers: [
       {
@@ -81,19 +79,13 @@ export default {
         value: "correo"
       },
       { text: "Usuario", value: "usuario" },
-      { text: "Telefono", value: "telefono" },
-      { text: "Identificación", value: "identificacion" },
-      { text: "Banco", value: "" },
+      { text: "Identificacion", value: "identificacion" },
+      { text: "Estado", value: "estado" },
       { text: "Actions", value: "actions", sortable: false }
     ],
     usuariolab: [],
     editedIndex: -1,
     editedItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0
     },
     defaultItem: {
       name: "",
@@ -106,7 +98,7 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1 ? "New Item" : "Editar Usuario";
     }
   },
 
@@ -126,25 +118,28 @@ export default {
     },
 
     editItem(item) {
+      
       this.editedIndex = this.usuariolab.indexOf(item);
+ 
+      this.contraseña = this.contraseña;
+
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
-    deleteItem(item) {
-      var confirmacion = confirm("¿Esta seguro de eliminar este usuario?");
+    desactiveItem(item) {
+      var confirmacion = confirm("¿Esta seguro de desactivar este usuario?");
 
       if (confirmacion) {
         const index = this.usuariolab.indexOf(item);
-        this.usuario = this.usuariolab[index].usuario;
+        this.codigo = this.usuariolab[index].identificacion;
 
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/borrar",
+            "http://giovannygz.ddns.net:5000/Usuario/desactivar",
             {
-              usuario: objeto.usuario
-              
+              codigo: objeto.codigo
             },
             {
               headers: {
@@ -157,13 +152,52 @@ export default {
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
-              objeto.usuariolab.splice(index, 1);
+              //   objeto.usuariolab.splice(index, 1);
+              objeto.buscar();
+            }
+          })
+          
+          .catch(function(error) {
+            alert(error);
+          });
+      }
+
+    },
+
+    activeItem(item) {
+      var confirmacion = confirm("¿Esta seguro de activar este usuario?");
+
+      if (confirmacion) {
+        const index = this.usuariolab.indexOf(item);
+        this.codigo = this.usuariolab[index].identificacion;
+
+        let objeto = this;
+        this.axios
+          .post(
+            "http://giovannygz.ddns.net:5000/Usuario/activar",
+            {
+              codigo: objeto.codigo
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(function(response) {
+            var respuesta = response.data.mensaje;
+            var status = response.data.status;
+            if (status == "1") {
+              alert(respuesta);
+              //   objeto.usuariolab.splice(index, 1);
+              objeto.buscar();
             }
           })
           .catch(function(error) {
             alert(error);
           });
       }
+     
     },
 
     close() {
@@ -175,23 +209,58 @@ export default {
     },
 
     save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.usuariolab[this.editedIndex], this.editedItem);
-      } else {
-        this.usuariolab.push(this.editedItem);
+      var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
+  
+    
+      this.usuario = this.editedItem.usuario;
+      this.codigo = this.editedItem.identificacion;
+      this.correo = this.editedItem.correo;
+      
+      if (confirmacion) {
+        let objeto = this;
+        this.axios
+          .post(
+            "http://giovannygz.ddns.net:5000/Usuario/editaruser",
+            {
+              codigo: objeto.codigo,
+              usuario: objeto.usuario,
+              contraseña: objeto.contraseña,
+              correo: objeto.correo
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(function(response) {
+            var respuesta = response.data.mensaje;
+            var status = response.data.status;
+            if (status == "1") {
+              alert(respuesta);
+              objeto.buscar();
+              //   objeto.usuariolab.splice(index, 1);
+            }
+          })
+          .catch(function(error) {
+            alert(error);
+          });
       }
+      this.buscar();
       this.close();
+
     },
     buscar() {
       let objeto = this;
       this.axios
-        .get("http://giovannygz.ddns.net:5000/Usuario/registrar", {
+        .get("http://giovannygz.ddns.net:5000/Usuario/consultarLabo", {
           headers: {
             "Content-Type": "application/json"
           }
         })
         .then(function(response) {
           objeto.usuariolab = response.data.data;
+          console.log(objeto.usuariolab);
         })
         .catch(function(error) {
           objeto.output = error;

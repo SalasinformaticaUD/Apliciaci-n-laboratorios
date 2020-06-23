@@ -2,9 +2,22 @@
   <v-container fluid>
     <Headerestudiantes />
 
+    <v-card>
+    <v-card-title>
+      Reservas
+      <v-spacer></v-spacer>
+      <v-text-field
+        v-model="search"
+        append-icon="fas far-search"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+    </v-card-title>
     <v-data-table
       :headers="headers"
       :items="usuariolab"
+      :search="search"
       sort-by="calories"
       class="elevation-1"
       color="background"
@@ -56,6 +69,7 @@
         <v-btn color="primary" @click="initialize">Reset</v-btn>
       </template>
     </v-data-table>
+    </v-card>
   </v-container>
 </template>
 
@@ -67,13 +81,16 @@ export default {
   },
   data: () => ({
     dialog: false,
+    search: "",
     headers: [
       {
-        text: "Hora",
+        text: "Usuario",
         align: "start",
         sortable: false,
-        value: "hora"
+        value: "usuario"
       },
+      { text: "Codigo", value: "codigo" },
+      { text: "Hora", value: "hora" },
       { text: "Dia", value: "dia" },
       { text: "Fecha Adicional", value: "fecha_adicional" },
       { text: "Fecha Reserva", value: "fecha_reserva" },
@@ -226,11 +243,8 @@ export default {
     buscar() {
       let objeto = this;
       this.axios
-        .post(
-          "http://giovannygz.ddns.net:5000/Usuario/buscarreserva",
-          {
-            codigo: "20201195009"
-          },
+        .get(
+          "http://giovannygz.ddns.net:5000/Usuario/buscarreservalabo",
           {
             headers: {
               "Content-Type": "application/json"

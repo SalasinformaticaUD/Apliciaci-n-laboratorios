@@ -1,24 +1,22 @@
 <template>
   <v-container fluid>
-    <Headerestudiantes />
+    <HeaderAdmin />
 
     <v-data-table
       :headers="headers"
-      :items="desserts"
+      :items="usuariolab"
       sort-by="calories"
       class="elevation-1"
       color="background"
     >
       <template v-slot:top>
         <v-toolbar flat color="white">
-          <v-toolbar-title>My CRUD</v-toolbar-title>
+          <v-toolbar-title>Edición y eliminación</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark class="mb-2" v-on="on"
-                >New Item</v-btn
-              >
+              <v-btn color="primary" dark class="mb-2" v-on="on">Nuevo usuario</v-btn>
             </template>
             <v-card>
               <v-card-title>
@@ -29,34 +27,19 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.name"
-                        label="Dessert name"
-                      ></v-text-field>
+                      <v-text-field v-model="editedItem.name" label="Nombre Laboratorista"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.calories"
-                        label="Calories"
-                      ></v-text-field>
+                      <v-text-field v-model="editedItem.calories" label="Correo"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.fat"
-                        label="Fat (g)"
-                      ></v-text-field>
+                      <v-text-field v-model="editedItem.fat" label="Telefono"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.carbs"
-                        label="Carbs (g)"
-                      ></v-text-field>
+                      <v-text-field v-model="editedItem.carbs" label="Identificación"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.protein"
-                        label="Protein (g)"
-                      ></v-text-field>
+                      <v-text-field v-model="editedItem.protein" label="Clave"></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -83,10 +66,10 @@
 </template>
 
 <script>
-import Headerestudiantes from "@/components/Headerestudiantes.vue";
+import HeaderAdmin from "@/components/HeaderAdmin.vue";
 export default {
   components: {
-    Headerestudiantes
+    HeaderAdmin
   },
   data: () => ({
     dialog: false,
@@ -98,12 +81,11 @@ export default {
         value: "correo"
       },
       { text: "Usuario", value: "usuario" },
-      { text: "Telefono", value: "telefono" },
-      { text: "Identificación", value: "identificacion" },
-      { text: "Banco", value: "" },
-      { text: "Actions", value: "", sortable: false }
+      { text: "Identificacion", value: "identificacion" },
+      { text: "Estado", value: "estado" },
+      { text: "Actions", value: "actions", sortable: false }
     ],
-    desserts: [],
+    usuariolab: [],
     editedIndex: -1,
     editedItem: {
       name: "",
@@ -139,21 +121,48 @@ export default {
 
   methods: {
     initialize() {
-      this.desserts = [
-            ],
-      this.buscar();       
+      (this.usuariolab = []), this.buscar();
     },
 
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.usuariolab.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      const index = this.desserts.indexOf(item);
-      confirm("Are you sure you want to delete this item?") &&
-        this.desserts.splice(index, 1);
+      var confirmacion = confirm("¿Esta seguro de eliminar este usuario?");
+
+      if (confirmacion) {
+        const index = this.usuariolab.indexOf(item);
+        this.usuario = this.usuariolab[index].usuario;
+
+        let objeto = this;
+        this.axios
+          .post(
+            "http://giovannygz.ddns.net:5000/Usuario/borrar",
+            {
+              usuario: objeto.usuario
+              
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(function(response) {
+            var respuesta = response.data.mensaje;
+            var status = response.data.status;
+            if (status == "1") {
+              alert(respuesta);
+              objeto.usuariolab.splice(index, 1);
+            }
+          })
+          .catch(function(error) {
+            alert(error);
+          });
+      }
     },
 
     close() {
@@ -166,25 +175,23 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        Object.assign(this.usuariolab[this.editedIndex], this.editedItem);
       } else {
-        this.desserts.push(this.editedItem);
+        this.usuariolab.push(this.editedItem);
       }
       this.close();
     },
-     buscar() {
+    buscar() {
       let objeto = this;
       this.axios
-        .get(
-          "http://giovannygz.ddns.net:5000/Usuario/registrar",
-            {
-            headers: {
-              "Content-Type": "application/json"
-            }
+        .get("http://giovannygz.ddns.net:5000/Usuario/consultarLabo", {
+          headers: {
+            "Content-Type": "application/json"
           }
-        )
+        })
         .then(function(response) {
-          objeto.desserts=response.data.data
+          objeto.usuariolab = response.data.data;
+          console.log( objeto.usuariolab);
         })
         .catch(function(error) {
           objeto.output = error;
