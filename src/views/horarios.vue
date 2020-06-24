@@ -1,10 +1,23 @@
 <template>
   <v-container fluid>
     <HeaderLaboratorista />
+    <v-card>
+      <v-card-title>
+      Horarios
+      <v-spacer></v-spacer>
+      <v-text-field
+        v-model="search"
+        append-icon="fas far-search"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+    </v-card-title>
 
     <v-data-table
       :headers="headers"
       :items="usuariolab"
+      :search="search"
       sort-by="calories"
       class="elevation-1"
       color="background"
@@ -22,6 +35,7 @@
         <v-btn color="primary" @click="initialize">Reset</v-btn>
       </template>
     </v-data-table>
+    </v-card>
   </v-container>
 </template>
 
@@ -33,6 +47,7 @@ export default {
   },
   data: () => ({
     dialog: false,
+    search: "",
     headers: [
       {
         text: "Asignatura",
@@ -62,6 +77,9 @@ export default {
       protein: 0
     }
   }),
+  mounted(){
+  this.$verificarLogin();
+  },
 
   computed: {
     formTitle() {
@@ -83,9 +101,6 @@ export default {
     initialize() {
       (this.usuariolab = []), this.buscar();
     },
-
-
-    
     buscar() {
       let objeto = this;
       this.axios

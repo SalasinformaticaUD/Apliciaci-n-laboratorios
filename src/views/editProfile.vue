@@ -12,6 +12,9 @@ export default {
   },
   data: () => ({
     //
-  })
+  }),
+  mounted(){
+  this.$verificarLogin();
+  },
 };
 </script>

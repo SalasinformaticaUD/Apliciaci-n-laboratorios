@@ -72,6 +72,9 @@ export default {
       }
     }
   }),
+  mounted(){
+  this.$verificarLogin();
+  },
   watch: {
     dialog(val) {
       val ;

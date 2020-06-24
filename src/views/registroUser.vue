@@ -112,6 +112,9 @@ export default {
       }
     };
   },
+  mounted(){
+  this.$verificarLogin();
+  },
   methods: {
     formSubmit() {
   this.errors=[]

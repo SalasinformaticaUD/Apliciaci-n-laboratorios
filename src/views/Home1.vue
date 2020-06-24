@@ -15,32 +15,24 @@
           <v-card-actions>
             <v-row>
               <v-col>
-                <v-text-field placeholder="Codigo" solo flat :rules="numeroRules" />
+                <v-text-field v-model="usuario2"
+                placeholder="Codigo" solo flat :rules="numeroRules" />
               </v-col>
               <v-col>
-                <v-text-field placeholder="Identificacion" solo flat :rules="numeroRules" />
-              </v-col>
-              <v-col>
-                <v-text-field
-                  placeholder="Correo Institucional"
+                <v-text-field v-model="contrasena2"
+                  type="password"
+                  placeholder="Identificacion"
                   solo
                   flat
-                  :rules="correoRules"
-                  required
-                />
+                  :rules="numeroRules" />
               </v-col>
               <v-col>
                 <v-btn
                   color="primary"
                   x-large
                   style="font-weitgh:lighter;font-family:Arial"
-                  to="/reservaestudiante"
+                  @click="session2"
                 >Ingresar</v-btn>
-              </v-col>
-              <v-col>
-                <v-btn x-large color="primary">
-                  <v-icon>fas fa-question</v-icon>
-                </v-btn>
               </v-col>
             </v-row>
           </v-card-actions>
@@ -51,15 +43,18 @@
     <v-row>
       <v-col cols="3">
         <v-card color="#424242" style="padding:20px" dark>
-          <v-card-title class="justify-center" style="color:#FFFFFF">Ingreso Administrativo</v-card-title>
+          <v-card-title class="justify-center" style="color:#FFFFFF">Ingreso  Laboratorista</v-card-title>
           <v-card-subtitle>Como personal Administrativo tienes acceso a los laboratorios desde aqui</v-card-subtitle>
           <v-card-actions>
             <v-container>
               <v-row>
-                <v-text-field placeholder="Usuario" solo flat :rules="numeroRules" />
+                <v-text-field 
+                v-model= "usuario3"
+                placeholder="Usuario" solo flat :rules="numeroRules" />
               </v-row>
               <v-row>
                 <v-text-field
+                  v-model="contrasena3"
                   type="password"
                   placeholder="Contraseña"
                   solo
@@ -73,7 +68,7 @@
                   color="primary"
                   x-large
                   style="font-weitgh:lighter;font-family:Arial"
-                  to="/homea"
+                  @click="session3"
                 >Ingresar</v-btn>
               </v-row>
             </v-container>
@@ -83,7 +78,7 @@
 
       <v-col cols="3">
         <v-card color="#424242" style="padding:20px" dark>
-          <v-card-title class="justify-center" style="color:#FFFFFF">Ingreso Laboratorista</v-card-title>
+          <v-card-title class="justify-center" style="color:#FFFFFF">Ingreso  Administrativo</v-card-title>
           <v-card-subtitle>Como personal Administrativo tienes acceso a los laboratorios desde aqui</v-card-subtitle>
           <v-card-actions>
             <v-container>
@@ -109,7 +104,6 @@
                   x-large
                   style="font-weitgh:lighter;font-family:Arial"
                   @click="session"
-                
                 >Ingresar</v-btn>
               </v-row>
             </v-container>
@@ -158,13 +152,17 @@ export default {
       v => /.+@.+/.test(v) || "El correo debe ser válido"
     ],
     usuario:"",
-    contrasena:""
+    contrasena:"",
+    usuario2:"",
+    contrasena2:"",
+    usuario3:"",
+    contrasena3:""
   }),
     methods: {
     session() {
       let objeto = this;
       this.axios
-        .post("http://giovannygz.ddns.net:5000/Usuario/login", {
+        .post("http://"+objeto.$serverURI+":"+objeto.$serverPort+"/login", {
           usuario: this.usuario,
           contrasena: this.contrasena
         },{
@@ -175,7 +173,57 @@ export default {
         .then(function(response) {
           var respuesta = response.data.mensaje;
           if (respuesta == "1") {
-            objeto.$router.push({name:'HomeLaboratorista'});
+            localStorage.autorizado = true;
+            objeto.$router.replace({name:'HomeAdmin'});
+          }else{
+              confirm("No existe")
+          }
+        })
+        .catch(function(error) {
+          alert(error);
+        });
+    },
+    session2() {
+      let objeto = this;
+      this.axios
+        .post("http://"+objeto.$serverURI+":"+objeto.$serverPort+"/login", {
+          usuario: this.usuario2,
+          contrasena: this.contrasena2
+        },{
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(function(response) {
+          var respuesta = response.data.mensaje;
+          if (respuesta == "1") {
+            localStorage.autorizado = true;
+            objeto.$router.replace({name:'reservaestudiante'});
+          }else{
+              confirm("No existe")
+          }
+        })
+        .catch(function(error) {
+          alert(error);
+        });
+    }
+    ,
+    session3() {
+      let objeto = this;
+      this.axios
+        .post("http://"+objeto.$serverURI+":"+objeto.$serverPort+"/login", {
+          usuario: this.usuario3,
+          contrasena: this.contrasena3
+        },{
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(function(response) {
+          var respuesta = response.data.mensaje;
+          if (respuesta == "1") {
+            localStorage.autorizado = true;
+            objeto.$router.replace({name:'HomeLaboratorista'});
           }else{
               confirm("No existe")
           }
@@ -185,7 +233,6 @@ export default {
         });
     }
   }
-
 
 };
 </script>

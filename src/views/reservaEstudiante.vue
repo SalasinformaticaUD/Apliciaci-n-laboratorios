@@ -20,6 +20,7 @@
             offset-y
             max-width="290px"
             min-width="290px"
+            v-on ="horasdisponibles(Horas,dateFormatted,hour,todaydate,HorasDis)"
           >
             <template v-slot:activator="{ on, attrs }" >
               <v-text-field
@@ -38,14 +39,13 @@
           </v-menu>
 
           <p align="justify" >2. Escoja el bloque de horas:</p>
-          <h1 v-on:click="horasdisponibles(Horas,dateFormatted,hour,todaydate,HorasDis)">{{HorasDis}} </h1>
 
           <v-autocomplete
             ref="Hora"
             v-model="form.Hora"
             :rules="[rules.required]"
             label="Horas"
-            :items = this.HorasDis
+            :items = "HorasDis"
             placeholder="Seleccionar..."
             required
           ></v-autocomplete>
@@ -163,12 +163,12 @@ export default {
   } 
     
   }),
+  mounted(){
+  this.$verificarLogin();
+  },
   computed: {
     computedDateFormatted() {
       return this.formatDate(this.date);
-    },
-    computedDateFormatted() {
-      return this.horasdisponibles(HorasDis)
     }
   },
   watch: {
@@ -189,8 +189,6 @@ export default {
       return `${year}-${month}-${day}`;
     },
     horasdisponibles(Horas,dateFormatted,hour,todaydate,HorasDis){
-    let objeto = this;
-    this.axios
     var a = 0
     if (dateFormatted == todaydate){
       for (var key in Horas){
@@ -201,8 +199,7 @@ export default {
           }
     }
     else {
-      HorasDis = []
-      HorasDis = Horas
+      this.HorasDis = Horas
     }
     console.log(HorasDis)
     },

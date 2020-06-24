@@ -1,6 +1,8 @@
 <template>
   <v-container fluid>
     <Headerestudiantes />
+    <v-row>
+      <v-col>
 
     <v-data-table
       :headers="headers"
@@ -56,6 +58,8 @@
         <v-btn color="primary" @click="initialize">Reset</v-btn>
       </template>
     </v-data-table>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -104,7 +108,9 @@ export default {
       protein: 0
     }
   }),
-
+  mounted(){
+  this.$verificarLogin();
+  },
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "New Item" : "Edit Item";
@@ -214,6 +220,7 @@ export default {
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
+              objeto.buscar();
               //   objeto.usuariolab.splice(index, 1);
             }
           })

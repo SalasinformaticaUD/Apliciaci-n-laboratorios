@@ -102,6 +102,9 @@ export default {
       protein: 0
     }
   }),
+  mounted(){
+  this.$verificarLogin();
+  },
 
   computed: {
     formTitle() {

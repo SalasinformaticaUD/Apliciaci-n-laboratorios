@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <Headerestudiantes />
+    <HeaderLaboratorista />
 
     <v-card>
     <v-card-title>
@@ -28,15 +28,6 @@
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{ on }">
-              <v-btn
-                color="primary"
-                dark
-                class="mb-2"
-                v-on="on"
-                to="/reservaestudiante"
-              >Nueva reserva</v-btn>
-            </template>
             <v-card>
               <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
@@ -74,10 +65,10 @@
 </template>
 
 <script>
-import Headerestudiantes from "@/components/Headerestudiantes.vue";
+import HeaderLaboratorista from "@/components/HeaderLaboratorista.vue";
 export default {
   components: {
-    Headerestudiantes
+    HeaderLaboratorista
   },
   data: () => ({
     dialog: false,
@@ -121,7 +112,9 @@ export default {
       protein: 0
     }
   }),
-
+  mounted(){
+  this.$verificarLogin();
+  },
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "New Item" : "Edit Item";
@@ -231,6 +224,7 @@ export default {
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
+              objeto.buscar();
               //   objeto.usuariolab.splice(index, 1);
             }
           })
