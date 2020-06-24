@@ -13,6 +13,9 @@ import Addnewsala from "../views/Addnewsala.vue";
 import studentpass from "../views/studentpass.vue";
 import editprofilelab from "../views/editprofilelab.vue";
 import consultareslabo from "../views/consultareslabo.vue";
+import editadmin from "../views/editadmin.vue";
+import editpassadmin from "../views/editpassadmin.vue";
+import horarios from "../views/horarios.vue";
 
 Vue.use(VueRouter);
 
@@ -33,9 +36,19 @@ const routes = [
     component: studentpass
   },
   {
+    path: "/editpassadmin",
+    name: "editpassadmin",
+    component: editpassadmin
+  },
+  {
     path: "/homea",
     name: "HomeAdmin",
     component: HomeAdmin
+  },
+  {
+    path: "/horarios",
+    name: "horarios",
+    component: horarios
   },
   {
     path: "/consulta",
@@ -54,6 +67,14 @@ const routes = [
     }
   },
   {
+    path: "/editadmin",
+    name: "editadmin",
+    component: editadmin,
+    meta: {
+      requiresAuth: false
+    }
+  },
+   {
     path: "/registrouser",
     name: "registrouser",
     component: registroUser,

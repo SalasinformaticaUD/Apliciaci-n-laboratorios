@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <HeaderLaboratorista />
+    <HeaderAdmin />
 
     <v-row align="center">
       <v-col cols="12" align="center">
@@ -41,10 +41,10 @@
 
 
 <script>
-import HeaderLaboratorista from "@/components/HeaderLaboratorista.vue";
+import HeaderAdmin from "@/components/HeaderAdmin.vue";
 export default {
   components: {
-    HeaderLaboratorista
+    HeaderAdmin
   },
   data: () => ({
     usuario:"",
@@ -102,7 +102,7 @@ export default {
           .post(
             "http://giovannygz.ddns.net:5000/Usuario/editaruserlab",
             {
-              codigo: "1019112068",
+              codigo: "79950025",
               usuario: this.usuario.toUpperCase(),
               correo: this.correo
             },
@@ -131,9 +131,9 @@ export default {
       let objeto = this;
       this.axios
         .post(
-          "http://giovannygz.ddns.net:5000/Usuario/consultaeditlabo",
+          "http://giovannygz.ddns.net:5000/Usuario/consultaeditadmin",
           {
-            codigo: "1019112068"
+            codigo: "79950025"
           },
           {
             headers: {
