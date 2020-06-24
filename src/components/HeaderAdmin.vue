@@ -36,18 +36,17 @@
             active-class="white--text text--accent-4"
           >
             <v-card color="red darken-4">
-              <v-list-item>
+              <v-list-item >
                 <v-list-item-icon>
                   <v-icon>mdi-home</v-icon>
                 </v-list-item-icon>
-                <v-list-item-title>Gestion de Salas</v-list-item-title>
+                <v-list-item-title>Gestion Salas</v-list-item-title>
               </v-list-item>
             </v-card>
             <v-card color="red darken-4">
               <v-list-group
                 no-action
                 sub-group
-                value="true"
                 active-class="white--text text--accent-4"
               >
                 <template v-slot:activator>
@@ -73,7 +72,6 @@
               <v-list-group
                 no-action
                 sub-group
-                value="true"
                 active-class="white--text text--accent-4"
               >
                 <template v-slot:activator>
@@ -95,7 +93,6 @@
               <v-list-group
                 no-action
                 sub-group
-                value="true"
                 active-class="white--text text--accent-4"
               >
                 <template v-slot:activator>
@@ -122,12 +119,12 @@
 
             <v-card color="red darken-4">
               <v-list-item
-              to= "/home"
+              @click ="cerrarSesion()"
               >
                 <v-list-item-icon>
                   <v-icon></v-icon>
                 </v-list-item-icon>
-                <v-list-item-title>Finalizar sesiòn</v-list-item-title>
+                <v-list-item-title>Finalizar sesión</v-list-item-title>
               </v-list-item>
             </v-card>
           </v-list-item-group>
@@ -149,9 +146,18 @@ export default {
     Reports: [["Generación de infromes", ""]],
     GestionProfiles: [
       ["Crear usuario", '/registrouser'],
-      ["Modificar usuario",  '/edituser']
+      ["Modificar usuario",  '/edituser'],
+      ["Editar mi perfil",  '/editadmin'],
+      ["Cambiar mi contraseña",  '/editpassadmin']
+      
     ],
     drawer: false
-  })
+  }),
+  methods:{
+    cerrarSesion(){
+      localStorage.autorizado = null;
+      this.$router.replace({name:'home'});
+    }
+  }
 };
 </script>

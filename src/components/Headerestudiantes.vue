@@ -47,7 +47,7 @@
               </v-list-item-icon>
               <v-list-item-title>Consultar laboratorios</v-list-item-title>
             </v-list-item>
-            <v-list-item to="/home">
+            <v-list-item @click ="cerrarSesion()" >
               <v-list-item-icon>
                 <v-icon>fas fa-sign-out-alt</v-icon>
               </v-list-item-icon>
@@ -64,6 +64,12 @@
 export default {
   data: () => ({
     drawer: false
-  })
+  }),
+  methods:{
+    cerrarSesion(){
+      localStorage.autorizado = null;
+      this.$router.replace({name:'home'});
+    }
+  }
 };
 </script>

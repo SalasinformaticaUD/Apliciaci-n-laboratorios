@@ -31,6 +31,11 @@ const routes = [
     component: HomeLaboratorista
   },
   {
+    path: "/horarios",
+    name: "horarios",
+    component: horarios
+  },
+  {
     path: "/studentpass",
     name: "studentpass",
     component: studentpass
@@ -41,21 +46,24 @@ const routes = [
     component: editpassadmin
   },
   {
+    path: "/editadmin",
+    name: "editadmin",
+    component: editadmin,
+    meta: {
+      requiresAuth: false
+    }
+  },
+  {
     path: "/homea",
     name: "HomeAdmin",
     component: HomeAdmin
-  },
-  {
-    path: "/horarios",
-    name: "horarios",
-    component: horarios
   },
   {
     path: "/consulta",
     name: "consulta",
     component: consultayCancelacion,
     meta: {
-      requiresAuth: false
+      requiresAuth: true
     }
   },
   {
@@ -67,14 +75,6 @@ const routes = [
     }
   },
   {
-    path: "/editadmin",
-    name: "editadmin",
-    component: editadmin,
-    meta: {
-      requiresAuth: false
-    }
-  },
-   {
     path: "/registrouser",
     name: "registrouser",
     component: registroUser,
@@ -123,8 +123,8 @@ const routes = [
     },
   },
   {
-    path: "/consultalabo",
-    name: "consultalabo",
+    path: "/consultareslabo",
+    name: "consultareslabo",
     component: consultareslabo,
     meta: {
       requiresAuth: false
