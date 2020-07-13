@@ -2,10 +2,10 @@
   <v-container fluid>
     <HeaderAdmin />
 
+    
     <v-data-table
       :headers="headers"
-      :items="usuariolab"
-      sort-by="calories"
+      :items="usuariolab"      
       class="elevation-1"
       color="background"
     >
@@ -26,14 +26,11 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12" sm="6" md="6">
                       <v-text-field v-model="editedItem.usuario" label="Nombre Laboratorista"></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12" sm="6" md="6">
                       <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="contraseña" label="Clave"></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -52,6 +49,7 @@
         <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
         <v-icon small class="mr-2" @click="activeItem(item)">fas fa-check-circle</v-icon>
         <v-icon small class="mr-2" @click="desactiveItem(item)">fas fa-times-circle</v-icon>
+            <v-icon small class="mr-2" @click="resetpass(item)">fas fa-key</v-icon>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -68,7 +66,8 @@ export default {
   },
   data: () => ({
     return: {
-      contraseña:""      
+      search: '',
+     contraseña:""      
     },
     dialog: false,
     headers: [
@@ -95,9 +94,9 @@ export default {
       protein: 0
     }
   }),
-  mounted(){
-  this.$verificarLogin();
-  },
+  // mounted(){
+  // this.$verificarLogin();
+  // },
 
   computed: {
     formTitle() {
@@ -123,8 +122,6 @@ export default {
     editItem(item) {
       
       this.editedIndex = this.usuariolab.indexOf(item);
- 
-      this.contraseña = this.contraseña;
 
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
@@ -140,7 +137,45 @@ export default {
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/desactivar",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/desactivar",
+            {
+              codigo: objeto.codigo
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(function(response) {
+            var respuesta = response.data.mensaje;
+            var status = response.data.status;
+            if (status == "1") {
+              alert(respuesta);
+              //   objeto.usuariolab.splice(index, 1);
+              objeto.buscar();
+            }
+          })
+          
+          .catch(function(error) {
+            alert(error);
+          });
+      }
+
+    },
+
+
+    resetpass(item) {
+      var confirmacion = confirm("¿Esta seguro de restablecer la clave de este usuario?");
+
+      if (confirmacion) {
+        const index = this.usuariolab.indexOf(item);
+        this.codigo = this.usuariolab[index].identificacion;
+
+        let objeto = this;
+        this.axios
+          .post(
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/resetpass",
             {
               codigo: objeto.codigo
             },
@@ -177,7 +212,7 @@ export default {
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/activar",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/activar",
             {
               codigo: objeto.codigo
             },
@@ -223,11 +258,10 @@ export default {
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/editaruser",
+           "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editaruser",
             {
               codigo: objeto.codigo,
               usuario: objeto.usuario,
-              contraseña: objeto.contraseña,
               correo: objeto.correo
             },
             {
@@ -256,7 +290,7 @@ export default {
     buscar() {
       let objeto = this;
       this.axios
-        .get("http://giovannygz.ddns.net:5000/Usuario/consultarLabo", {
+        .get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultarLabo", {
           headers: {
             "Content-Type": "application/json"
           }

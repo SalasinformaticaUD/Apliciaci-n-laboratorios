@@ -108,9 +108,9 @@ export default {
       protein: 0
     }
   }),
-  mounted(){
-  this.$verificarLogin();
-  },
+  // mounted(){
+  // this.$verificarLogin();
+  // },
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "New Item" : "Edit Item";
@@ -150,7 +150,7 @@ export default {
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/borrarreserva",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/borrarreserva",
             {
               codigo: "20201195009",
               sala: objeto.sala,
@@ -198,7 +198,7 @@ export default {
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/editarreserva",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editarreserva",
             {
               codigo: "20201195009",
               hora: this.hora,
@@ -234,7 +234,7 @@ export default {
       let objeto = this;
       this.axios
         .post(
-          "http://giovannygz.ddns.net:5000/Usuario/buscarreserva",
+          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/buscarreserva",
           {
             codigo: "20201195009"
           },

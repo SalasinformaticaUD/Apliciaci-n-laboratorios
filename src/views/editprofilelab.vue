@@ -3,8 +3,8 @@
     <HeaderLaboratorista />
 
     <v-row align="center">
-      <v-col cols="12" align="center">
-        <v-col cols="3" align="center">
+      <v-col align="center">
+        <v-col class="col-sm-10 col-lg-6">
           <v-card color="#424242" style="padding:30px">
             <v-card-title
               class="justify-center"
@@ -103,9 +103,9 @@ export default {
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/editaruserlab",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editaruserlab",
             {
-              codigo: "1019112068",
+              codigo: "20201195009",
               usuario: this.usuario.toUpperCase(),
               correo: this.correo
             },
@@ -134,9 +134,9 @@ export default {
       let objeto = this;
       this.axios
         .post(
-          "http://giovannygz.ddns.net:5000/Usuario/consultaeditlabo",
+         "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultaeditlabo",
           {
-            codigo: "1019112068"
+            codigo: "20201195009"
           },
           {
             headers: {

@@ -2,8 +2,8 @@
   <v-container class="grey darken-4" dark fluid>
     <HeaderAdmin />
     <v-row align="center">
-      <v-col cols="12" align="center">
-        <v-col cols="4">
+      <v-col align="center">
+        <v-col class="col-sm-10 col-lg-6">
           <v-card color="#424242" style="padding:30px">
             <v-card-title
               class="justify-center"
@@ -11,7 +11,7 @@
             >Crear Nuevo usuario</v-card-title>
 
  <p class="red--text" v-if="errors.length">
-            <b>Errore(s):</b>
+            <b>Error(es):</b>
             <ul>
               <li v-for="(err,index) in errors" :key="index">{{ err }}</li>
             </ul>
@@ -118,18 +118,19 @@ export default {
   methods: {
     formSubmit() {
   this.errors=[]
+  this.rules.email.value
   if (
           this.usuario &&
           this.identificacion &&
-          this.correo
-         
+          this.correo&&
+          this.rules.email
       ){
 
           //let currentObj = this.$refs.form;
           let objeto = this;
           this.axios
             .post(
-              "http://giovannygz.ddns.net:5000/Usuario/registrar",
+             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/registrar",
               {
                 usuario: this.usuario.toUpperCase(),
                 identificacion: this.identificacion,
@@ -163,10 +164,14 @@ export default {
             });
         }
         else{
-scroll(0,0)
+
         if (!this.usuario) this.errors.push("Nombre de usuario requerido.")
         if (!this.identificacion) this.errors.push("Identificación requerida.")
         if (!this.correo) this.errors.push("Dirección de correo requerida.")
+        if (!this.rules.email.value) this.errors.push("Dirección de correo invalida.")
+   
+
+
 
 
         }

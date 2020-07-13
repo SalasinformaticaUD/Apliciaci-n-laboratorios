@@ -3,8 +3,8 @@
     <HeaderAdmin />
 
     <v-row align="center">
-      <v-col cols="12" align="center">
-        <v-col cols="3" align="center">
+      <v-col  align="center">
+        <v-col  class="col-sm-10 col-lg-6">
           <v-card color="#424242" style="padding:30px">
             <v-card-title
               class="justify-center"
@@ -72,9 +72,9 @@ export default {
       }
     }
   }),
-  mounted(){
-  this.$verificarLogin();
-  },
+  // mounted(){
+  // this.$verificarLogin();
+  // },
   watch: {
     dialog(val) {
       val ;
@@ -103,7 +103,7 @@ export default {
         let objeto = this;
         this.axios
           .post(
-            "http://giovannygz.ddns.net:5000/Usuario/editaruserlab",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editaruserlab",
             {
               codigo: "79950025",
               usuario: this.usuario.toUpperCase(),
@@ -134,7 +134,7 @@ export default {
       let objeto = this;
       this.axios
         .post(
-          "http://giovannygz.ddns.net:5000/Usuario/consultaeditadmin",
+         "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultaeditadmin",
           {
             codigo: "79950025"
           },

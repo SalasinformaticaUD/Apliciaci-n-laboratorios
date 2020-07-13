@@ -7,21 +7,25 @@ import vuetify from "./plugins/vuetify";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import Axios from "axios";
+import { Row, Column } from 'vue-grid-responsive';
 
-Vue.prototype.$serverURI = "giovannygz.ddns.net";
+Vue.component("row", Row);
+Vue.component("column", Column);
+
+Vue.prototype.$serverURI = " http://127.0.0.1";
 Vue.prototype.$serverPort = "5000";
 
 Vue.config.productionTip = false;
-Vue.prototype.$verificarLogin = function(){
-  let objeto = this;
-  let pregunta = localStorage.autorizado
-  if(pregunta=='true'){
-    null
-  }else{
-    alert("Entro en error >;(");
-    objeto.$router.replace({name:'home'});
-  }
-}
+// Vue.prototype.$verificarLogin = function(){
+//   let objeto = this;
+//   let pregunta = localStorage.autorizado
+//   if(pregunta=='true'){
+//     null
+//   }else{
+//     alert("Entro en error >;(");
+//     objeto.$router.replace({name:'home'});
+//   }
+// }
 
 new Vue({
   router,

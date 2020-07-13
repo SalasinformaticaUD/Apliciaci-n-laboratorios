@@ -1,9 +1,9 @@
 <template>
   <v-container fluid>
-    <HeaderAdmin />
+    <HeaderLaboratorista />
 
     <v-row align="center">
-      <v-col cols="12" align="center">
+      <v-col align="center">
         <v-col class="col-sm-10 col-lg-6" align="center">
           <v-card color="#424242" style="padding:30px">
             <v-card-title
@@ -18,20 +18,21 @@
             </ul>
           </p>
 
+
             <v-text-field
               solo
               flat
               placeholder="Contraseña actual"
               v-model="contraseñaactual"
+              :rules="[rules.required]"
               :append-icon="show1 ? 'fas fa-eye' : 'fas fa-eye-slash'"
               :type="show1 ? 'text' : 'password'"
-              :rules="[rules.required]"
               @click:append="show1 = !show1"
             >contraseña actual</v-text-field>
 
             <v-text-field
               solo
-              flat
+              flatç
               placeholder="Nueva contraseña"
               v-model="nuevacontraseña"
               :rules="[rules.required]"
@@ -66,54 +67,56 @@
 
 
 <script>
-import HeaderAdmin from "@/components/HeaderAdmin.vue";
+import HeaderLaboratorista from "@/components/HeaderLaboratorista.vue";
 export default {
   components: {
-    HeaderAdmin
+    HeaderLaboratorista
   },
   data: () => {
     return {
-      show1: false,
+        show1: false,
       show2: false,
       show3: false,
       contraseñaactual: "",
       nuevacontraseña: "",
-      confirmcontraseña: "",
       errors:[],
       rules: {
         required: value => !!value || "Requerido.",
         pass: value =>
           ((this.nuevacontraseña === value)&&(this.confirmcontraseña === value)) || "No corresponden las contraseñas",
+        
+        }
       }
-    };
+    },
+    mounted(){
+  this.$verificarLogin();
   },
-  mounted() {
-    this.$verificarLogin();
-  },
+  
   methods: {
-      clear() {
+     clear() {
       this.contraseñaactual = "";
       this.nuevacontraseña = "";
       this.confirmcontraseña = "";
     },
     formSubmit() {
       this.errors = [];
-     
+        
       if (
-        this.contraseñaactual &&
+         this.contraseñaactual &&
         this.nuevacontraseña &&
         this.confirmcontraseña
-      ) {
+        ) {
+          
         //let currentObj = this.$refs.form;
         let objeto = this;
         this.axios
 
           .post(
-            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editpassadmin",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editpass",
             {
-              codigo: "79950025",
+              codigo: "20132005988",          
               nuevacontraseña: this.nuevacontraseña,
-              contraseña: this.contraseñaactual
+              contraseña: this.contraseñaactual  
             },
             {
               headers: {
@@ -121,22 +124,19 @@ export default {
               }
             }
           )
-          .then(function(response) {
+        .then(function(response) {
             var respuesta = response.data.mensaje;
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
-              objeto.clear();
-            } else if (status == "2") {
-              alert(respuesta);
-              objeto.clear();
+              //   objeto.usuariolab.splice(index, 1);
             }
           })
           .catch(function(error) {
             objeto.output = error;
           });
       } else {
-        if (!this.contraseñaactual) this.errors.push("Es necesaria la contraseña actual.");
+         if (!this.contraseñaactual) this.errors.push("Es necesaria la contraseña actual.");
         if ((!this.nuevacontraseña)||(!this.form.confirmcontraseña)) this.errors.push("Contraseña requerida.")
         else 
           if (!((this.form.nuevacontraseña)===(this.form.confirmcontraseña))) this.errors.push("Las contraseñas no coinciden.")

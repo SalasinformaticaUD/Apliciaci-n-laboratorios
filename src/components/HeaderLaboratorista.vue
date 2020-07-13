@@ -36,14 +36,7 @@
             v-model="group"
             active-class="white--text text--accent-4"
           >
-            <v-card color="red darken-4">
-              <v-list-item to = "/consultareslabo">
-                <v-list-item-icon>
-                  <v-icon>mdi-home</v-icon>
-                </v-list-item-icon>
-                <v-list-item-title>Gestion Reservas</v-list-item-title>
-              </v-list-item>
-            </v-card>
+            
             <v-card color="red darken-4">
               <v-list-group
                 no-action
@@ -107,10 +100,11 @@
                   v-for="(consulta, i) in Consultapres"
                   :key="i"
                   link
+                  router :to = consulta[1]
                 >
                   <v-list-item-title v-text="consulta[0]"></v-list-item-title>
                   <v-list-item-icon>
-                    <v-icon v-text="consulta[1]"></v-icon>
+                    <v-icon v-text="consulta[2]"></v-icon>
                   </v-list-item-icon>
                 </v-list-item>
               </v-list-group>
@@ -243,7 +237,8 @@ export default {
     ],
     Consultapres: [
       ["Nuevo Prestamo", ""],
-      ["Gestionar Prestamos", ""]
+      ["Gestionar Prestamos", ""],
+      ["Gestionar reserva",'/consultareslabo']
     ],
     Consultasalas: [
       ["Nueva Sala", ""],
@@ -255,7 +250,8 @@ export default {
     ],
     Reports: [["Generación de informes", ""]],
     GestionProfiles: [
-      ["Editar datos", '/editprofilelab']
+      ["Editar datos", '/editprofilelab'],
+      ["Cambiar contraseña", '/labpass']
     ],
     drawer: false
   }),

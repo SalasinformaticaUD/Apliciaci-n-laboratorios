@@ -24,7 +24,7 @@
             </v-card-text>
           </v-card>
           <v-row>
-            <v-col cols="4">
+            <v-col class="col-sm-12 col-lg-4">
               <v-card color="#424242" dark>
                 <h1 align="center">Calendario</h1>
                 <v-card-text>
@@ -42,7 +42,7 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="4">
+            <v-col class="col-sm-12 col-lg-4">
               <v-card color="#424242" dark>
                 <h1 align="center">Misión</h1>
                 <v-card-text class="font-weight-bold">
@@ -62,7 +62,7 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="4">
+            <v-col class="col-sm-12 col-lg-4">
               <v-card color="#424242" dark>
                 <h1 align="center">Visión</h1>
                 <v-card-text class="font-weight-bold">
@@ -94,8 +94,8 @@ export default {
   data: () => ({
     //
   }),
-  mounted(){
-  this.$verificarLogin();
-  },
+  // mounted(){
+  // this.$verificarLogin();
+  // },
 };
 </script>

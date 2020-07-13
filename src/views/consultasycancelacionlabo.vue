@@ -178,7 +178,7 @@ export default {
       let objeto = this;
       this.axios
         .get(
-          "http://giovannygz.ddns.net:5000/Usuario/registrar",
+        "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/registrar",
             {
             headers: {
               "Content-Type": "application/json"

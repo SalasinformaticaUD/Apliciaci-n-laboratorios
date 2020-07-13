@@ -16,6 +16,7 @@ import consultareslabo from "../views/consultareslabo.vue";
 import editadmin from "../views/editadmin.vue";
 import editpassadmin from "../views/editpassadmin.vue";
 import horarios from "../views/horarios.vue";
+import labpass from "../views/labpass.vue";
 
 Vue.use(VueRouter);
 
@@ -44,6 +45,11 @@ const routes = [
     path: "/editpassadmin",
     name: "editpassadmin",
     component: editpassadmin
+  },
+  {
+    path: "/labpass",
+    name: "labpass",
+    component: labpass
   },
   {
     path: "/editadmin",
@@ -154,3 +160,4 @@ const router = new VueRouter({
 });
 
 export default router;
+

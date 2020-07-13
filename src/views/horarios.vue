@@ -104,7 +104,7 @@ export default {
     buscar() {
       let objeto = this;
       this.axios
-        .get("http://giovannygz.ddns.net:5000/Usuario/buscarhorarios", {
+        .get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/buscarhorarios", {
           headers: {
             "Content-Type": "application/json"
           }

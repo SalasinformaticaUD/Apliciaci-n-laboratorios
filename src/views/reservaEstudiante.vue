@@ -1,8 +1,8 @@
 <template>
   <v-container fluid>
     <Headerestudiantes />
-    <v-col cols="12" align="center">
-      <v-col cols="6">
+    <v-col align="center">
+      <v-col class="col-sm-10 col-lg-7">
         <v-card color="grey darken-3" dark style="padding:30px">
           <h1 align="center">Reserva de laboratorios adicionales</h1>
 
@@ -207,7 +207,7 @@ export default {
       let objeto = this;
       this.axios
         .post(
-          "http://giovannygz.ddns.net:5000/Usuario/consultabanco",
+          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultabanco",
           {
             hora: this.form.Hora,
             fecha_adicional: this.dateFormatted,
@@ -249,7 +249,7 @@ export default {
       let objeto = this;
       this.axios
         .post(
-          "http://giovannygz.ddns.net:5000/Usuario/reserva",
+          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/reserva",
           {
             hora: this.form.Hora,
             fecha_adicional: this.dateFormatted,
