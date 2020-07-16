@@ -87,9 +87,9 @@ export default {
       }
     };
   },
-  mounted() {
-    this.$verificarLogin();
-  },
+  // mounted() {
+  //   this.$verificarLogin();
+  // },
   methods: {
       clear() {
       this.contraseñaactual = "";

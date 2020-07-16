@@ -77,9 +77,9 @@ export default {
       protein: 0
     }
   }),
-  mounted(){
-  this.$verificarLogin();
-  },
+  // mounted(){
+  // this.$verificarLogin();
+  // },
 
   computed: {
     formTitle() {

@@ -135,20 +135,18 @@
       </v-col>
 
       <v-col class="col-sm-12 col-lg-3">
+        <v-flex>
         <v-card color="#424242" dark style="padding:20px">
           <h1 align="center" style="color:#FFFFFF">Calendario</h1>
           <v-sheet height="364.5">
             <v-calendar
               ref="calendar"
-              v-model="focus"
-              :weekdays="weekday"
               color="primary"
-              :events="events"
-              :event-color="getEventColor"
               type="month"
             />
           </v-sheet>
         </v-card>
+        </v-flex>
       </v-col>
 
       <v-col class="col-sm-12 col-lg-3">
