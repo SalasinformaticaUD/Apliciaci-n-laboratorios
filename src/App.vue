@@ -14,10 +14,11 @@
       <!-- src="C:\Users\Angie\Desktop\AplicaciónLabs\Prueba-monitor\src\assets\computadores.PNG" -->
       <!-- gradient="to top right, rgba(53,50,48), rgba(30,30,30)" -->
       <v-row>
-        <v-col cols="2.5" class="text-center">
+        
+        <v-col cols="3" class="text-justify">
           <v-img
-            src="https://www.udistrital.edu.co/sites/default/files/logoUD.png"
-            max-width="300"
+            src="https://www.udistrital.edu.co/themes/custom/versh/images/default/preloader.png"
+            max-width="150"
           ></v-img>
         </v-col>
 

@@ -112,9 +112,9 @@ export default {
       }
     };
   },
-  mounted(){
-  this.$verificarLogin();
-  },
+  // mounted(){
+  // this.$verificarLogin();
+  // },
   methods: {
     formSubmit() {
   this.errors=[]

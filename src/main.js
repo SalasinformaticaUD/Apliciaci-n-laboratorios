@@ -12,20 +12,20 @@ import { Row, Column } from 'vue-grid-responsive';
 Vue.component("row", Row);
 Vue.component("column", Column);
 
-Vue.prototype.$serverURI = " http://127.0.0.1";
+Vue.prototype.$serverURI = "200.69.103.13";
 Vue.prototype.$serverPort = "5000";
 
 Vue.config.productionTip = false;
-// Vue.prototype.$verificarLogin = function(){
-//   let objeto = this;
-//   let pregunta = localStorage.autorizado
-//   if(pregunta=='true'){
-//     null
-//   }else{
-//     alert("Entro en error >;(");
-//     objeto.$router.replace({name:'home'});
-//   }
-// }
+Vue.prototype.$verificarLogin = function(){
+  let objeto = this;
+  let pregunta = localStorage.autorizado
+  if(pregunta=='true'){
+    null
+  }else{
+    alert("Entro en error >;(");
+    objeto.$router.replace({name:'home'});
+  }
+}
 
 new Vue({
   router,

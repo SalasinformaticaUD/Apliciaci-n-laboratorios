@@ -32,42 +32,31 @@
 
       <v-list nav dense>
         <v-card color="red darken-4" dark>
-          <v-list-item-group
-            v-model="group"
-            active-class="white--text text--accent-4"
-          >
-            
+          <v-list-item-group active-class="white--text text--accent-4">
             <v-card color="red darken-4">
-              <v-list-group
-                no-action
-                sub-group
-                active-class="white--text text--accent-4"
-              >
-            <template v-slot:activator>
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
+                <template v-slot:activator>
                   <v-list-item-content>
                     <v-list-item-title>Inventario</v-list-item-title>
                   </v-list-item-content>
                 </template>
-                
+
                 <v-list-item
                   v-for="(consulta, i) in Consultainvs"
                   :key="i"
                   link
+                  router
+                  :to="consulta[1]"
                 >
                   <v-list-item-title v-text="consulta[0]"></v-list-item-title>
                   <v-list-item-icon>
-                    <v-icon v-text="consulta[1]"></v-icon>
+                    <v-icon v-text="consulta[2]"></v-icon>
                   </v-list-item-icon>
                 </v-list-item>
               </v-list-group>
             </v-card>
             <v-card color="red darken-4">
-              <v-list-group
-                no-action
-                sub-group
-                active-class="white--text text--accent-4"
-              >
-                               
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
                 <template v-slot:activator>
                   <v-list-item-content>
                     <v-list-item-title>Horarios</v-list-item-title>
@@ -78,29 +67,27 @@
                   v-for="(consultah, i) in Consultahor"
                   :key="i"
                   link
-                  router :to = consultah[1]
+                  router
+                  :to="consultah[1]"
                 >
                   <v-list-item-title v-text="consultah[0]"></v-list-item-title>
                 </v-list-item>
               </v-list-group>
             </v-card>
-           <v-card color="red darken-4">
-              <v-list-group
-                no-action
-                sub-group
-                active-class="white--text text--accent-4"
-              >
-            <template v-slot:activator>
+            <v-card color="red darken-4">
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
+                <template v-slot:activator>
                   <v-list-item-content>
                     <v-list-item-title>Prestamos</v-list-item-title>
                   </v-list-item-content>
                 </template>
-                
+
                 <v-list-item
                   v-for="(consulta, i) in Consultapres"
                   :key="i"
                   link
-                  router :to = consulta[1]
+                  router
+                  :to="consulta[1]"
                 >
                   <v-list-item-title v-text="consulta[0]"></v-list-item-title>
                   <v-list-item-icon>
@@ -110,12 +97,7 @@
               </v-list-group>
             </v-card>
             <v-card color="red darken-4">
-              <v-list-group
-                no-action
-                sub-group
-                active-class="white--text text--accent-4"
-              >
-              
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
                 <template v-slot:activator>
                   <v-list-item-content>
                     <v-list-item-title>Reportes</v-list-item-title>
@@ -130,23 +112,15 @@
                 </v-list-item>
               </v-list-group>
             </v-card>
-  <v-card color="red darken-4">
-              <v-list-group
-                no-action
-                sub-group
-                active-class="white--text text--accent-4"
-              >
-            <template v-slot:activator>
+            <v-card color="red darken-4">
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
+                <template v-slot:activator>
                   <v-list-item-content>
                     <v-list-item-title>Salas</v-list-item-title>
                   </v-list-item-content>
                 </template>
-                
-                <v-list-item
-                  v-for="(consulta, i) in Consultasalas"
-                  :key="i"
-                  link
-                >
+
+                <v-list-item v-for="(consulta, i) in Consultasalas" :key="i" link>
                   <v-list-item-title v-text="consulta[0]"></v-list-item-title>
                   <v-list-item-icon>
                     <v-icon v-text="consulta[1]"></v-icon>
@@ -155,12 +129,8 @@
               </v-list-group>
             </v-card>
 
-             <v-card color="red darken-4">
-              <v-list-group
-                no-action
-                sub-group
-                active-class="white--text text--accent-4"
-              >
+            <v-card color="red darken-4">
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
                 <template v-slot:activator>
                   <v-list-item-content>
                     <v-list-item-title>Gestion de Mi Perfi</v-list-item-title>
@@ -171,8 +141,8 @@
                   v-for="(Gestion, i) in GestionProfiles"
                   :key="i"
                   link
-                  router :to = Gestion[1]
-                 
+                  router
+                  :to="Gestion[1]"
                 >
                   <v-list-item-title v-text="Gestion[0]"></v-list-item-title>
 
@@ -184,22 +154,14 @@
             </v-card>
 
             <v-card color="red darken-4">
-              <v-list-group
-                no-action
-                sub-group
-                active-class="white--text text--accent-4"
-              >
-            <template v-slot:activator>
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
+                <template v-slot:activator>
                   <v-list-item-content>
                     <v-list-item-title>Sanciones</v-list-item-title>
                   </v-list-item-content>
                 </template>
-                
-                <v-list-item
-                  v-for="(consulta, i) in Consultasanc"
-                  :key="i"
-                  link
-                >
+
+                <v-list-item v-for="(consulta, i) in Consultasanc" :key="i" link>
                   <v-list-item-title v-text="consulta[0]"></v-list-item-title>
                   <v-list-item-icon>
                     <v-icon v-text="consulta[1]"></v-icon>
@@ -209,9 +171,7 @@
             </v-card>
 
             <v-card color="red darken-4">
-              <v-list-item
-              @click ="cerrarSesion()"
-              >
+              <v-list-item @click="cerrarSesion()">
                 <v-list-item-icon>
                   <v-icon></v-icon>
                 </v-list-item-icon>
@@ -229,16 +189,15 @@
 export default {
   data: () => ({
     Consultainvs: [
+      ["Nuevo Equipo", "/addequipo"],
       ["Consultar Inventario", ""],
-      ["Modificación de Articulo", ""]
+      ["Modificación de Equipo", ""]
     ],
-    Consultahor: [
-      ["Consultar horarios", '/horarios']
-    ],
+    Consultahor: [["Consultar horarios", "/horarios"]],
     Consultapres: [
       ["Nuevo Prestamo", ""],
       ["Gestionar Prestamos", ""],
-      ["Gestionar reserva",'/consultareslabo']
+      ["Gestionar reserva", "/consultareslabo"]
     ],
     Consultasalas: [
       ["Nueva Sala", ""],
@@ -250,15 +209,15 @@ export default {
     ],
     Reports: [["Generación de informes", ""]],
     GestionProfiles: [
-      ["Editar datos", '/editprofilelab'],
-      ["Cambiar contraseña", '/labpass']
+      ["Editar datos", "/editprofilelab"],
+      ["Cambiar contraseña", "/labpass"]
     ],
     drawer: false
   }),
-  methods:{
-    cerrarSesion(){
+  methods: {
+    cerrarSesion() {
       localStorage.autorizado = null;
-      this.$router.replace({name:'home'});
+      this.$router.replace({ name: "home" });
     }
   }
 };

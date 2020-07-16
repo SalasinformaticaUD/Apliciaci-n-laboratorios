@@ -47,6 +47,14 @@
               </v-list-item-icon>
               <v-list-item-title>Consultar laboratorios</v-list-item-title>
             </v-list-item>
+
+            <v-list-item to="/studentpass">
+              <v-list-item-icon>
+                <v-icon>fa fa-key</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Cambio de contraseña</v-list-item-title>
+            </v-list-item>
+
             <v-list-item @click ="cerrarSesion()" >
               <v-list-item-icon>
                 <v-icon>fas fa-sign-out-alt</v-icon>

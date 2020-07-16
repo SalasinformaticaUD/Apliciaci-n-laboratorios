@@ -17,6 +17,9 @@ import editadmin from "../views/editadmin.vue";
 import editpassadmin from "../views/editpassadmin.vue";
 import horarios from "../views/horarios.vue";
 import labpass from "../views/labpass.vue";
+import Inventarioagregarequipo from "../views/Inventarioagregarequipo.vue";
+
+
 
 Vue.use(VueRouter);
 
@@ -152,7 +155,15 @@ const routes = [
     meta: {
       requiresAuth: false
     },
-  }
+  },
+  {
+    path: "/addequipo",
+    name: "Inventarioagregarequipo",
+    component: Inventarioagregarequipo,
+    meta: {
+      requiresAuth: false
+    },
+  },
 ];
 
 const router = new VueRouter({

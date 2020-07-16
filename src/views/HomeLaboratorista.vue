@@ -30,9 +30,10 @@
                 <v-card-text>
                   <v-calendar
                     ref="calendar"
-                    v-model="value"
+                    v-model="focus"
                     :weekdays="weekday"
-                    :type="type"
+                    color="primary"
+                    type="month"
                     :events="events"
                     :event-overlap-mode="mode"
                     :event-overlap-threshold="30"
