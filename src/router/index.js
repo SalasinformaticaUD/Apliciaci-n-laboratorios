@@ -21,6 +21,7 @@ import Inventarioagregarequipo from "../views/Inventarioagregarequipo.vue";
 import pruebaSelect2 from "../views/pruebaSelect2.vue";
 
 
+
 Vue.use(VueRouter);
 
 const routes = [
@@ -65,7 +66,10 @@ const routes = [
   {
     path: "/homea",
     name: "HomeAdmin",
-    component: HomeAdmin
+    component: HomeAdmin,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: "/consulta",
@@ -164,18 +168,30 @@ const routes = [
       requiresAuth: false
     },
   },
-  {
-    path: "/prueba2",
-    name: "pruebaSelect2",
-    component: pruebaSelect2,
-    meta: {
-      requiresAuth: false
-    },
+    {
+      path: "/pruebaBuscar",
+      name: "select2",
+      component: pruebaSelect2,
+      meta: {
+        requiresAuth: false
+      },
   },
 ];
 
 const router = new VueRouter({
   routes
+});
+
+let objeto = Vue;
+router.beforeEach((to, from, next) => {
+  let estaAuth = objeto.$cookies.get("user_session");
+  let needAuth = to.matched.some(record => record.meta.requiresAuth);
+  
+  if(needAuth && !estaAuth){
+    next('home')
+  }else{
+    next()
+  }
 });
 
 export default router;

@@ -135,18 +135,20 @@
       </v-col>
 
       <v-col class="col-sm-12 col-lg-3">
-        <v-flex>
         <v-card color="#424242" dark style="padding:20px">
           <h1 align="center" style="color:#FFFFFF">Calendario</h1>
           <v-sheet height="364.5">
             <v-calendar
               ref="calendar"
+              v-model="focus"
+              :weekdays="weekday"
               color="primary"
+              :events="events"
+              :event-color="getEventColor"
               type="month"
             />
           </v-sheet>
         </v-card>
-        </v-flex>
       </v-col>
 
       <v-col class="col-sm-12 col-lg-3">
@@ -195,7 +197,7 @@ export default {
       let objeto = this;
       this.axios
         .post(
-          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/login",
+          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/login",
           {
             usuario: this.usuario,
             contrasena: this.contrasena
@@ -208,8 +210,10 @@ export default {
         )
         .then(function(response) {
           var respuesta = response.data.mensaje;
+          let encriptado = objeto.$Crypto.AES.encrypt(objeto.usuario, response.data.data.token);
           if (respuesta == "1") {
-            localStorage.autorizado = true;
+            objeto.$cookies.set("user_session",encriptado.toString() ,60*10, null, null, null, true)
+            localStorage.cdcb0830cc2dd220 = response.data.data.token;
             objeto.$router.replace({ name: "HomeAdmin" });
           } else {
             confirm("No existe");
@@ -245,6 +249,7 @@ export default {
         })
         .catch(function(error) {
           alert(error);
+          console.log(error)
         });
     },
     session3() {

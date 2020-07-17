@@ -49,6 +49,7 @@ export default {
   data: () => ({
     usuario:"",
     correo:"",
+    token:"",
     usuariolab: [],
     editedIndex: -1,
     editedItem: {
@@ -73,7 +74,7 @@ export default {
     }
   }),
   mounted(){
-  this.$verificarLogin();
+    this.initialize();
   },
   watch: {
     dialog(val) {
@@ -83,7 +84,7 @@ export default {
 
 
   created() {
-    this.initialize();
+    
   },
   methods: {
     initialize() {
@@ -101,11 +102,12 @@ export default {
 
       if (confirmacion) {
         let objeto = this;
+        let codigoLab = objeto.codigoLab
         this.axios
           .post(
             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editaruserlab",
             {
-              codigo: "20201195009",
+              codigo: codigoLab,
               usuario: this.usuario.toUpperCase(),
               correo: this.correo
             },
@@ -132,11 +134,16 @@ export default {
     },
     buscar() {
       let objeto = this;
+      objeto.token = localStorage.cdcb0830cc2dd220;
+      let encrypted = objeto.$cookies.get("user_session");
+      let desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+      let codlab = desen.toString(objeto.$Crypto.enc.Utf8)
+      objeto.codigoLab = codlab;
       this.axios
         .post(
          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultaeditlabo",
           {
-            codigo: "20201195009"
+            codigo: objeto.codigoLab
           },
           {
             headers: {
@@ -146,14 +153,30 @@ export default {
         )
         .then(function(response) {
           objeto.usuariolab = response.data.data;
-          console.log(objeto.usuariolab);
           objeto.usuario=response.data.data[0].usuario
           objeto.correo=response.data.data[0].correo
         })
         .catch(function(error) {
           objeto.output = error;
         });
+    },
+    consultaTok(){
+      let objeto = this;
+      this.axios
+        .get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getToken", {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(function(response) {
+          objeto.token = response.data.mensaje;
+        })
+        .catch(function(error) {
+          objeto.output = error;
+        });
     }
+
+    
   }
 };
 </script>
