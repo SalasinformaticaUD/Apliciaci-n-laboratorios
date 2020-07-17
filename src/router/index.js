@@ -18,7 +18,7 @@ import editpassadmin from "../views/editpassadmin.vue";
 import horarios from "../views/horarios.vue";
 import labpass from "../views/labpass.vue";
 import Inventarioagregarequipo from "../views/Inventarioagregarequipo.vue";
-
+import pruebaSelect2 from "../views/pruebaSelect2.vue";
 
 
 Vue.use(VueRouter);
@@ -160,6 +160,14 @@ const routes = [
     path: "/addequipo",
     name: "Inventarioagregarequipo",
     component: Inventarioagregarequipo,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/prueba2",
+    name: "pruebaSelect2",
+    component: pruebaSelect2,
     meta: {
       requiresAuth: false
     },

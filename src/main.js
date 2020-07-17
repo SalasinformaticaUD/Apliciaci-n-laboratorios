@@ -7,13 +7,13 @@ import vuetify from "./plugins/vuetify";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import Axios from "axios";
-import { Row, Column } from 'vue-grid-responsive';
+import select2 from "./assets/select2/js/select2.js";
 
-Vue.component("row", Row);
-Vue.component("column", Column);
+Vue.prototype.$select2="select2";
 
 Vue.prototype.$serverURI = "200.69.103.13";
 Vue.prototype.$serverPort = "5000";
+
 
 Vue.config.productionTip = false;
 Vue.prototype.$verificarLogin = function(){
