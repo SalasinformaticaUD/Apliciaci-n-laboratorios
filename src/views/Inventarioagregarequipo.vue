@@ -36,7 +36,7 @@
 
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field label="Placa" solo></v-text-field>
+                    <v-text-field v-model="placa" label="Placa" solo></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="serial" label="Serial" solo></v-text-field>
@@ -52,10 +52,30 @@
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="estado" label="Estado" solo></v-text-field>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="serie" label="Serie" solo></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="marca" label="Marca" solo></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="numeroInterno" label="Número interno" solo></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="nombreFuncionario" label="Nombre del funcionario" solo></v-text-field>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field
+                      v-model="documentoFuncionario"
+                      label="Documento del funcionario"
+                      solo
+                    ></v-text-field>
                   </v-col>
                 </v-row>
               </v-card>
@@ -132,18 +152,21 @@
                     <v-text-field v-model="vigencia" label="Vigencia" solo></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="fechaAdquisicion" label="Fecha de adquisición" solo></v-text-field>
+                    <v-text-field v-model="cantidadAsignada" label="Cantidad asignada" solo></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="fechaAdquisicion" label="Fecha de adquisición" solo></v-text-field>
+                  </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="numeroContrato" label="Número de contrato" solo></v-text-field>
                   </v-col>
+                </v-row>
+                <v-row>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="numeroFactura" label="Número de factura de compra" solo></v-text-field>
                   </v-col>
-                </v-row>
-                <v-row>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="tiempoGarantia" label="Tiempo de garantía" solo></v-text-field>
                   </v-col>
@@ -164,7 +187,7 @@
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field
                       v-model="frecuenciaMantenimiento"
-                      label="Frecuencia de mantemnimiento"
+                      label="Frecuencia de mantenimiento"
                       solo
                     ></v-text-field>
                   </v-col>
@@ -209,7 +232,7 @@
                   </v-col>
                 </v-row>
               </v-card>
-              <v-btn rounded color="primary" dark @click="e1 = 2">Guardar</v-btn>
+              <v-btn rounded color="primary" dark @click="formSubmit">Guardar</v-btn>
               <v-btn text>Cancel</v-btn>
             </v-stepper-content>
           </v-stepper-items>
@@ -235,6 +258,8 @@ export default {
       modelo: "",
       marca: "",
       numeroInterno: "",
+      estado: "",
+      serie: "",
       sede: "",
       idSede: "",
       dependencia: "",
@@ -246,6 +271,7 @@ export default {
       ivaAplicado: "",
       tipoContrato: "",
       totalValorelemento: "",
+      cantidadAsignada: "",
       vigencia: "",
       fechaAdquisicion: "",
       numeroContrato: "",
@@ -260,17 +286,19 @@ export default {
       paisOrigen: "",
       impactoEquipo: "",
       especificacionesTecnicas: "",
-      accesorios: ""
+      accesorios: "",
+      documentoFuncionario: "",
+      nombreFuncionario: ""
     };
   },
   methods: {
     formSubmit() {
-      this.errors = [];
-      this.rules.email.value;
       if (
         this.placa &&
         this.serial &&
         this.nombreEquipo &&
+        this.estado &&
+        this.serie &&
         this.modelo &&
         this.marca &&
         this.numeroInterno &&
@@ -285,6 +313,7 @@ export default {
         this.ivaAplicado &&
         this.tipoContrato &&
         this.totalValorelemento &&
+        this.cantidadAsignada &&
         this.vigencia &&
         this.fechaAdquisicion &&
         this.numeroContrato &&
@@ -299,7 +328,9 @@ export default {
         this.paisOrigen &&
         this.impactoEquipo &&
         this.especificacionesTecnicas &&
-        this.accesorios
+        this.accesorios &&
+        this.documentoFuncionario &&
+        this.nombreFuncionario
       ) {
         //let currentObj = this.$refs.form;
         let objeto = this;
@@ -309,25 +340,28 @@ export default {
               objeto.$serverURI +
               ":" +
               objeto.$serverPort +
-              "/Usuario/registrar",
+              "/Usuario/registrarEquipo",
             {
               placa: this.placa,
               serial: this.serial,
               nombreEquipo: this.nombreEquipo.toUpperCase(),
+              estado: this.estado,
+              serie: this.serie.toUpperCase(),
               modelo: this.modelo,
               marca: this.marca.toUpperCase(),
               numeroInterno: this.numeroInterno,
               sede: this.sede.toUpperCase(),
               idSede: this.idSede,
-              dependencia: this.dependencia,
+              dependencia: this.dependencia.toUpperCase(),
               idUbicacion: this.idUbicacion,
-              espacioFisico: this.espacioFisico,
+              espacioFisico: this.espacioFisico.toUpperCase(),
               proveedor: this.proveedor,
               valorElemento: this.valorElemento,
               nit: this.nit,
               ivaAplicado: this.ivaAplicado,
               tipoContrato: this.tipoContrato,
               totalValorelemento: this.totalValorelemento,
+              cantidadAsignada: this.cantidadAsignada,
               vigencia: this.vigencia,
               fechaAdquisicion: this.fechaAdquisicion,
               numeroContrato: this.numeroContrato,
@@ -338,11 +372,13 @@ export default {
               tiempoVidautil: this.tiempoVidautil,
               tipoUso: this.tipoUso,
               potenciaElectrica: this.potenciaElectrica,
-              tipoUso_otro: this.tipoUso_otro,
-              paisOrigen: this.paisOrigen,
+              tipoUso_otro: this.tipoUso_otro.toUpperCase(),
+              paisOrigen: this.paisOrigen.toUpperCase(),
               impactoEquipo: this.impactoEquipo,
               especificacionesTecnicas: this.especificacionesTecnicas.toUpperCase(),
-              accesorios: this.accesorios.toUpperCase()
+              accesorios: this.accesorios.toUpperCase(),
+              documentoFuncionario: this.documentoFuncionario,
+              nombreFuncionario: this.nombreFuncionario.toUpperCase()
             },
             {
               headers: {
@@ -354,6 +390,8 @@ export default {
             if (response.data.status == 1) {
               objeto.vista = true;
               objeto.output = response.data.mensaje;
+              var respuesta = response.data.mensaje;
+              alert(respuesta);
             } else if (response.data.status == 2) {
               objeto.vista = true;
               objeto.output = response.data.status;
@@ -365,12 +403,6 @@ export default {
           .catch(function(error) {
             objeto.output = error;
           });
-      } else {
-        if (!this.usuario) this.errors.push("Nombre de usuario requerido.");
-        if (!this.identificacion) this.errors.push("Identificación requerida.");
-        if (!this.correo) this.errors.push("Dirección de correo requerida.");
-        if (!this.rules.email.value)
-          this.errors.push("Dirección de correo invalida.");
       }
     }
   }
