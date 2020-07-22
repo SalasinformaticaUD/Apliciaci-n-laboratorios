@@ -19,7 +19,7 @@ import horarios from "../views/horarios.vue";
 import labpass from "../views/labpass.vue";
 import Inventarioagregarequipo from "../views/Inventarioagregarequipo.vue";
 import pruebaSelect2 from "../views/pruebaSelect2.vue";
-
+import inventarioconsultar from "../views/inventarioconsultar.vue";
 
 
 Vue.use(VueRouter);
@@ -164,6 +164,14 @@ const routes = [
     path: "/addequipo",
     name: "Inventarioagregarequipo",
     component: Inventarioagregarequipo,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/busquedainventario",
+    name: "inventarioconsultar",
+    component: inventarioconsultar,
     meta: {
       requiresAuth: false
     },

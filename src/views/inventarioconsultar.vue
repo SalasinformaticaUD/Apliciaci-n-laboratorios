@@ -1,16 +1,22 @@
 <template>
   <v-container fluid>
-    <HeaderAdmin />
+    <HeaderLaboratorista />
 
-    <v-data-table :headers="headers" :items="usuariolab" class="elevation-1" color="background">
+    <v-data-table :headers="headers" :items="equipolab" class="elevation-1" color="background">
       <template v-slot:top>
         <v-toolbar flat color="white">
-          <v-toolbar-title>Edición y eliminación</v-toolbar-title>
+          <v-toolbar-title>Consulta inventario equipos</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{on}">
-              <v-btn color="primary" v-on="on" dark class="mb-2" to="/registrouser">Nuevo usuario</v-btn>
+              <v-btn
+                color="primary"
+                v-on="on"
+                dark
+                class="mb-2"
+                to="/addequipo"
+              >Agregar nuevo elemento</v-btn>
             </template>
             <v-card>
               <v-card-title>
@@ -20,11 +26,8 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field v-model="editedItem.usuario" label="Nombre Laboratorista"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
+                    <v-col cols="12" sm="8" md="8">
+                      <v-text-field v-model="editedItem.sala" label="Ubicación"></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -43,7 +46,6 @@
         <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
         <v-icon small class="mr-2" @click="activeItem(item)">fas fa-check-circle</v-icon>
         <v-icon small class="mr-2" @click="desactiveItem(item)">fas fa-times-circle</v-icon>
-        <v-icon small class="mr-2" @click="resetpass(item)">fas fa-key</v-icon>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -53,30 +55,31 @@
 </template>
 
 <script>
-import HeaderAdmin from "@/components/HeaderAdmin.vue";
+import HeaderLaboratorista from "@/components/HeaderLaboratorista.vue";
 export default {
   components: {
-    HeaderAdmin
+    HeaderLaboratorista
   },
   data: () => ({
     return: {
-      search: "",
-      contraseña: ""
+      search: ""
     },
     dialog: false,
     headers: [
       {
-        text: "correo",
+        text: "Placa",
         align: "start",
         sortable: false,
-        value: "correo"
+        value: "placa"
       },
-      { text: "Usuario", value: "usuario" },
-      { text: "Identificacion", value: "identificacion" },
+      { text: "Nombre equipo", value: "nombre" },
+      { text: "Marca", value: "marca" },
+      { text: "Serial", value: "serial" },
       { text: "Estado", value: "estado" },
-      { text: "Actions", value: "actions", sortable: false }
+      { text: "Sala", value: "sala" },
+      { text: "Acción", value: "actions", sortable: false }
     ],
-    usuariolab: [],
+    equipolab: [],
     editedIndex: -1,
     editedItem: {},
     defaultItem: {
@@ -93,7 +96,7 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Editar Usuario";
+      return this.editedIndex === -1 ? "New Item" : "Editar Ubicación";
     }
   },
 
@@ -109,11 +112,11 @@ export default {
 
   methods: {
     initialize() {
-      (this.usuariolab = []), this.buscar();
+      (this.equipolab = []), this.buscar();
     },
 
     editItem(item) {
-      this.editedIndex = this.usuariolab.indexOf(item);
+      this.editedIndex = this.equipolab.indexOf(item);
 
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
@@ -123,8 +126,8 @@ export default {
       var confirmacion = confirm("¿Esta seguro de desactivar este usuario?");
 
       if (confirmacion) {
-        const index = this.usuariolab.indexOf(item);
-        this.codigo = this.usuariolab[index].identificacion;
+        const index = this.equipolab.indexOf(item);
+        this.placa = this.equipolab[index].placa;
 
         let objeto = this;
         this.axios
@@ -133,9 +136,9 @@ export default {
               objeto.$serverURI +
               ":" +
               objeto.$serverPort +
-              "/Usuario/desactivar",
+              "/Usuario/desactivarEquipo",
             {
-              codigo: objeto.codigo
+              placa: objeto.placa
             },
             {
               headers: {
@@ -148,49 +151,7 @@ export default {
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
-              //   objeto.usuariolab.splice(index, 1);
-              objeto.buscar();
-            }
-          })
-
-          .catch(function(error) {
-            alert(error);
-          });
-      }
-    },
-
-    resetpass(item) {
-      var confirmacion = confirm(
-        "¿Esta seguro de restablecer la clave de este usuario?"
-      );
-
-      if (confirmacion) {
-        const index = this.usuariolab.indexOf(item);
-        this.codigo = this.usuariolab[index].identificacion;
-
-        let objeto = this;
-        this.axios
-          .post(
-            "http://" +
-              objeto.$serverURI +
-              ":" +
-              objeto.$serverPort +
-              "/Usuario/resetpass",
-            {
-              codigo: objeto.codigo
-            },
-            {
-              headers: {
-                "Content-Type": "application/json"
-              }
-            }
-          )
-          .then(function(response) {
-            var respuesta = response.data.mensaje;
-            var status = response.data.status;
-            if (status == "1") {
-              alert(respuesta);
-              //   objeto.usuariolab.splice(index, 1);
+              //   objeto.equipolab.splice(index, 1);
               objeto.buscar();
             }
           })
@@ -205,8 +166,8 @@ export default {
       var confirmacion = confirm("¿Esta seguro de activar este usuario?");
 
       if (confirmacion) {
-        const index = this.usuariolab.indexOf(item);
-        this.codigo = this.usuariolab[index].identificacion;
+        const index = this.equipolab.indexOf(item);
+        this.placa = this.equipolab[index].placa;
 
         let objeto = this;
         this.axios
@@ -215,9 +176,9 @@ export default {
               objeto.$serverURI +
               ":" +
               objeto.$serverPort +
-              "/Usuario/activar",
+              "/Usuario/activarEquipo",
             {
-              codigo: objeto.codigo
+              placa: objeto.placa
             },
             {
               headers: {
@@ -230,7 +191,7 @@ export default {
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
-              //   objeto.usuariolab.splice(index, 1);
+              //   objeto.equipolab.splice(index, 1);
               objeto.buscar();
             }
           })
@@ -251,9 +212,8 @@ export default {
     save() {
       var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
 
-      this.usuario = this.editedItem.usuario;
-      this.codigo = this.editedItem.identificacion;
-      this.correo = this.editedItem.correo;
+      this.placa = this.editedItem.placa;
+      this.sala = this.editedItem.sala;
 
       if (confirmacion) {
         let objeto = this;
@@ -263,11 +223,10 @@ export default {
               objeto.$serverURI +
               ":" +
               objeto.$serverPort +
-              "/Usuario/editaruser",
+              "/Usuario/editarequipo",
             {
-              codigo: objeto.codigo,
-              usuario: objeto.usuario.toUpperCase(),
-              correo: objeto.correo
+              placa: objeto.placa,
+              sala: objeto.sala.toUpperCase()
             },
             {
               headers: {
@@ -281,7 +240,7 @@ export default {
             if (status == "1") {
               alert(respuesta);
               objeto.buscar();
-              //   objeto.usuariolab.splice(index, 1);
+              //   objeto.equipolab.splice(index, 1);
             }
           })
           .catch(function(error) {
@@ -299,7 +258,7 @@ export default {
             objeto.$serverURI +
             ":" +
             objeto.$serverPort +
-            "/Usuario/consultarLabo",
+            "/Usuario/consultarEquipo",
           {
             headers: {
               "Content-Type": "application/json"
@@ -307,8 +266,8 @@ export default {
           }
         )
         .then(function(response) {
-          objeto.usuariolab = response.data.data;
-          console.log(objeto.usuariolab);
+          objeto.equipolab = response.data.data;
+          console.log(objeto.equipolab);
         })
         .catch(function(error) {
           objeto.output = error;

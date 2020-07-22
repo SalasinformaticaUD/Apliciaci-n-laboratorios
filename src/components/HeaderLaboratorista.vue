@@ -190,7 +190,7 @@ export default {
   data: () => ({
     Consultainvs: [
       ["Nuevo Equipo", "/addequipo"],
-      ["Consultar Inventario", ""],
+      ["Consultar Inventario", "busquedainventario"],
       ["Modificación de Equipo", ""]
     ],
     Consultahor: [["Consultar horarios", "/horarios"]],

@@ -162,7 +162,11 @@
 
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="frecuenciaMantenimiento" label="Frecuencia de mantemnimiento" solo></v-text-field>
+                    <v-text-field
+                      v-model="frecuenciaMantenimiento"
+                      label="Frecuencia de mantemnimiento"
+                      solo
+                    ></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="manual" label="Cuenta con manual" solo></v-text-field>
@@ -194,7 +198,11 @@
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-textarea v-model="especificacionesTecnicas" label="Especificaciones técnicas" solo></v-textarea>
+                    <v-textarea
+                      v-model="especificacionesTecnicas"
+                      label="Especificaciones técnicas"
+                      solo
+                    ></v-textarea>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-textarea v-model="accesorios" label="Accesorios" solo></v-textarea>
@@ -254,6 +262,117 @@ export default {
       especificacionesTecnicas: "",
       accesorios: ""
     };
+  },
+  methods: {
+    formSubmit() {
+      this.errors = [];
+      this.rules.email.value;
+      if (
+        this.placa &&
+        this.serial &&
+        this.nombreEquipo &&
+        this.modelo &&
+        this.marca &&
+        this.numeroInterno &&
+        this.sede &&
+        this.idSede &&
+        this.dependencia &&
+        this.idUbicacion &&
+        this.espacioFisico &&
+        this.proveedor &&
+        this.valorElemento &&
+        this.nit &&
+        this.ivaAplicado &&
+        this.tipoContrato &&
+        this.totalValorelemento &&
+        this.vigencia &&
+        this.fechaAdquisicion &&
+        this.numeroContrato &&
+        this.numeroFactura &&
+        this.tiempoGarantia &&
+        this.frecuenciaMantenimiento &&
+        this.manual &&
+        this.tiempoVidautil &&
+        this.tipoUso &&
+        this.potenciaElectrica &&
+        this.tipoUso_otro &&
+        this.paisOrigen &&
+        this.impactoEquipo &&
+        this.especificacionesTecnicas &&
+        this.accesorios
+      ) {
+        //let currentObj = this.$refs.form;
+        let objeto = this;
+        this.axios
+          .post(
+            "http://" +
+              objeto.$serverURI +
+              ":" +
+              objeto.$serverPort +
+              "/Usuario/registrar",
+            {
+              placa: this.placa,
+              serial: this.serial,
+              nombreEquipo: this.nombreEquipo.toUpperCase(),
+              modelo: this.modelo,
+              marca: this.marca.toUpperCase(),
+              numeroInterno: this.numeroInterno,
+              sede: this.sede.toUpperCase(),
+              idSede: this.idSede,
+              dependencia: this.dependencia,
+              idUbicacion: this.idUbicacion,
+              espacioFisico: this.espacioFisico,
+              proveedor: this.proveedor,
+              valorElemento: this.valorElemento,
+              nit: this.nit,
+              ivaAplicado: this.ivaAplicado,
+              tipoContrato: this.tipoContrato,
+              totalValorelemento: this.totalValorelemento,
+              vigencia: this.vigencia,
+              fechaAdquisicion: this.fechaAdquisicion,
+              numeroContrato: this.numeroContrato,
+              numeroFactura: this.numeroFactura,
+              tiempoGarantia: this.tiempoGarantia,
+              frecuenciaMantenimiento: this.frecuenciaMantenimiento,
+              manual: this.manual,
+              tiempoVidautil: this.tiempoVidautil,
+              tipoUso: this.tipoUso,
+              potenciaElectrica: this.potenciaElectrica,
+              tipoUso_otro: this.tipoUso_otro,
+              paisOrigen: this.paisOrigen,
+              impactoEquipo: this.impactoEquipo,
+              especificacionesTecnicas: this.especificacionesTecnicas.toUpperCase(),
+              accesorios: this.accesorios.toUpperCase()
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(function(response) {
+            if (response.data.status == 1) {
+              objeto.vista = true;
+              objeto.output = response.data.mensaje;
+            } else if (response.data.status == 2) {
+              objeto.vista = true;
+              objeto.output = response.data.status;
+            } else {
+              objeto.vista = true;
+              objeto.output = "Ha ocurrido un error";
+            }
+          })
+          .catch(function(error) {
+            objeto.output = error;
+          });
+      } else {
+        if (!this.usuario) this.errors.push("Nombre de usuario requerido.");
+        if (!this.identificacion) this.errors.push("Identificación requerida.");
+        if (!this.correo) this.errors.push("Dirección de correo requerida.");
+        if (!this.rules.email.value)
+          this.errors.push("Dirección de correo invalida.");
+      }
+    }
   }
 };
 </script>
