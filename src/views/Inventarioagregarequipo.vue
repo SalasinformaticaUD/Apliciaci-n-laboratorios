@@ -36,45 +36,55 @@
 
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="placa" label="Placa" solo></v-text-field>
+                    <v-text-field v-model="placa" label="Placa" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="serial" label="Serial" solo></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="nombreEquipo" label="Nombre del equipo" solo></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="modelo" label="Modelo" solo></v-text-field>
+                    <v-text-field v-model="serial" label="Serial" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-autocomplete :items="estados" v-model="estado" label="Estado" solo></v-autocomplete>
+                    <v-text-field v-model="nombreEquipo" label="Nombre del equipo" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="serie" label="Serie" solo></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="marca" label="Marca" solo></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="numeroInterno" label="Número interno" solo></v-text-field>
+                    <v-text-field v-model="modelo" label="Modelo" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="nombreFuncionario" label="Nombre del funcionario" solo></v-text-field>
+                    <v-autocomplete :items="estados" v-model="estado" label="Estado" solo
+                    :rules="[rules.required]"></v-autocomplete>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="serie" label="Serie" solo
+                    :rules="[rules.required]"></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="marca" label="Marca" solo
+                    :rules="[rules.required]"></v-text-field>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="numeroInterno" label="Número interno" solo
+                    :rules="[rules.required]"></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="nombreFuncionario" label="Nombre del funcionario" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field
                       v-model="documentoFuncionario"
                       label="Documento del funcionario"
                       solo
+                      :rules="[rules.required]"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -92,7 +102,8 @@
 
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-autocomplete :items="options.opt_sede" v-model="sede" label="Sede" solo></v-autocomplete>
+                    <v-autocomplete :items="options.opt_sede" v-model="sede" label="Sede" solo
+                    :rules="[rules.required]"></v-autocomplete>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-autocomplete
@@ -100,15 +111,18 @@
                       v-model="idSede"
                       label="Id sede"
                       solo
+                      :rules="[rules.required]"
                     ></v-autocomplete>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-autocomplete  :items="options.opt_dependencia" v-model="dependencia" label="Dependencia" solo></v-autocomplete>
+                    <v-autocomplete  :items="options.opt_dependencia" v-model="dependencia" label="Dependencia" solo
+                    :rules="[rules.required]"></v-autocomplete>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="idUbicacion" label="Id ubicación" solo></v-text-field>
+                    <v-text-field v-model="idUbicacion" label="Id ubicación" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -118,6 +132,7 @@
                       v-model="espacioFisico"
                       label="Espacio fisico"
                       solo
+                      :rules="[rules.required]"
                     ></v-autocomplete>
                   </v-col>
                 </v-row>
@@ -135,34 +150,42 @@
 
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="proveedor" label="Proveedor" solo></v-text-field>
+                    <v-text-field v-model="proveedor" label="Proveedor" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="valorElemento" label="Valor elemento" solo></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="nit" label="Nit" solo></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="ivaAplicado" label="IVA aplicado" solo></v-text-field>
+                    <v-text-field v-model="valorElemento" label="Valor elemento" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="tipoContrato" label="Tipo de contrato" solo></v-text-field>
+                    <v-text-field v-model="nit" label="Nit" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="totalValorelemento" label="Total valor de elemento" solo></v-text-field>
+                    <v-text-field v-model="ivaAplicado" label="IVA aplicado" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="vigencia" label="Vigencia" solo></v-text-field>
+                    <v-text-field v-model="tipoContrato" label="Tipo de contrato" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="cantidadAsignada" label="Cantidad asignada" solo></v-text-field>
+                    <v-text-field v-model="totalValorelemento" label="Total valor de elemento" solo
+                    :rules="[rules.required]"></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="vigencia" label="Vigencia" solo
+                    :rules="[rules.required]"></v-text-field>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="cantidadAsignada" label="Cantidad asignada" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -186,18 +209,21 @@
                           prepend-icon="far fa-calendar-plus"
                           v-bind="attrs"
                           v-on="on"
+                          :rules="[rules.required]"
                         ></v-text-field>
                       </template>
                       <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
                     </v-menu>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="numeroContrato" label="Número de contrato" solo></v-text-field>
+                    <v-text-field v-model="numeroContrato" label="Número de contrato" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="numeroFactura" label="Número de factura de compra" solo></v-text-field>
+                    <v-text-field v-model="numeroFactura" label="Número de factura de compra" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-autocomplete
@@ -205,6 +231,7 @@
                       v-model="tiempoGarantia"
                       label="Tiempo de garantía"
                       solo
+                      :rules="[rules.required]"
                     ></v-autocomplete>
                   </v-col>
                 </v-row>
@@ -226,6 +253,7 @@
                       v-model="frecuenciaMantenimiento"
                       label="Frecuencia de mantenimiento"
                       solo
+                      :rules="[rules.required]"
                     ></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
@@ -234,31 +262,38 @@
                       v-model="manual"
                       label="Cuenta con manual"
                       solo
+                      :rules="[rules.required]"
                     ></v-autocomplete>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="tiempoVidautil" label="Tiempo de vida util" solo></v-text-field>
+                    <v-text-field v-model="tiempoVidautil" label="Tiempo de vida util" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-autocomplete :items="tiposUso" v-model="tipoUso" label="Tipo de uso" solo></v-autocomplete>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="potenciaElectrica" label="Potencia Eléctrica" solo></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="tipoUso_otro" label="Tipo de uso-otro" solo></v-text-field>
+                    <v-autocomplete :items="tiposUso" v-model="tipoUso" label="Tipo de uso" solo
+                    :rules="[rules.required]"></v-autocomplete>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="paisOrigen" label="País de origen" solo></v-text-field>
+                    <v-text-field v-model="potenciaElectrica" label="Potencia Eléctrica" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="impactoEquipo" label="Impacto del equipo" solo></v-text-field>
+                    <v-text-field v-model="tipoUso_otro" label="Tipo de uso-otro" solo
+                    :rules="[rules.required]"></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="paisOrigen" label="País de origen" solo
+                    :rules="[rules.required]"></v-text-field>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="impactoEquipo" label="Impacto del equipo" solo
+                    :rules="[rules.required]"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -267,13 +302,21 @@
                       v-model="especificacionesTecnicas"
                       label="Especificaciones técnicas"
                       solo
+                      :rules="[rules.required]"
                     ></v-textarea>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-textarea v-model="accesorios" label="Accesorios" solo></v-textarea>
+                    <v-textarea v-model="accesorios" label="Accesorios" solo
+                    :rules="[rules.required]"></v-textarea>
                   </v-col>
                 </v-row>
               </v-card>
+               <p class="red--text" v-if="errors.length">
+                <b>Error(es):</b>
+                <ul>
+                  <li v-for="(err,index) in errors" :key="index">{{ err }}</li>
+                </ul>
+              </p>
               <v-btn rounded color="primary" dark @click="formSubmit">Guardar</v-btn>
               <v-btn text>Cancel</v-btn>
             </v-stepper-content>
@@ -321,7 +364,7 @@ export default {
       menu1: false,
       numeroContrato: "",
       numeroFactura: "",
-      tiemposGarantia: "",
+      tiempoGarantia: "",
       tiemposGarantia: [
         "MENOS DE 1 AÑO",
         "1 AÑO",
@@ -351,6 +394,10 @@ export default {
       accesorios: "",
       documentoFuncionario: "",
       nombreFuncionario: "",
+      errors:[],
+      rules: {
+        required: value => !!value || "Requerido.",      
+      },
       support: {
         iden_sedes: "",
         iden_salas: ""
@@ -717,6 +764,7 @@ export default {
       return `${day}/${month}/${year}`;
     },
     formSubmit() {
+      this.errors=[]
       if (
         this.placa &&
         this.serial &&
@@ -774,11 +822,11 @@ export default {
               modelo: this.modelo,
               marca: this.marca.toUpperCase(),
               numeroInterno: this.numeroInterno,
-              sede: this.sede.toUpperCase(),
+              sede: this.sede,
               idSede: this.idSede,
-              dependencia: this.dependencia.toUpperCase(),
+              dependencia: this.dependencia,
               idUbicacion: this.idUbicacion,
-              espacioFisico: this.espacioFisico.toUpperCase(),
+              espacioFisico: this.espacioFisico,
               proveedor: this.proveedor,
               valorElemento: this.valorElemento,
               nit: this.nit,
@@ -828,6 +876,45 @@ export default {
             objeto.output = error;
           });
       }
+      else{
+        if (!this.placa) this.errors.push("Placa requerida.")
+        if (!this.serial) this.errors.push("Serial requerido.")
+        if (!this.nombreEquipo) this.errors.push("Nombre Equipo requerida.")
+        if (!this.estado) this.errors.push("Estado requerido.")
+        if (!this.serie) this.errors.push("Serie requerido.")
+        if (!this.modelo) this.errors.push("Modelo requerido.")
+        if (!this.marca) this.errors.push("Marca requerida.")
+        if (!this.numeroInterno) this.errors.push("Número interno requerido.")
+        if (!this.sede) this.errors.push("Sede requerida.")
+        if (!this.idSede) this.errors.push("Id sede requerida.")
+        if (!this.dependencia) this.errors.push("Dependencia requerida.")
+        if (!this.idUbicacion) this.errors.push("Id ubicación requerido.")
+        if (!this.espacioFisico) this.errors.push("Espacio físico requerido.")
+        if (!this.proveedor) this.errors.push("Proveedor requerido.")
+        if (!this.valorElemento) this.errors.push("Valor elemento requerido.")
+        if (!this.nit) this.errors.push("NIT requerido.")
+        if (!this.ivaAplicado) this.errors.push("Iva aplicado requerido.")
+        if (!this.tipoContrato) this.errors.push("Tipo contrato requerido.")
+        if (!this.totalValorelemento) this.errors.push("Total valor elemento requerido.")
+        if (!this.cantidadAsignada) this.errors.push("Cantidad asignada requerido.")
+        if (!this.vigencia) this.errors.push("Vigencia requerido.")
+        if (!this.fechaAdquisicion) this.errors.push("Fecha adquisición requerido.")
+        if (!this.numeroContrato) this.errors.push("Número contrato requerida.")
+        if (!this.numeroFactura) this.errors.push("Número factura requerido.")
+        if (!this.tiempoGarantia) this.errors.push("Tiempo garantía requerida.")
+        if (!this.frecuenciaMantenimiento ) this.errors.push("Frecuencia mantenimiento requerida.")
+        if (!this.manual) this.errors.push("Manual requerida.")
+        if (!this.tiempoVidautil) this.errors.push("Tiempo vida útil requerido.")
+        if (!this.tipoUso) this.errors.push("Tipo uso requerido.")
+        if (!this.potenciaElectrica) this.errors.push("Potencia eléctrica requerido.")
+        if (!this.tipoUso_otro) this.errors.push("Tipo uso Otro requerido.")
+        if (!this.paisOrigen) this.errors.push("País origen requerido.")
+        if (!this.impactoEquipo) this.errors.push("Impacto equipo requerido.")
+        if (!this.especificacionesTecnicas) this.errors.push("Especificaciones téncicas requeridas.")
+        if (!this.accesorios) this.errors.push("Accesorios requerido.")
+        if (!this.documentoFuncionario) this.errors.push("Documento funcionario requerido.")
+        if (!this.nombreFuncionario) this.errors.push("Nombre funcionario requerido.")
+        }
     }
   }
 };

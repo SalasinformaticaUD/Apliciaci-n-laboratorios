@@ -20,6 +20,7 @@ import labpass from "../views/labpass.vue";
 import Inventarioagregarequipo from "../views/Inventarioagregarequipo.vue";
 import pruebaSelect2 from "../views/pruebaSelect2.vue";
 import inventarioconsultar from "../views/inventarioconsultar.vue";
+import ticketsman from "../views/ticketsman.vue";
 
 
 Vue.use(VueRouter);
@@ -150,8 +151,16 @@ const routes = [
     component: editprofilelab,
     meta: {
       requiresAuth: false
-    },
+    }
   },
+    {
+      path: "/ticketsman",
+      name: "ticketsman",
+      component: ticketsman,
+      meta: {
+        requiresAuth: false
+      },
+    },
   {
     path: "/addnewsala",
     name: "addnewsala",
