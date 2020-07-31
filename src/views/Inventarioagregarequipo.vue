@@ -52,7 +52,7 @@
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="estado" label="Estado" solo></v-text-field>
+                    <v-autocomplete :items="estados" v-model="estado" label="Estado" solo></v-autocomplete>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="serie" label="Serie" solo></v-text-field>
@@ -92,15 +92,20 @@
 
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="sede" label="Sede" solo></v-text-field>
+                    <v-autocomplete :items="options.opt_sede" v-model="sede" label="Sede" solo></v-autocomplete>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="idSede" label="Id sede" solo></v-text-field>
+                    <v-autocomplete
+                      :items="filteredDatasedes"
+                      v-model="idSede"
+                      label="Id sede"
+                      solo
+                    ></v-autocomplete>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="dependencia" label="Dependencia" solo></v-text-field>
+                    <v-autocomplete  :items="options.opt_dependencia" v-model="dependencia" label="Dependencia" solo></v-autocomplete>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="idUbicacion" label="Id ubicación" solo></v-text-field>
@@ -108,7 +113,12 @@
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="espacioFisico" label="Espacio fisico" solo></v-text-field>
+                    <v-autocomplete
+                      :items="filteredDatalabs"
+                      v-model="espacioFisico"
+                      label="Espacio fisico"
+                      solo
+                    ></v-autocomplete>
                   </v-col>
                 </v-row>
               </v-card>
@@ -157,7 +167,29 @@
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="fechaAdquisicion" label="Fecha de adquisición" solo></v-text-field>
+                    <v-menu
+                      ref="menu1"
+                      v-model="menu1"
+                      :close-on-content-click="false"
+                      transition="scale-transition"
+                      offset-y
+                      max-width="290px"
+                      min-width="290px"
+                      dark
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="fechaAdquisicion"
+                          label="Fecha de adquisición"
+                          hint="DD/MM/YYYY"
+                          persistent-hint
+                          prepend-icon="far fa-calendar-plus"
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
+                    </v-menu>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field v-model="numeroContrato" label="Número de contrato" solo></v-text-field>
@@ -168,7 +200,12 @@
                     <v-text-field v-model="numeroFactura" label="Número de factura de compra" solo></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="tiempoGarantia" label="Tiempo de garantía" solo></v-text-field>
+                    <v-autocomplete
+                      :items="tiemposGarantia"
+                      v-model="tiempoGarantia"
+                      label="Tiempo de garantía"
+                      solo
+                    ></v-autocomplete>
                   </v-col>
                 </v-row>
               </v-card>
@@ -192,7 +229,12 @@
                     ></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="manual" label="Cuenta con manual" solo></v-text-field>
+                    <v-autocomplete
+                      :items="manuales"
+                      v-model="manual"
+                      label="Cuenta con manual"
+                      solo
+                    ></v-autocomplete>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -200,7 +242,7 @@
                     <v-text-field v-model="tiempoVidautil" label="Tiempo de vida util" solo></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="tipoUso" label="Tipo de uso" solo></v-text-field>
+                    <v-autocomplete :items="tiposUso" v-model="tipoUso" label="Tipo de uso" solo></v-autocomplete>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -258,6 +300,7 @@ export default {
       modelo: "",
       marca: "",
       numeroInterno: "",
+      estados: ["ACTIVO", "NO-ACTIVO"],
       estado: "",
       serie: "",
       sede: "",
@@ -273,14 +316,33 @@ export default {
       totalValorelemento: "",
       cantidadAsignada: "",
       vigencia: "",
-      fechaAdquisicion: "",
+      date: new Date().toISOString().substr(0, 10),
+      fechaAdquisicion: this.formatDate(new Date().toISOString().substr(0, 10)),
+      menu1: false,
       numeroContrato: "",
       numeroFactura: "",
-      tiempoGarantia: "",
+      tiemposGarantia: "",
+      tiemposGarantia: [
+        "MENOS DE 1 AÑO",
+        "1 AÑO",
+        "2 AÑOS",
+        "3 AÑOS",
+        "4 AÑOS",
+        "5 AÑOS",
+        "MÁS DE 5 AÑOS"
+      ],
       frecuenciaMantenimiento: "",
       manual: "",
+      manuales: ["SI", "NO"],
       tiempoVidautil: "",
       tipoUso: "",
+      tiposUso: [
+        "ACADÉMICO",
+        "INVESTIGACIÓN",
+        "EXTENSIÓN",
+        "SERVICIOS",
+        "OTROS"
+      ],
       potenciaElectrica: "",
       tipoUso_otro: "",
       paisOrigen: "",
@@ -288,10 +350,372 @@ export default {
       especificacionesTecnicas: "",
       accesorios: "",
       documentoFuncionario: "",
-      nombreFuncionario: ""
+      nombreFuncionario: "",
+      support: {
+        iden_sedes: "",
+        iden_salas: ""
+      },
+      options: {
+        opt_sede: [
+          {
+            text: "ACADEMIA SUPERIOR ARTES-ASAB",
+            value: 1
+          },
+          {
+            text: "ACADEMICA LUIS A. CALVO",
+            value: 2
+          },
+          {
+            text: "ADUANILLA DE PAIBA",
+            value: 3
+          },
+          {
+            text: "CALLE 34",
+            value: 4
+          },
+          {
+            text: "CALLE 40",
+            value: 5
+          },
+          {
+            text: "CENTRO CULTURAL NUEVA SANTAFE",
+            value: 6
+          },
+          {
+            text: "EMISORA",
+            value: 7
+          },
+          {
+            text: "GRUPO DESARROLLO FISICO - PIGA",
+            value: 8
+          },
+          {
+            text: "IDEXUD",
+            value: 9
+          },
+          {
+            text: "MACARENA - A",
+            value: 10
+          },
+          {
+            text: "MACARENA - B",
+            value: 11
+          },
+          {
+            text: "PORVENIR BOSA",
+            value: 12
+          },
+          {
+            text: "POSGRADOS",
+            value: 13
+          },
+          {
+            text: "SECCION DE PUBLICACIONES",
+            value: 14
+          },
+          {
+            text: "SOTANOS AVENIDA JIMENEZ",
+            value: 15
+          },
+          {
+            text: "TECNOLOGICA",
+            value: 16
+          },
+          {
+            text: "TEUSAQUILLO",
+            value: 17
+          },
+          {
+            text: "THOMAS JEFFERSON",
+            value: 18
+          },
+          {
+            text: "UGI ILUD",
+            value: 19
+          },
+          {
+            text: "VIVERO",
+            value: 20
+          }
+        ],
+        opt_dependencia: [
+          {
+            text: "Coordinación laboratorios facultad de ingeniería",
+            value: 1
+          }
+        ],
+        opt_idsede: [
+          {
+            text: "FAAS01",
+            value: 1,
+            dependency: 1
+          },
+          {
+            text: "FALC01",
+            value: 1,
+            dependency: 2
+          },
+          {
+            text: "00AP01",
+            value: 1,
+            dependency: 3
+          },
+          {
+            text: "FMCT01",
+            value: 1,
+            dependency: 4
+          },
+          {
+            text: "FICC01",
+            value: 1,
+            dependency: 5
+          },
+          {
+            text: "#N/A",
+            value: 1,
+            dependency: 6
+          },
+          {
+            text: "00EM01",
+            value: 1,
+            dependency: 7
+          },
+          {
+            text: "#N/A",
+            value: 1,
+            dependency: 8
+          },
+          {
+            text: "#N/A",
+            value: 1,
+            dependency: 9
+          },
+          {
+            text: "FCMAB3",
+            value: 1,
+            dependency: 10
+          },
+          {
+            text: "FCMB02",
+            value: 1,
+            dependency: 11
+          },
+          {
+            text: "00POB1",
+            value: 1,
+            dependency: 12
+          },
+          {
+            text: "FCPO01",
+            value: 1,
+            dependency: 13
+          },
+          {
+            text: "#N/A",
+            value: 1,
+            dependency: 14
+          },
+          {
+            text: "FASO01",
+            value: 1,
+            dependency: 15
+          },
+          {
+            text: "FTTE10",
+            value: 1,
+            dependency: 16
+          },
+          {
+            text: "#N/A",
+            value: 1,
+            dependency: 17
+          },
+          {
+            text: "#N/A",
+            value: 1,
+            dependency: 18
+          },
+          {
+            text: "#N/A",
+            value: 1,
+            dependency: 19
+          },
+          {
+            text: "FMVI04",
+            value: 1,
+            dependency: 20
+          }
+        ],
+        opt_salas: [
+          {
+            text: "LABORATORIO DE CIRCUITOS",
+            value: 1,
+            dependency: 1
+          },
+            {
+            text: "LABORATORIO DE ELECTRONICA A",
+            value: 2,
+            dependency: 1
+          },
+           {
+            text: "LABORATORIO DE ELECTRONICA B",
+            value: 3,
+            dependency: 1
+          },
+           {
+            text: "LABORATORIO DE BASICA",
+            value: 4,
+            dependency: 1
+          },
+           {
+            text: "LABORATORIO DE DIGITALES",
+            value: 5,
+            dependency: 1
+          },   
+          {
+            text: "LABORATORIO DE COMUNICACIONES",
+            value: 6,
+            dependency: 1
+          },
+          {
+            text: "LABORATORIO DE CONTROL",
+            value: 7,
+            dependency: 1
+          },
+          {
+            text: "LABORATORIO DE MAQUINAS",
+            value: 8,
+            dependency: 1
+          },
+           {
+            text: "LABORATORIO FESTO",
+            value: 9,
+            dependency: 1
+          },
+          {
+            text: "FISICA 509",
+            value: 10,
+            dependency: 1
+          },
+          {
+            text: "FISICA 510",
+            value: 11,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 500",
+            value: 12,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 501",
+            value: 13,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 502",
+            value: 14,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 503",
+            value: 15,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 504",
+            value: 16,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 505",
+            value: 17,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 506",
+            value: 18,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 507",
+            value: 19,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 508",
+            value: 20,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 601",
+            value: 21,
+            dependency: 1
+          },
+          {
+            text: "SALA DE SISTEMAS 701",
+            value: 22,
+            dependency: 1
+          },
+
+          {
+            text: "SALA DE SISTEMAS 702",
+            value: 23,
+            dependency: 1
+          },
+
+          {
+            text: "SALA DE SISTEMAS 703",
+            value: 24,
+            dependency: 1
+          },
+
+          {
+            text: "SALA DE SISTEMAS 704",
+            value: 25,
+            dependency: 1
+          },
+
+          {
+            text: "SALA DE SISTEMAS 706",
+            value: 26,
+            dependency: 1
+          },
+
+          {
+            text: "SALA DE SISTEMAS 707",
+            value: 27,
+            dependency: 1
+          }
+        ]
+      }
     };
   },
+  computed: {
+    filteredDatasedes() {
+      let options = this.options.opt_idsede;
+      return options.filter(o => o.dependency == this.sede);
+    },
+    filteredDatalabs() {
+      let options = this.options.opt_salas;
+      return options.filter(o => o.dependency == this.dependencia);
+    },
+    computedDateFormatted() {
+      return this.formatDate(this.date);
+    }
+  },
+  watch: {
+    date(val) {
+      this.fechaAdquisicion = this.formatDate(this.date);
+    }
+  },
   methods: {
+    formatDate(date) {
+      if (!date) return null;
+
+      const [year, month, day] = date.split("-");
+      return `${day}/${month}/${year}`;
+    },
     formSubmit() {
       if (
         this.placa &&

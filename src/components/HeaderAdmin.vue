@@ -59,10 +59,12 @@
                   v-for="(consulta, i) in Consultainvs"
                   :key="i"
                   link
+                  router
+                  :to="consulta[1]"
                 >
                   <v-list-item-title v-text="consulta[0]"></v-list-item-title>
                   <v-list-item-icon>
-                    <v-icon v-text="consulta[1]"></v-icon>
+                    <v-icon v-text="consulta[2]"></v-icon>
                   </v-list-item-icon>
                 </v-list-item>
               </v-list-group>
@@ -138,12 +140,12 @@
 export default {
   data: () => ({
     Consultainvs: [
-      ["Consulta Inventario", ""],
-      ["Ingreso de Inventario", ""],
+      ["Consultar Inventario", "/busquedainventario"],
+      ["Nuevo Equipo", "/addequipo"],
       ["Deshabilitar Articulos", ""],
       ["Modificación de Articulo", ""]
     ],
-    Reports: [["Generación de infromes", ""]],
+    Reports: [["Generación de informes", ""]],
     GestionProfiles: [
       ["Crear usuario", '/registrouser'],
       ["Modificar usuario",  '/edituser'],
