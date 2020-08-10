@@ -21,13 +21,17 @@
       </v-card>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" absolute temporary color="background">
-      <v-card color="background" dense class="pa-5" dark>
+    <v-navigation-drawer v-model="drawer" absolute temporary color="background" width="280">
+      <v-card color="background" dense class="pa-6" dark>
         <div class="text-center">
           <v-avatar color="red" size="100">
             <v-icon dark class="fas fa-user-circle"></v-icon>
           </v-avatar>
         </div>
+        <div class="text-center">
+ <p>{{$usuario}}</p>
+        </div>
+        
       </v-card>
 
       <v-list nav dense>
@@ -48,9 +52,12 @@
                   router
                   :to="consulta[1]"
                 >
-                  <v-list-item-title v-text="consulta[0]"></v-list-item-title>
+                  <v-badge :color="consulta[3]" :content="consulta[2]" size="100">
+                    <v-list-item-title v-text="consulta[0]"></v-list-item-title>
+                  </v-badge>
+
                   <v-list-item-icon>
-                    <v-icon v-text="consulta[2]"></v-icon>
+                    <v-icon v-text="consulta[4]"></v-icon>
                   </v-list-item-icon>
                 </v-list-item>
               </v-list-group>
@@ -188,10 +195,11 @@
 <script>
 export default {
   data: () => ({
+    token:"",
     Consultainvs: [
-      ["Nuevo Equipo", "/addequipo"],
-      ["Consultar Inventario", "/busquedainventario"],
-      ["Modificación de Equipo", ""]
+      ["Nuevo Equipo", "/addequipo", "", "", "fas fa-plus"],
+      ["Consultar Inventario", "/busquedainventario", "", "", "fas fa-search"],
+      ["Solicitudes de Traslado", "/busquedainventario", "6", "green", ""]
     ],
     Consultahor: [["Consultar horarios", "/horarios"]],
     Consultapres: [
@@ -214,11 +222,49 @@ export default {
     ],
     drawer: false
   }),
+    mounted(){
+    this.initialize();
+  },
   methods: {
+    initialize() {
+    this.buscar();
+    },
     cerrarSesion() {
       localStorage.autorizado = null;
       this.$router.replace({ name: "home" });
-    }
+    },
+    buscar() {
+      let objeto = this;
+      objeto.token = localStorage.cdcb0830cc2dd220;
+      let encrypted = objeto.$cookies.get("user_session");
+      let desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+      let codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+      objeto.codigoLab = codlab;
+      this.axios
+        .post(
+          "http://" +
+            objeto.$serverURI +
+            ":" +
+            objeto.$serverPort +
+            "/Usuario/consultaeditlabo",
+          {
+            codigo: objeto.codigoLab
+          },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(function(response) {
+          objeto.prototype.$usuario="";
+          objeto.$usuario = response.data.data[0].usuario;          
+        })
+        .catch(function(error) {
+          objeto.output = error;
+        });
+    },
+
   }
 };
 </script>

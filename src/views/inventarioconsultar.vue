@@ -2,9 +2,9 @@
   <v-container fluid>
     <HeaderLaboratorista />
 
-    <v-data-table :headers="headers" :items="equipolab" class="elevation-1" color="background">
+    <v-data-table :headers="headers" :items="equipolab" class="elevation-1" color="background" dark>
       <template v-slot:top>
-        <v-toolbar flat color="white">
+        <v-toolbar flat dark>
           <v-toolbar-title>Consulta inventario equipos</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
@@ -18,7 +18,7 @@
                 to="/addequipo"
               >Agregar nuevo elemento</v-btn>
             </template>
-            <v-card>
+            <v-card dark>
               <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
               </v-card-title>
@@ -26,18 +26,298 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="8" md="8">
-                      <v-text-field v-model="editedItem.sala" label="Ubicación"></v-text-field>
+                    <v-col class="col-sm-8 col-lg-8">
+                      <v-text-field v-model="editedItem.espacioFisico" label="Ubicación"></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
-
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="close">Cancelar</v-btn>
                 <v-btn color="blue darken-1" text @click="save(item)">Guardar</v-btn>
               </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <v-dialog v-model="dialog2" max-width="1400px">
+            <v-card dark>
+              <v-card-title>
+                <span class="headline">Información Básica</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-col class="col-sm-12 col-lg-10">
+                    <v-row>
+                      <v-col>
+                        <v-text-field v-model="infoItem.placa" :disabled="true" label="Placa"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.serial" :disabled="true" label="Serial"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.nombreEquipo"
+                          :disabled="true"
+                          label="Nombre del equipo"
+                        ></v-text-field>
+                      </v-col>
+                     
+                    </v-row>
+                    <v-row>
+                       <v-col>
+                        <v-text-field v-model="infoItem.modelo" :disabled="true" label="Modelo"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.estado" :disabled="true" label="Estado"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.serie" :disabled="true" label="Serie"></v-text-field>
+                      </v-col>
+                  
+                    </v-row>
+                    <v-row>
+                          <v-col>
+                        <v-text-field v-model="infoItem.marca" :disabled="true" label="Marca"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.numeroInterno"
+                          :disabled="true"
+                          label="Número interno"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.nombreFuncionario"
+                          :disabled="true"
+                          label="Nombre del funcionario"
+                        ></v-text-field>
+                      </v-col>
+                   
+                    </v-row>
+                    <v-row>
+                         <v-col>
+                        <v-text-field
+                          v-model="infoItem.documentoFuncionario"
+                          :disabled="true"
+                          label="Documento del funcionario"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-container>
+              </v-card-text>
+            </v-card>
+            <v-card dark>
+              <v-card-title>
+                <span class="headline">Ubicación</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-col class="col-sm-12 col-lg-10">
+                    <v-row>
+                      <v-col>
+                        <v-text-field v-model="infoItem.sede" :disabled="true" label="Sede"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.idSede" :disabled="true" label="Id sede"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.dependencia" :disabled="true" label="Dependencia"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.idUbicacion" :disabled="true" label="Id ubicación"></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.espacioFisico"
+                          :disabled="true"
+                          label="Espacio fisico"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-container>
+              </v-card-text>
+            </v-card>
+            <v-card dark>
+              <v-card-title>
+                <span class="headline">Detalles de compra</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-col class="col-sm-12 col-lg-10">
+                    <v-row>
+                      <v-col>
+                        <v-text-field v-model="infoItem.proveedor" :disabled="true" label="Proveedor"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.valorElemento"
+                          :disabled="true"
+                          label="Valor elemento"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.nit" :disabled="true" label="Nit"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.ivaAplicado" :disabled="true" label="Iva aplicado"></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.tipoContrato"
+                          :disabled="true"
+                          label="Tipo de contrato"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.totalValorelemento"
+                          :disabled="true"
+                          label="Total valor del elemento"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.vigencia" :disabled="true" label="Vigencia"></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.cantidadAsignada"
+                          :disabled="true"
+                          label="Cantidad asignada"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.fechaAdquisicion"
+                          :disabled="true"
+                          label="Fecha de adquisición"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.numeroContrato"
+                          :disabled="true"
+                          label="Número de contrato"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.numeroFactura"
+                          :disabled="true"
+                          label="Número de factura de compra"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.tiempoGarantia"
+                          :disabled="true"
+                          label="Tiempo de garantia"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-container>
+              </v-card-text>
+            </v-card>
+            <v-card dark>
+              <v-card-title>
+                <span class="headline">Caracteristicas del Equipo</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-col class="col-sm-12 col-lg-10">
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.frecuenciaMantenimiento"
+                          :disabled="true"
+                          label="Frecuencia de mantenimiento"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.manual"
+                          :disabled="true"
+                          label="Cuenta con manual"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.tiempoVidautil"
+                          :disabled="true"
+                          label="Tiempo de vida útil"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.tipoUso" :disabled="true" label="Tipo de uso"></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.potenciaElectrica"
+                          :disabled="true"
+                          label="Potencia eléctrica"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.tipoUso_otro"
+                          :disabled="true"
+                          label="Tipo de uso-otro"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.paisOrigen"
+                          :disabled="true"
+                          label="País de origen"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.impactoEquipo"
+                          :disabled="true"
+                          label="Impacto del equipo"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-textarea
+                          v-model="infoItem.especificacionesTecnicas"
+                          :disabled="true"
+                          auto-grow
+                          outlined
+                          rows="1"
+                          label="Especificaciones técnicas"
+                        ></v-textarea>
+                      </v-col>
+                      <v-col>
+                        <v-textarea
+                          v-model="infoItem.accesorios"
+                          :disabled="true"
+                          auto-grow
+                          outlined
+                          rows="1"
+                          label="Accesorios"
+                        ></v-textarea>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-container>
+              </v-card-text>
             </v-card>
           </v-dialog>
         </v-toolbar>
@@ -46,6 +326,7 @@
         <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
         <v-icon small class="mr-2" @click="activeItem(item)">fas fa-check-circle</v-icon>
         <v-icon small class="mr-2" @click="desactiveItem(item)">fas fa-times-circle</v-icon>
+        <v-icon small class="mr-2" @click="inforItem(item)">fas fa-info-circle</v-icon>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -65,6 +346,7 @@ export default {
       search: ""
     },
     dialog: false,
+    dialog2: false,
     headers: [
       {
         text: "Placa",
@@ -72,16 +354,19 @@ export default {
         sortable: false,
         value: "placa"
       },
-      { text: "Nombre equipo", value: "nombre" },
+      { text: "Nombre equipo", value: "nombreEquipo" },
       { text: "Marca", value: "marca" },
       { text: "Serial", value: "serial" },
       { text: "Estado", value: "estado" },
-      { text: "Sala", value: "sala" },
+      { text: "Sala", value: "espacioFisico" },
       { text: "Acción", value: "actions", sortable: false }
     ],
     equipolab: [],
     editedIndex: -1,
     editedItem: {},
+    infoIndex: -1,
+    infoItem: {},
+
     defaultItem: {
       name: "",
       calories: 0,
@@ -112,7 +397,8 @@ export default {
 
   methods: {
     initialize() {
-      (this.equipolab = []), this.buscar();
+      (this.equipolab = [])
+      , this.buscar()
     },
 
     editItem(item) {
@@ -122,6 +408,12 @@ export default {
       this.dialog = true;
     },
 
+    inforItem(item) {
+      this.infoIndex = this.equipolab.indexOf(item);
+
+      this.infoItem = Object.assign({}, item);
+      this.dialog2 = true;
+    },
     desactiveItem(item) {
       var confirmacion = confirm("¿Esta seguro de desactivar este usuario?");
 
@@ -267,7 +559,7 @@ export default {
         )
         .then(function(response) {
           objeto.equipolab = response.data.data;
-          console.log(objeto.equipolab);
+          // console.log(objeto.equipolab);
         })
         .catch(function(error) {
           objeto.output = error;

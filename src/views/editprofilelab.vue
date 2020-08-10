@@ -88,13 +88,7 @@ export default {
   },
   methods: {
     initialize() {
-      (this.usuariolab = []), this.buscar();
-    },
-    editItem(item) {
-      this.editedIndex = this.usuariolab.indexOf(item);
-
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
+       this.buscar();
     },
 
     save() {
@@ -152,7 +146,6 @@ export default {
           }
         )
         .then(function(response) {
-          objeto.usuariolab = response.data.data;
           objeto.usuario=response.data.data[0].usuario
           objeto.correo=response.data.data[0].correo
         })
@@ -160,23 +153,7 @@ export default {
           objeto.output = error;
         });
     },
-    consultaTok(){
-      let objeto = this;
-      this.axios
-        .get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getToken", {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-        .then(function(response) {
-          objeto.token = response.data.mensaje;
-        })
-        .catch(function(error) {
-          objeto.output = error;
-        });
-    }
-
-    
+   
   }
 };
 </script>

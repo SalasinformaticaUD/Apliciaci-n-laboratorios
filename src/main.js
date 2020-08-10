@@ -21,7 +21,6 @@ Vue.prototype.$serverPort = "5000";
 Vue.prototype.$select2 = select2;
 Vue.config.productionTip = false;
 Vue.prototype.$cookies = Vue.$cookies;
-
 Vue.prototype.$Crypto = CryptoJS;
 
 

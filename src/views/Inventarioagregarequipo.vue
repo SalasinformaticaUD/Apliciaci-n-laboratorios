@@ -268,7 +268,7 @@
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="tiempoVidautil" label="Tiempo de vida util" solo
+                    <v-text-field v-model="tiempoVidautil" label="Tiempo de vida útil" solo
                     :rules="[rules.required]"></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
@@ -301,12 +301,16 @@
                     <v-textarea
                       v-model="especificacionesTecnicas"
                       label="Especificaciones técnicas"
+                      auto-grow
+                      rows="1"
                       solo
                       :rules="[rules.required]"
                     ></v-textarea>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-textarea v-model="accesorios" label="Accesorios" solo
+                    <v-textarea v-model="accesorios" label="Accesorios" auto-grow
+                    rows="1" 
+                    solo
                     :rules="[rules.required]"></v-textarea>
                   </v-col>
                 </v-row>
@@ -336,6 +340,7 @@ export default {
   data() {
     return {
       e1: 1,
+      usuario:"",
       editable: true,
       placa: "",
       serial: "",
@@ -398,341 +403,337 @@ export default {
       rules: {
         required: value => !!value || "Requerido.",      
       },
-      support: {
-        iden_sedes: "",
-        iden_salas: ""
-      },
       options: {
         opt_sede: [
           {
             text: "ACADEMIA SUPERIOR ARTES-ASAB",
-            value: 1
+            value: "ACADEMIA SUPERIOR ARTES-ASAB"
           },
           {
             text: "ACADEMICA LUIS A. CALVO",
-            value: 2
+            value: "ACADEMICA LUIS A. CALVO"
           },
           {
             text: "ADUANILLA DE PAIBA",
-            value: 3
+            value: "ADUANILLA DE PAIBA"
           },
           {
             text: "CALLE 34",
-            value: 4
+            value: "CALLE 34"
           },
           {
             text: "CALLE 40",
-            value: 5
+            value: "CALLE 40"
           },
           {
             text: "CENTRO CULTURAL NUEVA SANTAFE",
-            value: 6
+            value: "CENTRO CULTURAL NUEVA SANTAFE"
           },
           {
             text: "EMISORA",
-            value: 7
+            value: "EMISORA"
           },
           {
             text: "GRUPO DESARROLLO FISICO - PIGA",
-            value: 8
+            value: "GRUPO DESARROLLO FISICO - PIGA"
           },
           {
             text: "IDEXUD",
-            value: 9
+            value: "IDEXUD"
           },
           {
             text: "MACARENA - A",
-            value: 10
+            value: "MACARENA - A"
           },
           {
             text: "MACARENA - B",
-            value: 11
+            value: "MACARENA - B"
           },
           {
             text: "PORVENIR BOSA",
-            value: 12
+            value: "PORVENIR BOSA"
           },
           {
             text: "POSGRADOS",
-            value: 13
+            value: "POSGRADOS"
           },
           {
             text: "SECCION DE PUBLICACIONES",
-            value: 14
+            value: "SECCION DE PUBLICACIONES"
           },
           {
             text: "SOTANOS AVENIDA JIMENEZ",
-            value: 15
+            value: "SOTANOS AVENIDA JIMENEZ"
           },
           {
             text: "TECNOLOGICA",
-            value: 16
+            value: "TECNOLOGICA"
           },
           {
             text: "TEUSAQUILLO",
-            value: 17
+            value: "TEUSAQUILLO"
           },
           {
             text: "THOMAS JEFFERSON",
-            value: 18
+            value: "THOMAS JEFFERSON"
           },
           {
             text: "UGI ILUD",
-            value: 19
+            value: "UGI ILUD"
           },
           {
             text: "VIVERO",
-            value: 20
+            value: "VIVERO"
           }
         ],
         opt_dependencia: [
           {
-            text: "Coordinación laboratorios facultad de ingeniería",
-            value: 1
+            text: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA",
+            value: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           }
         ],
         opt_idsede: [
           {
             text: "FAAS01",
-            value: 1,
-            dependency: 1
+            value: "FAAS01",
+            dependency: "ACADEMIA SUPERIOR ARTES-ASAB"
           },
           {
             text: "FALC01",
-            value: 1,
-            dependency: 2
+            value: "FALC01",
+            dependency: "ACADEMICA LUIS A. CALVO"
           },
           {
             text: "00AP01",
-            value: 1,
-            dependency: 3
+            value: "00AP01",
+            dependency: "ADUANILLA DE PAIBA"
           },
           {
             text: "FMCT01",
-            value: 1,
-            dependency: 4
+            value:"FMCT01",
+            dependency: "CALLE 34"
           },
           {
             text: "FICC01",
-            value: 1,
-            dependency: 5
+            value: "FICC01",
+            dependency: "CALLE 40"
           },
           {
             text: "#N/A",
-            value: 1,
-            dependency: 6
+            value: "#N/A",
+            dependency: "CENTRO CULTURAL NUEVA SANTAFE"
           },
           {
             text: "00EM01",
-            value: 1,
-            dependency: 7
+            value: "00EM01",
+            dependency: "EMISORA"
           },
           {
             text: "#N/A",
-            value: 1,
-            dependency: 8
+            value: "#N/A",
+            dependency: "GRUPO DESARROLLO FISICO - PIGA"
           },
           {
             text: "#N/A",
-            value: 1,
-            dependency: 9
+            value: "#N/A",
+            dependency: "IDEXUD"
           },
           {
             text: "FCMAB3",
-            value: 1,
-            dependency: 10
+            value: "FCMAB3",
+            dependency: "MACARENA - A"
           },
           {
             text: "FCMB02",
-            value: 1,
-            dependency: 11
+            value: "FCMB02",
+            dependency: "MACARENA - B"
           },
           {
             text: "00POB1",
-            value: 1,
-            dependency: 12
+            value: "00POB1",
+            dependency: "PORVENIR BOSA"
           },
           {
             text: "FCPO01",
-            value: 1,
-            dependency: 13
+            value: "FCPO01",
+            dependency: "POSGRADOS"
           },
           {
             text: "#N/A",
-            value: 1,
-            dependency: 14
+            value: "#N/A",
+            dependency: "SECCION DE PUBLICACIONES"
           },
           {
             text: "FASO01",
-            value: 1,
-            dependency: 15
+            value: "FASO01",
+            dependency: "SOTANOS AVENIDA JIMENEZ"
           },
           {
             text: "FTTE10",
-            value: 1,
-            dependency: 16
+            value: "FTTE10",
+            dependency:  "TECNOLOGICA"
           },
           {
             text: "#N/A",
-            value: 1,
-            dependency: 17
+            value: "#N/A",
+            dependency: "TEUSAQUILLO"
           },
           {
             text: "#N/A",
-            value: 1,
-            dependency: 18
+            value: "#N/A",
+            dependency: "THOMAS JEFFERSON"
           },
           {
             text: "#N/A",
-            value: 1,
-            dependency: 19
+            value: "#N/A",
+            dependency: "UGI ILUD"
           },
           {
             text: "FMVI04",
-            value: 1,
-            dependency: 20
+            value: "FMVI04",
+            dependency: "VIVERO"
           }
         ],
         opt_salas: [
           {
             text: "LABORATORIO DE CIRCUITOS",
-            value: 1,
-            dependency: 1
+            value: "LABORATORIO DE CIRCUITOS",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
             {
             text: "LABORATORIO DE ELECTRONICA A",
-            value: 2,
-            dependency: 1
+            value:  "LABORATORIO DE ELECTRONICA A",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
            {
             text: "LABORATORIO DE ELECTRONICA B",
-            value: 3,
-            dependency: 1
+            value: "LABORATORIO DE ELECTRONICA B",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
            {
             text: "LABORATORIO DE BASICA",
-            value: 4,
-            dependency: 1
+            value: "LABORATORIO DE BASICA",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
            {
             text: "LABORATORIO DE DIGITALES",
-            value: 5,
-            dependency: 1
+            value: "LABORATORIO DE DIGITALES",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },   
           {
             text: "LABORATORIO DE COMUNICACIONES",
-            value: 6,
-            dependency: 1
+            value: "LABORATORIO DE COMUNICACIONES",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "LABORATORIO DE CONTROL",
-            value: 7,
-            dependency: 1
+            value: "LABORATORIO DE CONTROL",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "LABORATORIO DE MAQUINAS",
-            value: 8,
-            dependency: 1
+            value: "LABORATORIO DE MAQUINAS",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
            {
             text: "LABORATORIO FESTO",
-            value: 9,
-            dependency: 1
+            value: "LABORATORIO FESTO",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "FISICA 509",
-            value: 10,
-            dependency: 1
+            value: "FISICA 509",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "FISICA 510",
-            value: 11,
-            dependency: 1
+            value: "FISICA 510",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 500",
-            value: 12,
-            dependency: 1
+            value:"SALA DE SISTEMAS 500",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 501",
-            value: 13,
-            dependency: 1
+            value: "SALA DE SISTEMAS 501",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 502",
-            value: 14,
-            dependency: 1
+            value: "SALA DE SISTEMAS 502",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 503",
-            value: 15,
-            dependency: 1
+            value:"SALA DE SISTEMAS 503",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 504",
-            value: 16,
-            dependency: 1
+            value: "SALA DE SISTEMAS 504",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 505",
-            value: 17,
-            dependency: 1
+            value: "SALA DE SISTEMAS 505",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 506",
-            value: 18,
-            dependency: 1
+            value: "SALA DE SISTEMAS 506",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 507",
-            value: 19,
-            dependency: 1
+            value: "SALA DE SISTEMAS 507",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 508",
-            value: 20,
-            dependency: 1
+            value: "SALA DE SISTEMAS 508",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 601",
-            value: 21,
-            dependency: 1
+            value: "SALA DE SISTEMAS 601",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
           {
             text: "SALA DE SISTEMAS 701",
-            value: 22,
-            dependency: 1
+            value: "SALA DE SISTEMAS 701",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
 
           {
             text: "SALA DE SISTEMAS 702",
-            value: 23,
-            dependency: 1
+            value: "SALA DE SISTEMAS 702",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
 
           {
             text: "SALA DE SISTEMAS 703",
-            value: 24,
-            dependency: 1
+            value: "SALA DE SISTEMAS 703",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
 
           {
             text: "SALA DE SISTEMAS 704",
-            value: 25,
-            dependency: 1
+            value: "SALA DE SISTEMAS 704",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
 
           {
             text: "SALA DE SISTEMAS 706",
-            value: 26,
-            dependency: 1
+            value: "SALA DE SISTEMAS 706",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           },
 
           {
             text: "SALA DE SISTEMAS 707",
-            value: 27,
-            dependency: 1
+            value: "SALA DE SISTEMAS 707",
+            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
           }
         ]
       }
@@ -755,6 +756,10 @@ export default {
     date(val) {
       this.fechaAdquisicion = this.formatDate(this.date);
     }
+  },
+   mounted() {
+    this.usuario=this.$usuario;
+    console.log(this.$usuario)
   },
   methods: {
     formatDate(date) {
@@ -850,7 +855,8 @@ export default {
               especificacionesTecnicas: this.especificacionesTecnicas.toUpperCase(),
               accesorios: this.accesorios.toUpperCase(),
               documentoFuncionario: this.documentoFuncionario,
-              nombreFuncionario: this.nombreFuncionario.toUpperCase()
+              nombreFuncionario: this.nombreFuncionario.toUpperCase(),
+              laboratorista: this.usuario
             },
             {
               headers: {
