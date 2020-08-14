@@ -504,9 +504,6 @@ export default {
         ],
         opt_ubicacion:[
           {
-            text: "PUESTO",
-            value: "PUESTO"
-          },{
             text: "BANCO",
             value: "BANCO",            
           },{
@@ -620,11 +617,6 @@ export default {
           }
         ],
         opt_salas: [
-          {
-            text: "ALMACEN",
-            value: "ALMACEN",
-            dependency: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
-          },
           {
             text: "LABORATORIO DE CIRCUITOS",
             value: "LABORATORIO DE CIRCUITOS",
@@ -770,135 +762,6 @@ export default {
           {
             text: "1",
             value: "1",
-            dependency: "PUESTO"
-          }, {
-            text: "2",
-            value: "2",
-            dependency: "PUESTO"
-          }, {
-            text: "3",
-            value: "3",
-            dependency: "PUESTO"
-          }, {
-            text: "4",
-            value: "4",
-            dependency: "PUESTO"
-          }, {
-            text: "5",
-            value: "5",
-            dependency: "PUESTO"
-          },  {
-            text: "6",
-            value: "6",
-            dependency: "PUESTO"
-          },  {
-            text: "7",
-            value: "7",
-            dependency: "PUESTO"
-          },  {
-            text: "8",
-            value: "8",
-            dependency: "PUESTO"
-          },  {
-            text: "9",
-            value: "9",
-            dependency: "PUESTO"
-          },  {
-            text: "10",
-            value: "10",
-            dependency: "PUESTO"
-          },  {
-            text: "11",
-            value: "11",
-            dependency: "PUESTO"
-          },  {
-            text: "12",
-            value: "12",
-            dependency: "PUESTO"
-          },  {
-            text: "13",
-            value: "13",
-            dependency: "PUESTO"
-          },  {
-            text: "14",
-            value: "14",
-            dependency: "PUESTO"
-          },  {
-            text: "15",
-            value: "15",
-            dependency: "PUESTO"
-          },  {
-            text: "16",
-            value: "16",
-            dependency: "PUESTO"
-          },  {
-            text: "17",
-            value: "17",
-            dependency: "PUESTO"
-          },{
-            text: "18",
-            value: "18",
-            dependency: "PUESTO"
-          },{
-            text: "19",
-            value: "19",
-            dependency: "PUESTO"
-          },{
-            text: "20",
-            value: "20",
-            dependency: "PUESTO"
-          },{
-            text: "21",
-            value: "21",
-            dependency: "PUESTO"
-          },{
-            text: "22",
-            value: "22",
-            dependency: "PUESTO"
-          },{
-            text: "23",
-            value: "23",
-            dependency: "PUESTO"
-          },{
-            text: "24",
-            value: "24",
-            dependency: "PUESTO"
-          },{
-            text: "25",
-            value: "25",
-            dependency: "PUESTO"
-          },{
-            text: "26",
-            value: "26",
-            dependency: "PUESTO"
-          },{
-            text: "27",
-            value: "27",
-            dependency: "PUESTO"
-          },{
-            text: "28",
-            value: "28",
-            dependency: "PUESTO"
-          },{
-            text: "29",
-            value: "29",
-            dependency: "PUESTO"
-          },{
-            text: "30",
-            value: "30",
-            dependency: "PUESTO"
-          },{
-            text: "31",
-            value: "31",
-            dependency: "PUESTO"
-          },{
-            text: "32",
-            value: "32",
-            dependency: "PUESTO"
-          },
-          {
-            text: "1",
-            value: "1",
             dependency: "BANCO"
           },{
             text: "2",
@@ -1020,7 +883,7 @@ export default {
             text: "18",
             value: "18",
             dependency: "STAND"
-          }, {
+          },       {
             text: "1",
             value: "1",
             dependency: "ARMARIO"
@@ -1093,9 +956,8 @@ export default {
       let encrypted = objeto.$cookies.get("user_session");
       let desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
       let codlab = desen.toString(objeto.$Crypto.enc.Utf8)
+      
       objeto.codigoLab = codlab;
-      objeto.idUbicacion= objeto.TipoUbicacion + " " + objeto.numeroidUbicacion;
-
       this.errors=[]
       if (
         this.placa &&

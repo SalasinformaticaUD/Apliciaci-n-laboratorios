@@ -212,7 +212,7 @@ export default {
           var respuesta = response.data.mensaje;
           let encriptado = objeto.$Crypto.AES.encrypt(objeto.usuario, response.data.data.token);
           if (respuesta == "1") {
-            objeto.$cookies.set("user_session",encriptado.toString() ,60*10, null, null, null, true)
+            objeto.$cookies.set("user_session",encriptado.toString() ,60*100, null, null, null, true)
             localStorage.cdcb0830cc2dd220 = response.data.data.token;
             objeto.$router.replace({ name: "HomeAdmin" });
           } else {

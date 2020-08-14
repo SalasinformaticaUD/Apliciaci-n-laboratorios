@@ -27,7 +27,7 @@
                 <v-container>
                   <v-row>
                     <v-col class="col-sm-8 col-lg-8">
-                      <v-text-field v-model="editedItem.espacioFisico" label="Ubicación"></v-text-field>
+                      <v-text-field v-model="editedItem.espacioFisico" :disabled="true" label="Ubicación Actual"></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -35,7 +35,7 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="close">Cancelar</v-btn>
-                <v-btn color="blue darken-1" text @click="save(item)">Guardar</v-btn>
+                <v-btn color="blue darken-1" text @click="save(item)">Enviar</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -62,10 +62,9 @@
                           label="Nombre del equipo"
                         ></v-text-field>
                       </v-col>
-                     
                     </v-row>
                     <v-row>
-                       <v-col>
+                      <v-col>
                         <v-text-field v-model="infoItem.modelo" :disabled="true" label="Modelo"></v-text-field>
                       </v-col>
                       <v-col>
@@ -74,10 +73,9 @@
                       <v-col>
                         <v-text-field v-model="infoItem.serie" :disabled="true" label="Serie"></v-text-field>
                       </v-col>
-                  
                     </v-row>
                     <v-row>
-                          <v-col>
+                      <v-col>
                         <v-text-field v-model="infoItem.marca" :disabled="true" label="Marca"></v-text-field>
                       </v-col>
                       <v-col>
@@ -94,10 +92,9 @@
                           label="Nombre del funcionario"
                         ></v-text-field>
                       </v-col>
-                   
                     </v-row>
                     <v-row>
-                         <v-col>
+                      <v-col>
                         <v-text-field
                           v-model="infoItem.documentoFuncionario"
                           :disabled="true"
@@ -124,10 +121,18 @@
                         <v-text-field v-model="infoItem.idSede" :disabled="true" label="Id sede"></v-text-field>
                       </v-col>
                       <v-col>
-                        <v-text-field v-model="infoItem.dependencia" :disabled="true" label="Dependencia"></v-text-field>
+                        <v-text-field
+                          v-model="infoItem.dependencia"
+                          :disabled="true"
+                          label="Dependencia"
+                        ></v-text-field>
                       </v-col>
                       <v-col>
-                        <v-text-field v-model="infoItem.idUbicacion" :disabled="true" label="Id ubicación"></v-text-field>
+                        <v-text-field
+                          v-model="infoItem.idUbicacion"
+                          :disabled="true"
+                          label="Id ubicación"
+                        ></v-text-field>
                       </v-col>
                     </v-row>
                     <v-row>
@@ -152,7 +157,11 @@
                   <v-col class="col-sm-12 col-lg-10">
                     <v-row>
                       <v-col>
-                        <v-text-field v-model="infoItem.proveedor" :disabled="true" label="Proveedor"></v-text-field>
+                        <v-text-field
+                          v-model="infoItem.proveedor"
+                          :disabled="true"
+                          label="Proveedor"
+                        ></v-text-field>
                       </v-col>
                       <v-col>
                         <v-text-field
@@ -165,7 +174,11 @@
                         <v-text-field v-model="infoItem.nit" :disabled="true" label="Nit"></v-text-field>
                       </v-col>
                       <v-col>
-                        <v-text-field v-model="infoItem.ivaAplicado" :disabled="true" label="Iva aplicado"></v-text-field>
+                        <v-text-field
+                          v-model="infoItem.ivaAplicado"
+                          :disabled="true"
+                          label="Iva aplicado"
+                        ></v-text-field>
                       </v-col>
                     </v-row>
                     <v-row>
@@ -260,7 +273,11 @@
                         ></v-text-field>
                       </v-col>
                       <v-col>
-                        <v-text-field v-model="infoItem.tipoUso" :disabled="true" label="Tipo de uso"></v-text-field>
+                        <v-text-field
+                          v-model="infoItem.tipoUso"
+                          :disabled="true"
+                          label="Tipo de uso"
+                        ></v-text-field>
                       </v-col>
                     </v-row>
                     <v-row>
@@ -317,6 +334,13 @@
                     </v-row>
                   </v-col>
                 </v-container>
+                <v-row justify="space-around">
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    
+                    <v-btn outlined color="blue darken-1" text @click="close2">Cerrar</v-btn>
+                  </v-card-actions>
+                </v-row>
               </v-card-text>
             </v-card>
           </v-dialog>
@@ -397,8 +421,7 @@ export default {
 
   methods: {
     initialize() {
-      (this.equipolab = [])
-      , this.buscar()
+      (this.equipolab = []), this.buscar();
     },
 
     editItem(item) {
@@ -501,6 +524,15 @@ export default {
       });
     },
 
+
+    close2() {
+      this.dialog2 = false;
+      this.$nextTick(() => {
+        this.infoItem = Object.assign({}, this.defaultItem);
+        this.infoIndex = -1;
+      });
+    },
+
     save() {
       var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
 
@@ -559,6 +591,7 @@ export default {
         )
         .then(function(response) {
           objeto.equipolab = response.data.data;
+          
           // console.log(objeto.equipolab);
         })
         .catch(function(error) {

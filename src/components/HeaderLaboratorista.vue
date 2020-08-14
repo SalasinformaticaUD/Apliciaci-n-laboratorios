@@ -29,7 +29,7 @@
           </v-avatar>
         </div>
         <div class="text-center">
- <p>{{$usuario}}</p>
+ <p>{{usuario}}</p>
         </div>
         
       </v-card>
@@ -62,6 +62,31 @@
                 </v-list-item>
               </v-list-group>
             </v-card>
+
+      <v-card color="red darken-4">
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
+                <template v-slot:activator>
+                  <v-list-item-content>
+                    <v-list-item-title>Mantenimeinto</v-list-item-title>
+                  </v-list-item-content>
+                </template>
+
+                <v-list-item
+                  v-for="(consulta, i) in Consultamant"
+                  :key="i"
+                  link
+                  router
+                  :to="consulta[1]"
+                >
+                    <v-list-item-title v-text="consulta[0]"></v-list-item-title>
+
+                  <v-list-item-icon>
+                    <v-icon v-text="consulta[4]"></v-icon>
+                  </v-list-item-icon>
+                </v-list-item>
+              </v-list-group>
+            </v-card>
+
             <v-card color="red darken-4">
               <v-list-group no-action sub-group active-class="white--text text--accent-4">
                 <template v-slot:activator>
@@ -196,10 +221,17 @@
 export default {
   data: () => ({
     token:"",
+    usuario:"",
+    conca:"",
     Consultainvs: [
       ["Nuevo Equipo", "/addequipo", "", "", "fas fa-plus"],
       ["Consultar Inventario", "/busquedainventario", "", "", "fas fa-search"],
       ["Solicitudes de Traslado", "/busquedainventario", "6", "green", ""]
+    ],
+     Consultamant: [
+      ["Nuevo mantenimeinto", ""],
+      ["Consultar mantenimientos", "/consultamantenimiento"],
+     
     ],
     Consultahor: [["Consultar horarios", "/horarios"]],
     Consultapres: [
@@ -223,6 +255,7 @@ export default {
     drawer: false
   }),
     mounted(){
+    this.usuario = localStorage.usuario,
     this.initialize();
   },
   methods: {
@@ -257,8 +290,8 @@ export default {
           }
         )
         .then(function(response) {
-          objeto.prototype.$usuario="";
-          objeto.$usuario = response.data.data[0].usuario;          
+          
+          localStorage.usuario = response.data.data[0].usuario;   
         })
         .catch(function(error) {
           objeto.output = error;

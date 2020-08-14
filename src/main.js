@@ -20,6 +20,7 @@ Vue.prototype.$serverURI = "200.69.103.13";
 Vue.prototype.$serverPort = "5000";
 Vue.prototype.$select2 = select2;
 Vue.config.productionTip = false;
+Vue.prototype.$usuario="";
 Vue.prototype.$cookies = Vue.$cookies;
 Vue.prototype.$Crypto = CryptoJS;
 

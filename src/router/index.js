@@ -21,7 +21,8 @@ import Inventarioagregarequipo from "../views/Inventarioagregarequipo.vue";
 import pruebaSelect2 from "../views/pruebaSelect2.vue";
 import inventarioconsultar from "../views/inventarioconsultar.vue";
 import ticketsman from "../views/ticketsman.vue";
-
+import consultamantenimiento from "../views/consultamantenimiento.vue";
+import mantenimiento from "../views/mantenimiento.vue";
 
 Vue.use(VueRouter);
 
@@ -181,6 +182,22 @@ const routes = [
     path: "/busquedainventario",
     name: "inventarioconsultar",
     component: inventarioconsultar,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/mantenimiento",
+    name: "mantenimiento",
+    component: mantenimiento,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/consultamantenimiento",
+    name: "consultamantenimiento",
+    component: consultamantenimiento,
     meta: {
       requiresAuth: false
     },
