@@ -41,7 +41,7 @@
                   color="primary"
                   x-large
                   style="font-weitgh:lighter;font-family:Arial"
-                  @click="session2"
+                  @click="session(usuario2,contrasena2)"
                 >Ingresar</v-btn>
               </v-col>
             </v-row>
@@ -84,7 +84,7 @@
                   color="primary"
                   x-large
                   style="font-weitgh:lighter;font-family:Arial"
-                  @click="session3"
+                  @click="session(usuario3,contrasena3)"
                 >Ingresar</v-btn>
               </v-row>
             </v-container>
@@ -126,7 +126,7 @@
                   color="primary"
                   x-large
                   style="font-weitgh:lighter;font-family:Arial"
-                  @click="session"
+                  @click="session(usuario,contrasena)"
                 >Ingresar</v-btn>
               </v-row>
             </v-container>
@@ -193,14 +193,18 @@ export default {
     contrasena3: ""
   }),
   methods: {
-    session() {
+    session(usuario, contrasena) {
       let objeto = this;
       this.axios
         .post(
-          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/login",
+          "http://" +
+            objeto.$serverURI +
+            ":" +
+            objeto.$serverPort +
+            "/Usuario/login",
           {
-            usuario: this.usuario,
-            contrasena: this.contrasena
+            usuario: usuario,
+            contrasena: contrasena
           },
           {
             headers: {
@@ -210,76 +214,32 @@ export default {
         )
         .then(function(response) {
           var respuesta = response.data.mensaje;
-          let encriptado = objeto.$Crypto.AES.encrypt(objeto.usuario, response.data.data.token);
+
+          let encriptado = objeto.$Crypto.AES.encrypt(
+            objeto.usuario,
+            response.data.data.token
+          );
           if (respuesta == "1") {
-            objeto.$cookies.set("user_session",encriptado.toString() ,60*100, null, null, null, true)
+            objeto.$cookies.set(
+              "user_session",
+              encriptado.toString(),
+              60 * 100,
+              null,
+              null,
+              null,
+              true
+            );
             localStorage.cdcb0830cc2dd220 = response.data.data.token;
-            objeto.$router.replace({ name: "HomeAdmin" });
+            objeto.$router.replace({ name: response.data.data.addr });
           } else {
-            confirm("No existe");
+            alert("No existe");
           }
         })
         .catch(function(error) {
-          alert(error);
-        });
-    },
-    session2() {
-      let objeto = this;
-      this.axios
-        .post(
-          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/login",
-          {
-            usuario: this.usuario2,
-            contrasena: this.contrasena2
-          },
-          {
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
-        )
-        .then(function(response) {
-          var respuesta = response.data.mensaje;
-          if (respuesta == "1") {
-            localStorage.autorizado = true;
-            objeto.$router.replace({ name: "reservaestudiante" });
-          } else {
-            confirm("No existe");
-          }
-        })
-        .catch(function(error) {
-          alert(error);
-          console.log(error)
-        });
-    },
-    session3() {
-      let objeto = this;
-      this.axios
-        .post(
-          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/login",
-          {
-            usuario: this.usuario3,
-            contrasena: this.contrasena3
-          },
-          {
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
-        )
-        .then(function(response) {
-          var respuesta = response.data.mensaje;
-          if (respuesta == "1") {
-            localStorage.autorizado = true;
-            objeto.$router.replace({ name: "HomeLaboratorista" });
-          } else {
-            confirm("No existe");
-          }
-        })
-        .catch(function(error) {
-          alert(error);
+          // alert(error);
         });
     }
   }
+
 };
 </script>

@@ -27,6 +27,7 @@ import reservatemp from "../views/reservatemp.vue";
 import clasesadd from "../views/clasesadd.vue";
 import prestamoequExt from "../views/prestamoequExt.vue";
 import prestamoequInt from "../views/prestamoequInt.vue";
+import consultareservalabstemp from "../views/consultareservalabstemp.vue";
 
 Vue.use(VueRouter);
 
@@ -253,7 +254,20 @@ const routes = [
       meta: {
         requiresAuth: false
       },
+      
   },
+
+  {
+    path: "/consultareservalabstemp",
+    name: "consultareservalabstemp",
+    component: consultareservalabstemp,
+    meta: {
+      requiresAuth: false
+    },
+    
+  },
+
+
 ];
 
 const router = new VueRouter({

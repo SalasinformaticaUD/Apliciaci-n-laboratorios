@@ -235,8 +235,8 @@ export default {
     ],
     Consultahor: [["Consultar horarios", "/horarios"]],
     Consultapres: [
-      ["Nuevo Prestamo", ""],
-      ["Gestionar Prestamos", ""],
+      
+      ["Gestionar Prestamos", "/consultareservalabstemp"],
       ["Gestionar reserva", "/consultareslabo"]
     ],
     Consultasalas: [
