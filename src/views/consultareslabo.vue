@@ -52,7 +52,7 @@
           </v-dialog>
         </v-toolbar>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template>
         <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
         <v-icon small @click="deleteItem(item)">fas fa-trash</v-icon>
       </template>
@@ -83,11 +83,11 @@ export default {
       { text: "Codigo", value: "codigo" },
       { text: "Hora", value: "hora" },
       { text: "Dia", value: "dia" },
-      { text: "Fecha Adicional", value: "fecha_adicional" },
       { text: "Fecha Reserva", value: "fecha_reserva" },
       { text: "Sala", value: "sala" },
       { text: "Banco", value: "banco" },
       { text: "Elemento", value: "elemento" },
+      { text: "Estado", value: "estado" },
       { text: "Actions", value: "actions", sortable: false }
     ],
     Elementos: [

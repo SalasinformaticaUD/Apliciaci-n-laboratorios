@@ -50,7 +50,7 @@
           </v-dialog>
         </v-toolbar>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template>
         <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
         <v-icon small @click="deleteItem(item)">fas fa-trash</v-icon>
       </template>

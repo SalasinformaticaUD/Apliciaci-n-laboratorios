@@ -23,6 +23,10 @@ import inventarioconsultar from "../views/inventarioconsultar.vue";
 import ticketsman from "../views/ticketsman.vue";
 import consultamantenimiento from "../views/consultamantenimiento.vue";
 import mantenimiento from "../views/mantenimiento.vue";
+import reservatemp from "../views/reservatemp.vue";
+import clasesadd from "../views/clasesadd.vue";
+import prestamoequExt from "../views/prestamoequExt.vue";
+import prestamoequInt from "../views/prestamoequInt.vue";
 
 Vue.use(VueRouter);
 
@@ -133,6 +137,46 @@ const routes = [
     path: "/reservaestudiante",
     name: "reservaestudiante",
     component: reservaEstudiante,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/reservatemp",
+    name: "reservatemp",
+    component: reservatemp,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/clasesadd",
+    name: "clasesadd",
+    component: clasesadd,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/clasesadd",
+    name: "clasesadd",
+    component: clasesadd,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/prestamoequext",
+    name: "prestamoequext",
+    component: prestamoequExt,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/prestamoequint",
+    name: "prestamoequint",
+    component: prestamoequInt,
     meta: {
       requiresAuth: false
     },
