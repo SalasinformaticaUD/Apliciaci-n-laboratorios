@@ -90,7 +90,7 @@
                 </v-row>
               </v-card>
               <v-btn rounded color="primary" dark @click="e1 = 2">Siguiente</v-btn>
-              <v-btn text>Cancel</v-btn>
+              <v-btn text @click="volverpag()">Cancel</v-btn>
             </v-stepper-content>
 
             <v-stepper-content step="2">
@@ -146,7 +146,7 @@
                 </v-row>
               </v-card>
               <v-btn rounded color="primary" dark @click="e1 = 3">Siguiente</v-btn>
-              <v-btn text>Cancel</v-btn>
+              <v-btn text @click="volverpag()">Cancel</v-btn>
             </v-stepper-content>
 
             <v-stepper-content step="3">
@@ -245,7 +245,7 @@
                 </v-row>
               </v-card>
               <v-btn rounded color="primary" dark @click="e1 = 4">Siguiente</v-btn>
-              <v-btn text>Cancel</v-btn>
+              <v-btn text @click="volverpag()">Cancel</v-btn>
             </v-stepper-content>
 
             <v-stepper-content step="4">
@@ -330,7 +330,7 @@
                 </ul>
               </p>
               <v-btn rounded color="primary" dark @click="formSubmit">Guardar</v-btn>
-              <v-btn text>Cancel</v-btn>
+              <v-btn text @click="volverpag()">Cancel</v-btn>
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
@@ -1083,6 +1083,10 @@ export default {
       this.usuario=localStorage.usuario
       console.log(this.usuario)
     },
+    volverpag(){
+      window.history.back()
+    },
+
     formatDate(date) {
       if (!date) return null;
 

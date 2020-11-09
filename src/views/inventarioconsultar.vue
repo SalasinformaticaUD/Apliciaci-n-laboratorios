@@ -51,7 +51,16 @@
                 <v-container>
                   <v-row>
                     <v-col class="col-sm-8 col-lg-8">
-                      <v-text-field v-model="editedItem.espacioFisico" :disabled="false" label="Ubicación Actual"></v-text-field>
+                      
+                    <v-autocomplete
+                      v-model="editedItem.espacioFisico"
+                      :items="ubicaciones"
+                      dense
+                      filled
+                      label="Ubicación Actual"
+                    ></v-autocomplete>
+
+                      <!--<v-text-field v-model="editedItem.espacioFisico" :disabled="false" label="Ubicación Actual"></v-text-field>-->
                     </v-col>
                   </v-row>
                 </v-container>
@@ -390,6 +399,7 @@ export default {
     HeaderLaboratorista
   },
   data: () => ({
+    ubicaciones: ['ALMACEN', 'CIRCUITOS', 'SALAS', 'buzz'],
     return: {
       search: ""
     },
