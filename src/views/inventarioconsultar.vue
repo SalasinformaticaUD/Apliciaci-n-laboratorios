@@ -1,33 +1,57 @@
 <template>
   <v-container fluid>
-    <HeaderLaboratorista />
 
-    <v-data-table :headers="headers" :items="equipolab" class="elevation-1" color="background" dark>
+    <HeaderLaboratorista />
+    
+
+    <v-data-table :headers="headers" :items="equipolab" :search="search" class="elevation-1" color="background" dark>
       <template v-slot:top>
         <v-toolbar flat dark>
           <v-toolbar-title>Consulta inventario equipos</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
+          
+          <!--BARRA DE BUSQUEDA-->
+          <v-text-field
+            v-model="search"
+            ref="form"
+            append-icon="fas far-search"
+            label="Buscar"
+            single-line
+            hide-details
+            
+            dark
+            
+          ></v-text-field>
+          
+          <!--BOTÓN BUSCAR-->
+          <v-btn color="primary" @click="initialize">Buscar</v-btn>
+          
+          <v-spacer></v-spacer>          
+          <v-btn color="primary" @click="reset">Reset</v-btn>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{on}">
               <v-btn
                 color="primary"
-                v-on="on"
-                dark
-                class="mb-2"
+                
+                
                 to="/addequipo"
               >Agregar nuevo elemento</v-btn>
             </template>
-            <v-card dark>
-              <v-card-title>
+
+            
+
+            <v-card dark>            
+
+              <!-- <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
+              </v-card-title> -->
 
               <v-card-text>
                 <v-container>
                   <v-row>
                     <v-col class="col-sm-8 col-lg-8">
-                      <v-text-field v-model="editedItem.espacioFisico" :disabled="true" label="Ubicación Actual"></v-text-field>
+                      <v-text-field v-model="editedItem.espacioFisico" :disabled="false" label="Ubicación Actual"></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -346,15 +370,15 @@
           </v-dialog>
         </v-toolbar>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <!-- FORMA CORRECTA: -->
+      <!-- <template v-slot:[`item.actions`]="{ item }"> -->
+      <template v-slot:[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
         <v-icon small class="mr-2" @click="activeItem(item)">fas fa-check-circle</v-icon>
         <v-icon small class="mr-2" @click="desactiveItem(item)">fas fa-times-circle</v-icon>
         <v-icon small class="mr-2" @click="inforItem(item)">fas fa-info-circle</v-icon>
       </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
-      </template>
+      
     </v-data-table>
   </v-container>
 </template>
@@ -424,6 +448,10 @@ export default {
       (this.equipolab = []), this.buscar();
     },
 
+    reset () {
+        this.$refs.form.reset(), this.initialize();
+      },
+
     editItem(item) {
       this.editedIndex = this.equipolab.indexOf(item);
 
@@ -438,7 +466,7 @@ export default {
       this.dialog2 = true;
     },
     desactiveItem(item) {
-      var confirmacion = confirm("¿Esta seguro de desactivar este usuario?");
+      var confirmacion = confirm("¿Esta seguro de desactivar este elemento?");
 
       if (confirmacion) {
         const index = this.equipolab.indexOf(item);
@@ -478,7 +506,7 @@ export default {
     },
 
     activeItem(item) {
-      var confirmacion = confirm("¿Esta seguro de activar este usuario?");
+      var confirmacion = confirm("¿Esta seguro de activar este elemento?");
 
       if (confirmacion) {
         const index = this.equipolab.indexOf(item);
@@ -534,10 +562,12 @@ export default {
     },
 
     save() {
-      var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
+      
 
       this.placa = this.editedItem.placa;
-      this.sala = this.editedItem.sala;
+      this.sala = this.editedItem.espacioFisico;
+
+      var confirmacion = confirm("¿Esta seguro de guardar estos cambios?");
 
       if (confirmacion) {
         let objeto = this;
@@ -550,8 +580,9 @@ export default {
               "/Usuario/editarequipo",
             {
               placa: objeto.placa,
-              sala: objeto.sala.toUpperCase()
+              sala: objeto.sala
             },
+            //toUpperCase convierte la cadena de String a mayusculas
             {
               headers: {
                 "Content-Type": "application/json"

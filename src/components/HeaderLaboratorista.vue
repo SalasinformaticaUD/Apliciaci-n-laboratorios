@@ -223,6 +223,8 @@ export default {
     token:"",
     usuario:"",
     conca:"",
+    codigoLab:"",
+    
     Consultainvs: [
       ["Nuevo Equipo", "/addequipo", "", "", "fas fa-plus"],
       ["Consultar Inventario", "/busquedainventario", "", "", "fas fa-search"],
@@ -267,12 +269,27 @@ export default {
       this.$router.replace({ name: "home" });
     },
     buscar() {
+      
       let objeto = this;
       objeto.token = localStorage.cdcb0830cc2dd220;
-      let encrypted = objeto.$cookies.get("user_session");
-      let desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
-      let codlab = desen.toString(objeto.$Crypto.enc.Utf8);
-      objeto.codigoLab = codlab;
+      
+      var encrypted = objeto.$cookies.get("user_session");      
+      var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+      var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+      
+      
+      console.log("Método buscar header laboratorista linea 277");
+      console.log("token: ",objeto.token)
+      console.log("ENCRYPTED 1: ",objeto.encrypted);
+      console.log("ENCRYPTED 2: ",objeto.$cookies.get("user_session"));
+      console.log("DESENCRYPTED 1: ",objeto.desen);
+      console.log("DESENCRYPTED 2: ",objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token));
+      console.log("codlab 1: ",objeto.codlab);
+      console.log("codigolab : ",objeto.codigoLab);
+      //console.log("codlab 2: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
+      console.log("AQUÍ EL CODIGO: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
+      
       this.axios
         .post(
           "http://" +
@@ -281,7 +298,8 @@ export default {
             objeto.$serverPort +
             "/Usuario/consultaeditlabo",
           {
-            codigo: objeto.codigoLab
+            codigo: objeto.codigoLab,          
+            
           },
           {
             headers: {
@@ -291,7 +309,9 @@ export default {
         )
         .then(function(response) {
           
-          localStorage.usuario = response.data.data[0].usuario;   
+          localStorage.usuario = response.data.data[0].usuario;  
+          console.log("AUYUDAAA VUE");
+
         })
         .catch(function(error) {
           objeto.output = error;

@@ -28,6 +28,7 @@ import clasesadd from "../views/clasesadd.vue";
 import prestamoequExt from "../views/prestamoequExt.vue";
 import prestamoequInt from "../views/prestamoequInt.vue";
 import consultareservalabstemp from "../views/consultareservalabstemp.vue";
+import CRUD from "../views/CRUD.vue";
 
 Vue.use(VueRouter);
 
@@ -36,6 +37,11 @@ const routes = [
     path: "/",
     name: "Home1",
     component: Home1
+  },
+  {
+    path: "/crud",
+    name: "CRUD",
+    component: CRUD
   },
   {
     path: "/homel",
@@ -273,6 +279,7 @@ const routes = [
 const router = new VueRouter({
   routes
 });
+
 
 let objeto = Vue;
 router.beforeEach((to, from, next) => {

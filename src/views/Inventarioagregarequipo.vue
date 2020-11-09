@@ -1079,7 +1079,9 @@ export default {
 
   methods: {
      initialize() {
+
       this.usuario=localStorage.usuario
+      console.log(this.usuario)
     },
     formatDate(date) {
       if (!date) return null;

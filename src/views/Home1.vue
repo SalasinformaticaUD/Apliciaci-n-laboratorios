@@ -3,6 +3,7 @@
     <Headerhome />
 
     <v-row>
+      <!--INGRESO ESTUDIANTES-->
       <v-col>
         <v-card color="#424242" style="padding-left:30px">
           <v-card-title
@@ -15,14 +16,18 @@
           </v-card-subtitle>
           <v-card-actions>
             <v-row class="justify-center">
+
+              <!--COMENTARIO: rules = numeros, hace que la contraseña sea solo de tipo numerica-->
+
               <v-col class="col-sm-7 col-lg-4">
                 <v-text-field
                   v-model="usuario2"
                   placeholder="Codigo"
                   solo
                   flat
-                  :rules="numeroRules"
+                  :rules="numeroRules" 
                 />
+                
               </v-col>
               <v-col class="col-sm-7 col-lg-4">
                 <v-text-field
@@ -50,6 +55,8 @@
       </v-col>
     </v-row>
 
+
+  <!--INGRESO LABORATORISTA-->
     <v-row>
       <v-col class="col-sm-12 col-lg-3">
         <v-card color="#424242" style="height:100%" dark>
@@ -92,6 +99,7 @@
         </v-card>
       </v-col>
 
+<!--INGRESO ADMINISTRATIVO-->
       <v-col class="col-sm-12 col-lg-3">
         <v-card color="#424242" style="height:100%" dark>
           <v-card-title class="justify-center" style="color:#FFFFFF">Ingreso Administrativo</v-card-title>
@@ -134,6 +142,7 @@
         </v-card>
       </v-col>
 
+    <!--CALENDARIO -->
       <v-col class="col-sm-12 col-lg-3">
         <v-card color="#424242" dark style="padding:20px">
           <h1 align="center" style="color:#FFFFFF">Calendario</h1>
@@ -151,6 +160,7 @@
         </v-card>
       </v-col>
 
+<!--REGLAMENTO -->
       <v-col class="col-sm-12 col-lg-3">
         <v-card color="#424242" style="height:100%">
           <v-card-title class="justify-center" style="color:white;">NOTAS</v-card-title>
@@ -193,7 +203,8 @@ export default {
     contrasena3: ""
   }),
   methods: {
-    session(usuario, contrasena) {
+    session(usuarioL, contrasenaL) {
+      console.log(usuarioL, contrasenaL)
       let objeto = this;
       this.axios
         .post(
@@ -203,9 +214,9 @@ export default {
             objeto.$serverPort +
             "/Usuario/login",
           {
-            usuario: usuario,
-            contrasena: contrasena
-          },
+            usuario: usuarioL,
+            contrasena: contrasenaL
+          },          
           {
             headers: {
               "Content-Type": "application/json"
@@ -219,6 +230,7 @@ export default {
             objeto.usuario,
             response.data.data.token
           );
+          console.log("AQUI EL ENCRIPTADO COOKIE: ",encriptado);
           if (respuesta == "1") {
             objeto.$cookies.set(
               "user_session",
@@ -229,6 +241,8 @@ export default {
               null,
               true
             );
+            console.log("COOKIE HOME1: ",objeto.$cookies.get("user_session"));
+
             localStorage.cdcb0830cc2dd220 = response.data.data.token;
             objeto.$router.replace({ name: response.data.data.addr });
           } else {
