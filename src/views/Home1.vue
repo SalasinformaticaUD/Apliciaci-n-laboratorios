@@ -39,6 +39,7 @@
                   :append-icon="show1 ? 'fas fa-eye' : 'fas fa-eye-slash'"
                   :type="show1 ? 'text' : 'password'"
                   @click:append="show1 = !show1"
+                  @keyup.enter="session(usuario2,contrasena2)"
                 />
               </v-col>
               <v-col class="col-sm-7 col-lg-4">
@@ -83,6 +84,7 @@
                   :type="show2 ? 'text' : 'password'"
                   @click:append="show2 = !show2"
                   :rules="numeroRules"
+                   @keyup.enter="session(usuario3,contrasena3)"
                 />
               </v-row>
 
@@ -126,6 +128,7 @@
                   :type="show3 ? 'text' : 'password'"
                   @click:append="show3 = !show3"
                   :rules="numeroRules"
+                   @keyup.enter="session(usuario,contrasena)"
                 />
               </v-row>
 
@@ -225,12 +228,14 @@ export default {
         )
         .then(function(response) {
           var respuesta = response.data.mensaje;
-
+          localStorage.identificacion= usuarioL; //TENER CUIDADO PARA PRUEBA
+          
           let encriptado = objeto.$Crypto.AES.encrypt(
-            objeto.usuario,
+            objeto.usuarioL,
             response.data.data.token
           );
           console.log("AQUI EL ENCRIPTADO COOKIE: ",encriptado);
+          console.log("AQUI EL OBJ USUARIO: ",usuarioL);
           if (respuesta == "1") {
             objeto.$cookies.set(
               "user_session",

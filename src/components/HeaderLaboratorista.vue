@@ -276,7 +276,9 @@ export default {
       var encrypted = objeto.$cookies.get("user_session");      
       var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
       var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
-      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+      //objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+      objeto.codigoLab = localStorage.identificacion;
+      
       
       
       console.log("Método buscar header laboratorista linea 277");
@@ -288,7 +290,9 @@ export default {
       console.log("codlab 1: ",objeto.codlab);
       console.log("codigolab : ",objeto.codigoLab);
       //console.log("codlab 2: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
-      console.log("AQUÍ EL CODIGO: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
+      
+      //console.log("AQUÍ EL CODIGO $%: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
+      console.log("AQUÍ EL CODIGO: ",objeto.codigoLab)
       
       this.axios
         .post(
