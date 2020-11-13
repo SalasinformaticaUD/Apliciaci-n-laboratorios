@@ -20,7 +20,7 @@
             hide-details
             
             dark
-            
+            @keyup.enter="initialize"
           ></v-text-field>
           
           <!--BOTÓN BUSCAR-->
@@ -50,18 +50,59 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col class="col-sm-8 col-lg-8">
+                    <v-col class="col-sm-12 col-lg-6">
+                      <v-text-field v-model="editedItem.sede" :disabled="true" label="Sede"></v-text-field>
+                    </v-col>
+                    <v-col class="col-sm-12 col-lg-6">                       
+                      <v-text-field v-model="editedItem.idSede" :disabled="true" label="Id sede"></v-text-field>
+                    </v-col>
+                  </v-row>
+
+                  <v-row>
+                    <v-col class="col-sm-12 col-lg-6">
+                      <v-text-field                    
+                          v-model="editedItem.dependencia" :disabled="true" label="Dependencia"                        
+                      ></v-text-field>
+                    </v-col>
+
+                    <v-col class="col-sm-12 col-lg-6">
                       
-                    <v-autocomplete
-                      v-model="editedItem.espacioFisico"
-                      :items="ubicaciones"
-                      dense
-                      filled
-                      label="Ubicación Actual"
-                    ></v-autocomplete>
+                      <v-autocomplete
+                        v-model="editedItem.espacioFisico"
+                        :items="ubicaciones"
+                        dense
+                        filled
+                        label="Ubicación Actual"
+                        
+                      ></v-autocomplete>
+                    </v-col>
+
+                  </v-row>
+                  <v-row>
+                    <v-col class="col-sm-12 col-lg-6">
+                      <v-autocomplete
+                        v-model="editedItem.tipo"
+                        :items="T_ubicaciones"
+                        dense
+                        filled
+                        label="Tipo de ubicación"
+                        
+                      ></v-autocomplete>
 
                       <!--<v-text-field v-model="editedItem.espacioFisico" :disabled="false" label="Ubicación Actual"></v-text-field>-->
                     </v-col>
+
+                    <v-col class="col-sm-12 col-lg-6">
+                      <v-autocomplete
+                        v-model="editedItem.numero"
+                        :items="N_ubicaciones"
+                        dense
+                        filled
+                        label="Número"
+                        
+                      ></v-autocomplete>                      
+                    </v-col>
+
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -399,9 +440,13 @@ export default {
     HeaderLaboratorista
   },
   data: () => ({
-    ubicaciones: ['ALMACEN', 'CIRCUITOS', 'SALAS', 'buzz'],
+    ubicaciones: ["ALMACEN", "LABORATORIO DE CIRCUITOS", "LABORATORIO DE ELECTRONICA A","LABORATORIO DE ELECTRONICA B","LABORATORIO DE BASICA","LABORATORIO DE DIGITALES","LABORATORIO DE COMUNICACIONES","LABORATORIO DE CONTROL","LABORATORIO DE MAQUINAS","LABORATORIO FESTO","FISICA 509","FISICA 510","SALA DE SISTEMAS 500","SALA DE SISTEMAS 501","SALA DE SISTEMAS 502","SALA DE SISTEMAS 503","SALA DE SISTEMAS 504","SALA DE SISTEMAS 505","SALA DE SISTEMAS 506","SALA DE SISTEMAS 507","SALA DE SISTEMAS 508","SALA DE SISTEMAS 601","SALA DE SISTEMAS 701","SALA DE SISTEMAS 702","SALA DE SISTEMAS 703","SALA DE SISTEMAS 704","SALA DE SISTEMAS 706","SALA DE SISTEMAS 707"],
+    T_ubicaciones: ["PUESTO","BANCO","STAND","ARMARIO"],
+    N_ubicaciones:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],
     return: {
-      search: ""
+      search: "",
+      TipoUbicacion: "",   
+      idUbicacion:"",   
     },
     dialog: false,
     dialog2: false,
@@ -573,9 +618,14 @@ export default {
 
     save() {
       
-
+      let objeto2 = this;
       this.placa = this.editedItem.placa;
       this.sala = this.editedItem.espacioFisico;
+      var tipo_u = this.editedItem.tipo;
+      var numero_u = this.editedItem.numero;
+      objeto2.idUbicacion= tipo_u + " " + numero_u;
+      console.log("idUbicación: ",objeto2.idUbicacion);
+      
 
       var confirmacion = confirm("¿Esta seguro de guardar estos cambios?");
 
@@ -590,7 +640,9 @@ export default {
               "/Usuario/editarequipo",
             {
               placa: objeto.placa,
-              sala: objeto.sala
+              sala: objeto.sala,
+              iUbicacion: objeto2.idUbicacion,
+              
             },
             //toUpperCase convierte la cadena de String a mayusculas
             {

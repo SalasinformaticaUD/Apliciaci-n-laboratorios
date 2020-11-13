@@ -276,8 +276,8 @@ export default {
       var encrypted = objeto.$cookies.get("user_session");      
       var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
       var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
-      //objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
-      objeto.codigoLab = localStorage.identificacion;
+      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+      //objeto.codigoLab = localStorage.identificacion;
       
       
       
@@ -290,9 +290,9 @@ export default {
       console.log("codlab 1: ",objeto.codlab);
       console.log("codigolab : ",objeto.codigoLab);
       //console.log("codlab 2: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
-      
-      //console.log("AQUÍ EL CODIGO $%: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
-      console.log("AQUÍ EL CODIGO: ",objeto.codigoLab)
+      objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+      console.log("AQUÍ EL CODIGO $: ",objeto.codigoLab);
+      //console.log("AQUÍ EL CODIGO: ",objeto.codigoLab)
       
       this.axios
         .post(
@@ -302,8 +302,7 @@ export default {
             objeto.$serverPort +
             "/Usuario/consultaeditlabo",
           {
-            codigo: objeto.codigoLab,          
-            
+            codigo: objeto.codigoLab,                      
           },
           {
             headers: {

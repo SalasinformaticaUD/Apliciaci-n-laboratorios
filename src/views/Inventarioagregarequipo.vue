@@ -499,7 +499,8 @@ export default {
         opt_dependencia: [
           {
             text: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA",
-            value: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA"
+            value: "COORDINACIÓN DE LABORATORIOS DE INGENIERÍA",
+            dependency: "CALLE 40"
           }
         ],
         opt_ubicacion:[

@@ -231,7 +231,8 @@ export default {
           localStorage.identificacion= usuarioL; //TENER CUIDADO PARA PRUEBA
           
           let encriptado = objeto.$Crypto.AES.encrypt(
-            objeto.usuarioL,
+            //objeto.usuarioL,
+            usuarioL,
             response.data.data.token
           );
           console.log("AQUI EL ENCRIPTADO COOKIE: ",encriptado);
