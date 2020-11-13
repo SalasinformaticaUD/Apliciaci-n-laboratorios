@@ -11,6 +11,10 @@ import select2 from "./assets/select2/js/select2.js";
 import VueCookies from 'vue-cookies';
 import CryptoJS from 'crypto-js';
 
+import jsPDF from "jspdf";
+import 'jspdf-autotable';
+import Chart from 'chart.js';
+
 Vue.use(VueCookies);
 
 Vue.use(CryptoJS);

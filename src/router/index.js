@@ -29,6 +29,7 @@ import prestamoequExt from "../views/prestamoequExt.vue";
 import prestamoequInt from "../views/prestamoequInt.vue";
 import consultareservalabstemp from "../views/consultareservalabstemp.vue";
 import CRUD from "../views/CRUD.vue";
+import informes from "../views/informes.vue";
 
 Vue.use(VueRouter);
 
@@ -273,6 +274,14 @@ const routes = [
     
   },
 
+  {
+    path: "/informes",
+    name: "informes",
+    component: informes,
+    meta: {
+      requiresAuth: false
+    }
+  },
 
 ];
 

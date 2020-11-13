@@ -132,15 +132,17 @@
               <v-list-group no-action sub-group active-class="white--text text--accent-4">
                 <template v-slot:activator>
                   <v-list-item-content>
-                    <v-list-item-title>Reportes</v-list-item-title>
+                    <v-list-item-title>Informes</v-list-item-title>
                   </v-list-item-content>
                 </template>
 
-                <v-list-item v-for="(Report, i) in Reports" :key="i" link>
-                  <v-list-item-title v-text="Report[0]"></v-list-item-title>
-                  <v-list-item-icon>
-                    <v-icon v-text="Report[1]"></v-icon>
-                  </v-list-item-icon>
+                <v-list-item 
+                  v-for="(item, i) in Reports"
+                  :key="i" 
+                  link
+                  router
+                  :to="item[1]">
+                  <v-list-item-title v-text="item[0]"></v-list-item-title>
                 </v-list-item>
               </v-list-group>
             </v-card>
@@ -249,7 +251,7 @@ export default {
       ["Nueva Sanción", ""],
       ["Gestionar Sanciones", ""]
     ],
-    Reports: [["Generación de informes", ""]],
+    Reports: [["Generación de informes", "/informes"]],
     GestionProfiles: [
       ["Editar datos", "/editprofilelab"],
       ["Cambiar contraseña", "/labpass"]
