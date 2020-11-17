@@ -4,7 +4,11 @@
     <v-col cols="12" align="center">
       <v-col class="col-sm-12 col-lg-8">
         <h1 style="color:white;">Agregar Equipo</h1>
-
+          <v-form
+            ref="form"
+            v-model="valid"
+            lazy-validation
+          >
         <v-stepper v-model="e1" dark>
           <v-stepper-header>
             <v-stepper-step :complete="e1 > 1" step="1" :editable="editable">Información básica</v-stepper-step>
@@ -334,6 +338,7 @@
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
+        </v-form>
       </v-col>
     </v-col>
   </v-container>
@@ -1079,13 +1084,16 @@ export default {
   },
 
   methods: {
+     reset () {
+      this.$refs.form.reset(), this.initialize();
+    },
      initialize() {
 
       this.usuario=localStorage.usuario
       console.log(this.usuario)
     },
     volverpag(){
-      window.history.back()
+      window.history.back()      
     },
 
     formatDate(date) {
@@ -1205,7 +1213,10 @@ export default {
               objeto.vista = true;
               objeto.output = response.data.mensaje;
               var respuesta = response.data.mensaje;
+              objeto.reset(); //Eliminar datos del form
+              objeto.e1=1; // Envía al formulario 1
               alert(respuesta);
+              
             } else if (response.data.status == 2) {
               objeto.vista = true;
               objeto.output = response.data.status;
