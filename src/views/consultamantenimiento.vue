@@ -2,12 +2,34 @@
   <v-container fluid>
     <HeaderLaboratorista />
 
-    <v-data-table :headers="headers" :items="equipolab" class="elevation-1" color="background" dark>
+    <v-data-table :headers="headers" :items="equipolab" :search="search" class="elevation-1" color="background" dark>
       <template v-slot:top>
         <v-toolbar flat dark>
           <v-toolbar-title>Consulta Mantenimientos</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
+
+          <v-text-field
+            v-model="search"
+            ref="form"
+            append-icon="fas far-search"
+            label="Buscar"
+            single-line
+            hide-details
+            
+            dark
+            @keyup.enter="initialize"
+          ></v-text-field>
+          
+          <!--BOTÓN BUSCAR-->
+          <v-btn color="primary" @click="initialize">Buscar</v-btn>
+          
+          <v-spacer></v-spacer>          
+          <v-btn color="primary" @click="reset">Reset</v-btn>
           <v-spacer></v-spacer>
+
+
+
+          
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{on}">
               <v-btn
@@ -15,7 +37,7 @@
                 v-on="on"
                 dark
                 class="mb-2"
-                to=""
+                to="/mantenimiento"
               >Agregar nuevo mantenimiento</v-btn>
             </template>
             <v-card dark>
@@ -97,7 +119,7 @@
           </v-dialog>
         </v-toolbar>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template v-slot:[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="inforItem(item)">fas fa-info-circle</v-icon>
       </template>
       <template v-slot:no-data>
@@ -121,7 +143,7 @@ export default {
     dialog2: false,
     headers: [
       {
-        text: "placa Equipo",
+        text: "Placa",
         align: "start",
         sortable: false,
         value: "placa"
@@ -130,7 +152,7 @@ export default {
       { text: "Fecha", value: "fechaMantenimiento" },
       { text: "Hora", value: "hora" },
       { text: "Laboratorista", value: "laboratorista" }, 
-       { text: "Esto del Mantenimiento", value: "estado" }, 
+       { text: "Estado del Mantenimiento", value: "estado" }, 
       { text: "Detalles", value: "actions", sortable: false }
     ],
     equipolab: [],
@@ -169,8 +191,12 @@ export default {
 
   methods: {
     initialize() {
-      (this.equipolab = [])
-      , this.buscar()
+      (this.equipolab = []);
+       this.buscar();
+    },
+
+    reset () {
+      this.$refs.form.reset(), this.initialize();
     },
 
     inforItem(item) {
@@ -205,7 +231,8 @@ export default {
         )
         .then(function(response) {
           objeto.equipolab = response.data.data;
-          // console.log(objeto.equipolab);
+           console.log("AJI");
+           console.log(objeto.equipolab);
         })
         .catch(function(error) {
           objeto.output = error;
