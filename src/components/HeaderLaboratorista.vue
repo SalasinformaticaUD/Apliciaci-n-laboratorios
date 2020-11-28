@@ -233,7 +233,7 @@ export default {
       ["Solicitudes de Traslado", "/busquedainventario", "6", "green", ""]
     ],
      Consultamant: [
-      ["Nuevo mantenimeinto", ""],
+      ["Nuevo mantenimeinto", "/mantenimiento"],
       ["Consultar mantenimientos", "/consultamantenimiento"],
      
     ],

@@ -93,6 +93,43 @@
                         ></v-text-field>
                       </v-col>
                 
+                    </v-row>                    
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.fechaMantenimiento"
+                          :disabled="true"
+                          label="Fecha"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.hora"
+                          :disabled="true"
+                          label="Hora"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.sala"
+                          :disabled="true"
+                          label="Sala"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.numeroInterno"
+                          :disabled="true"
+                          label="Número Interno"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.estado"
+                          :disabled="true"
+                          label="Estado"
+                        ></v-text-field>
+                      </v-col>
                     </v-row>
                     <v-row>
                       <v-col>
@@ -104,7 +141,6 @@
                       </v-col>
        
                     </v-row>
-                  
                   </v-col>
                 </v-container>
                  <v-row justify="space-around">

@@ -3,7 +3,7 @@
     <HeaderLaboratorista />
     <v-col cols="12" align="center">
       <v-col class="col-sm-12 col-lg-8">
-        <h1 style="color:white;">Añadir mante</h1>
+        <h1 style="color:white;">Añadir mantenimiento</h1>
 
         <v-stepper v-model="e1" dark>
           <v-stepper-header>
@@ -83,12 +83,16 @@
                     </v-menu>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="numeroInterno" label="Horario" solo></v-text-field>
+                    <v-text-field v-model="Horario" label="Horario" solo></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-text-field v-model="Estado" label="Estado" solo></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-select
+                      v-model="Tipo_De_Mantenimiento"
                       :items="mantenimientos"
                       label="Tipo de Mantenimiento"
                       solo
@@ -104,7 +108,7 @@
                 </v-row>
               </v-card>
               <v-btn rounded color="primary" dark @click="e1 = 2">Siguiente</v-btn>
-              <v-btn text>Cancel</v-btn>
+              <v-btn text @click="volverpag()">Cancelar</v-btn>
             </v-stepper-content>
 
             <v-stepper-content step="2">
@@ -192,7 +196,7 @@
                 </v-row>
               </v-card>
               <v-btn rounded color="primary" dark @click="formSubmit">Guardar</v-btn>
-              <v-btn text>Cancel</v-btn>
+              <v-btn text @click="volverpag()">Cancelar</v-btn>
             </v-stepper-content>
 
           </v-stepper-items>
@@ -227,7 +231,9 @@ export default {
       nomUsu:'',
       nomEqu:'',
       sala:'',
-      numeroInterno:'',
+      Horario:'',
+      Estado:'',
+      Tipo_De_Mantenimiento:'',
       descDano:'',
       nomEmpresa:'',
       nit:'',
@@ -311,6 +317,9 @@ export default {
     }
   },
   methods: {
+    volverpag(){
+      window.history.back()      
+    },
     formatDate (date) {
         if (!date) return null
 
@@ -328,7 +337,8 @@ export default {
         this.nomUsu &&
         this.nomEqu &&
         this.sala &&
-        this.numeroInterno &&
+        this.Horario &&
+        this.Estado &&
         this.descDano &&
         this.nomEmpresa &&
         this.nit &&
@@ -351,27 +361,30 @@ export default {
               objeto.$serverPort +
               "/Usuario/registrarMant",
             {
-              fecha :this.fechaForm,
-              fechaReal:this.fechaRealForm,
               placa:this.placa,
+              Numero_Interno:this.numInterno,
+              fecha :this.fechaForm,
               codUsu:this.codUsu,
-              numInterno:this.numInterno,
               nomUsu:this.nomUsu,
-              nomEqu:this.nomEqu,
               sala:this.sala,
-              numeroInterno:this.numeroInterno,
+              Horario:this.Horario,
+              Estado:this.Estado,
               descDano:this.descDano,
+              Tipo_De_Mantenimiento:this.Tipo_De_Mantenimiento,
+              fechaReal:this.fechaRealForm,
               nomEmpresa:this.nomEmpresa,
               nit:this.nit,
               tiempoGar:this.tiempGar,
-              costMan:this.costMant,
               numOrdServ:this.numOrdServ,
               vigencia:this.vigencia,
               supervisor:this.supervisor,
-              repuestos:this.repuestos ,
+              repuestos:this.repuestos,                           
+              costMan:this.costMant,            
+              supervisor:this.supervisor,              
               proxMant:this.proxMant ,
               espMantReal:this.espMantReal ,
-              observaciones:this.observaciones
+              observaciones:this.observaciones,
+              nomEqu:this.nomEqu
             },
             {
               headers: {
@@ -393,7 +406,7 @@ export default {
             objeto.output = error;
           });
       }else{
-        alert('Falta un campo');
+        alert('Falta un campo');       
       }
     }
   }
