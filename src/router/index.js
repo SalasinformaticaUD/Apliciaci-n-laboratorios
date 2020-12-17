@@ -30,6 +30,7 @@ import prestamoequInt from "../views/prestamoequInt.vue";
 import consultareservalabstemp from "../views/consultareservalabstemp.vue";
 import CRUD from "../views/CRUD.vue";
 import informesElementos from "../views/informesElementos.vue";
+import informesHorarios from "../views/informesHorarios.vue";
 
 Vue.use(VueRouter);
 
@@ -278,6 +279,14 @@ const routes = [
     path: "/informesElementos",
     name: "informesElementos",
     component: informesElementos,
+    meta: {
+      requiresAuth: false
+    }
+  },
+  {
+    path: "/informesHorarios",
+    name: "informesHorarios",
+    component: informesHorarios,
     meta: {
       requiresAuth: false
     }

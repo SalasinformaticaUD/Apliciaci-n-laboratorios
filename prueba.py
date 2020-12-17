@@ -11,9 +11,13 @@ import json
 from bson import json_util, ObjectId
 from flask_mail import Mail,  Message
 
+
+from openpyxl.utils import get_column_letter
 from openpyxl import Workbook, cell
 from openpyxl.writer.excel import save_virtual_workbook
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Border, Side
+from openpyxl.worksheet.table import Table, TableStyleInfo
+from openpyxl.chart import BarChart, Reference, Series
 
 
 app = Flask(__name__)
@@ -324,7 +328,7 @@ class Usuario(Resource):
 
 
 
-        print("HOLA AUXILIO 333")#BORRAR ESTO
+        print("HOLA AUXILIO 333 CAMBIO")#BORRAR ESTO
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def consultaeditadmin(self):
@@ -340,6 +344,7 @@ class Usuario(Resource):
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def consultarEquipo(self):
+        print("ENTRA A CONSULTAR EQUIPO")
         elemento = mongo.db.Elementos
         sede = "FICC01"
         output = []
@@ -365,9 +370,10 @@ class Usuario(Resource):
         elemento = mongo.db.Elementos
         placa = request.json['placa']
         sala = request.json['sala']
+        iUbicacion = request.json['iUbicacion']
         mensaje = "Ubicación del equipo actualizada"
         actualizardatos = elemento.update({"Placa": placa}, {"$set": {
-            "Espacio_Fisico": sala}})
+            "Espacio_Fisico": sala, 'Id_Ubicacion': iUbicacion}})
         if actualizardatos:
             self.status = 1
         else:
@@ -463,35 +469,38 @@ class Usuario(Resource):
 
     def registrarMant(self):
         mensaje = "0"
-        elemento = mongo.db.Mantenimientos
-        fecha = request.json['fecha']
-        fechaReal = request.json['fechaReal']
+        elemento = mongo.db.Mantenimiento
         placa = request.json['placa']
+        Numero_Interno = request.json['Numero_Interno']
+        fecha = request.json['fecha']
         codUsu = request.json['codUsu']
-        numInterno = request.json['numInterno']
         nomUsu = request.json['nomUsu']
-        nomEqu = request.json['nomEqu']
         sala = request.json['sala']
-        numeroInterno = request.json['numeroInterno']
+        Horario = request.json['Horario']
         descDano = request.json['descDano']
+        Tipo_De_Mantenimiento = request.json['Tipo_De_Mantenimiento']
+        fechaReal = request.json['fechaReal']
         nomEmpresa = request.json['nomEmpresa']
-        nit = request.json['nit']
-        tiempoGar = request.json['tiempoGar']
+        nit = request.json['nit']		
+        tiempoGar = request.json['tiempoGar']		
+        espMantReal = request.json['espMantReal']        
         costMant = request.json['costMan']
-        numOrdServ = request.json['numOrdServ']
+        numOrdServ = request.json['numOrdServ']                                 
         vigencia = request.json['vigencia']
         supervisor = request.json['supervisor']
         repuestos = request.json['repuestos']
-        proxMant = request.json['proxMant']
-        espMantReal = request.json['espMantReal']
+        proxMant = request.json['proxMant'] 
         observaciones = request.json['observaciones']
-        nuevoElemento = elemento.insert({'Fecha':fecha,'fechaRealizacion':fechaReal,'Placa':placa,'codUsu':codUsu,'numInterno':numInterno,'nomUsu':nomUsu,'nomEqu':nomEqu,'sala':sala,'numeroInterno':numeroInterno,'nomUsu':nomUsu,'nomEqu':nomEqu,'sala':sala,'numeroInterno':numeroInterno,'descDano':descDano,'nomEmpresa':nomEmpresa,'nit':nit,'tiempoGar':tiempoGar,'costMant':costMant,'numOrdServ':numOrdServ,'vigencia':vigencia,'supervisor':supervisor,'repuestos':repuestos,'proxMant':proxMant,'espMantReal':espMantReal,'observaciones':observaciones})
+        nomEqu = request.json['nomEqu']        
+        Estado = request.json['Estado']
+        nuevoElemento = elemento.insert({'Placa':placa,'Numero_Interno':Numero_Interno,'Fecha':fecha,'Codigo_Usuario ':codUsu,'Nombre_Usuario':nomUsu,'Sala':sala,'Horario':Horario,'Descripcion_Dano':descDano,'Tipo_De_Mantenimiento':Tipo_De_Mantenimiento,'Fecha_De_Realizacion':fechaReal,'Nombre_Empresa_Contratada':nomEmpresa,'Nit':nit,'Tiempo_De_Garantia':tiempoGar,'Especificaciones_Del_Mantenimiento_Realizado':espMantReal,'Costo_Mantenimiento':costMant,'Numero_Orden_De_Servicio_Del_Mantenimiento':numOrdServ,'Vigencia':vigencia,'Supervisor':supervisor,'Repuestos':repuestos,'Proximo_Mantenimiento':proxMant,'Observaciones':observaciones,'Estado':Estado})
         mensaje = "Mantenimiento Registrado correctamente"
         self.status = 1
         return mensaje
 
 
     def consultaMantenimiento(self):
+        print("ENTRO AJI MANTENIMIENTOS OK")
         mantenimiento = mongo.db.Mantenimiento
         output = []
         self.status = 1
@@ -499,11 +508,13 @@ class Usuario(Resource):
         if encontrar:
             mensaje = "Mantenimientos Encontrados"
             for u in mantenimiento.find({}):
-                output.append({'placa': u['Placa'], 'laboratorista': u['Nombre_Usuario'], 'fechaMantenimiento': u['Fecha'],'sala':u['Sala'], 'dano':u['Descripcion_Dano'],
+                output.append({'placa': u['Placa'], 'laboratorista': u['Nombre_Usuario'],'sala':u['Sala'], 'dano':u['Descripcion_Dano'], 'fechaMantenimiento':json.dumps(u['Fecha'],default=str),
                                'tipoMantenimiento': u['Tipo_De_Mantenimiento'],  'numeroInterno': u['Numero_Interno'], 'hora':u['Horario'], 'estado':u['Estado']
                                })
         else:
             mensaje = "no se encontro"
+        print("SALIO AJI MANTENIMIENTOS:", mensaje)
+        print("DATOS: ",output)
         return {'status': self.status, 'mensaje': mensaje, 'data': output}    
 
 
@@ -551,6 +562,298 @@ class Usuario(Resource):
             self.status = 1
             mensaje = " usuarios eliminados"
         return mensaje
+
+    ############### Metodos para crear documentos Excel ###########################
+    def excelTemporalElementos(self):
+        # Este if pregunta si existe la base de datos temporal y en caso de que si, la elimina
+        if 'temporalExcel' in mongo.db.list_collection_names():
+            temporalExcel = mongo.db.temporalExcel
+            temporalExcel.drop()
+
+        # Valida los campos 'true' enviados por el usuario para crear una base de datos temporal. Si el campo itemPost es verdadero, recorre todos la coleccion elementos y solo agrega el campo solicitado a la coleccion temporal. El if mas interno es para validar si no existe un documento en la coleccion con ese id para insertar un nuevo elemento o en caso contrario actualizar uno
+        temporalExcel = mongo.db["temporalExcel"]
+        elemento = mongo.db.Elementos
+        req_data = request.get_json()
+        for itemPost in req_data:
+            if request.json[itemPost]:
+                for (index,item) in enumerate(elemento.find().limit(20)):
+                    if temporalExcel.count_documents({"_id": index+1})==0:
+                        temporalExcel.insert_one({"_id":index+1,itemPost:item[itemPost]})
+                    else:
+                        temporalExcel.update({"_id":index+1},{'$set':{itemPost:item[itemPost]}})
+
+        self.status = 1    
+        mensaje = "Se creo la base de datos temporal"    
+        return mensaje
+    
+    def excelTemporalFilterDate(self):
+        # Se toman las fechas y se separan los caracteres en un vector [dia, mes, año]
+        startDate = request.json['startDate'].split('/')
+        endDate = request.json['endDate'].split('/')
+
+        # Variable que tiene asociada el nombre del elemento asociado a la fecha en la base de datos
+        nameKeyDate = request.json['nameKeyDate']
+
+        # Se borra la base de datos temporal
+        if 'temporalExcelFilterDate' in mongo.db.list_collection_names():
+            temporalExcelFilterDate = mongo.db.temporalExcelFilterDate
+            temporalExcelFilterDate.drop()
+
+        # Se crea la base de datos temporal
+        temporalExcelFilterDate = mongo.db["temporalExcelFilterDate"]
+
+        # Se obtiene la base de datos segun el nombre que llega en la peticion
+        elemento = mongo.db.get_collection(request.json['dataBase'])
+
+        for (index,item) in enumerate(elemento.find().limit(35)):
+            # La fecha tiene un espacio...
+            # Se toma la fecha del elemento y se separa en un vector [dia,mes,año]
+            dateElement = item[nameKeyDate].split('/')
+            # Se valida si la fecha del elemento esta en el rango de busqueda
+            if startDate[2] <= dateElement[2] and dateElement[2] <= endDate[2] and startDate[1] <= dateElement[1] and dateElement[1] <= endDate[1] and startDate[0] <= dateElement[0] and dateElement[0] <= endDate[0]:
+                temporalExcelFilterDate.insert_one(item)
+
+        if (temporalExcelFilterDate.find().count()!=0):
+            self.status = 1    
+            mensaje = "Se creo la base de datos temporal"    
+        else:
+            self.status = 3   
+            mensaje = "No hay elementos que coincidan con los datos de busqueda."    
+
+        return mensaje
+
+    def obtenerElementosExcel(self):
+        elemento = mongo.db.Elementos
+        sede = "FICC01"
+        output = []
+        self.status = 1
+        encontrar = elemento.find({"Id_Sede": sede})
+        if encontrar:
+            mensaje = "Base de datos de elementos encontrada"
+            for u in elemento.find({"Id_Sede": sede}):
+                output.append({'Placa': u['Placa'], 'Nombre_Del_Equipo': u['Nombre_Del_Equipo'], 'Estado': u['Estado'],'Serie':u['Serie'], 'Referencia/Modelo':u['Referencia/Modelo'],                            'Marca': u['Marca'],  'Codigo_Interno': u['Codigo_Interno'], 'Sede':u['Sede'], 'Id_Sede':u['Id_Sede'],'Dependencia':u['Dependencia'],'Id_Ubicacion':u['Id_Ubicacion'],
+                               'Espacio_Fisico': u['Espacio_Fisico'], 'Proveedor':u['Proveedor'], 'Valor_Elemento':u['Valor_Elemento'], 'Nit':u['Nit'],'Iva_Aplicado':u['Iva_Aplicado'],
+                               'Tipo_De_Contrato':u['Tipo_De_Contrato'],'Total_Valor_Elemento':u['Total_Valor_Elemento'], 'Cantidad_Asignada':u['Cantidad_Asignada'],'Vigencia':u['Vigencia'],
+                               'Fecha_De_Adquisicion':u['Fecha_De_Adquisicion'], 'Numero_De_Contrato':u['Numero_De_Contrato'], '#_De_Factura_Compra':u['#_De_Factura_Compra'], 'Tiempo_De_Garantia':u['Tiempo_De_Garantia'],
+                               'Frecuencia_De_Mantenimiento':u['Frecuencia_De_Mantenimiento'],'Cuenta_Con_Manual':u['Cuenta_Con_Manual'],'Tiempo_De_Vida_Util':u['Tiempo_De_Vida_Util'],'Tipo_De_Uso':u['Tipo_De_Uso'],
+                               'Potencia_Electrica':u['Potencia_Electrica'], 'Tipo_De_Uso_Otro':u['Tipo_De_Uso_Otro'], 'Pais_De_Origen':u['Pais_De_Origen'],'Impacto_Uso_Del_Equipo':u['Impacto_Uso_Del_Equipo'],
+                               'Especificaciones_Tecnicas':u['Especificaciones_Tecnicas'], 'Accesorios' :u['Accesorios'], 'Documento_Funcionario':u['Documento_Funcionario'], 'Nombre_Del_Funcionario':u['Nombre_Del_Funcionario']
+                               })
+        else:
+            mensaje = "no se encontro"
+        return {'status': self.status, 'mensaje': mensaje, 'data': output}
+
+    def createExcel(self):
+        # Se crea la instancia para crear el excel
+        xlsx = Workbook()
+        # Se activa la primera hoja del documento
+        doc = xlsx.active
+        # Por defecto la primera hoja se llama Sheet, entonces se le cambia a Informe
+        doc.title = "Informe"
+
+        header = []
+        data = []
+
+        elemento = mongo.db.temporalExcel
+
+        for item in elemento.find().limit(1):
+            for nameKey in item:
+                if nameKey != "_id":
+                    header.append(nameKey)
+
+        for item in elemento.find():
+            dataAux = []
+            for nameKey in item:
+                if nameKey != "_id":
+                    dataAux.append(item[nameKey])
+            data.append(dataAux)
+        
+        if 'temporalExcel' in mongo.db.list_collection_names():
+            temporalExcel = mongo.db.temporalExcel
+            temporalExcel.drop()
+
+        # Se agrega el encabezado y el contenido de la tabla. Se agrega fila por fila
+        doc.append(header)    
+        for row in data:
+            doc.append(row)
+
+        # ESTILOS Header
+        for col in doc.iter_cols(min_col=1,max_col=doc.max_column,min_row=1,max_row=1):
+            for col_index in col:
+                col_index.alignment = Alignment(horizontal='center',vertical='center') 
+
+        # Para desplazar la tabla se insertan nuevas filas y columnas en blanco
+        marginLeft = 1
+        marginTop = 1
+        doc.insert_cols(1,marginLeft)
+        doc.insert_rows(1,marginTop)
+
+        # PosX es la celda en que la tabla inicia (esquina superior izquierda), esto es: la cantidad de celdas del margen izquierdo : la cantidad de celdas del margen superior
+        # PosY es la celda en que la tabla termina (esquina inferior derecha), esto es: la ultima columna con datos : la ultima fila con datos
+        posX = get_column_letter(marginLeft+1)+str(marginTop+1)
+        posY = get_column_letter(doc.max_column)+str(doc.max_row)
+
+        # Se le da el formato de tabla para establecer los estilos
+        table = Table(displayName="Tabla1", ref=posX+":"+posY)
+
+        style = TableStyleInfo(name="TableStyleLight10", showFirstColumn=False,
+                showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
+        # Se aplican los estilos a la tabla creada
+        table.tableStyleInfo = style
+
+        # Se añade la tabla al documento
+        doc.add_table(table)
+
+        # Se juntan las celdas para crear el header
+        # doc.merge_cells('B2:I2')
+        # doc.merge_cells('B3:I3')
+        # doc.merge_cells('B4:I4')
+
+        # Se inserta el header
+        # doc["B2"]="MANTENIMIENTOS LABORATORIOS DE INGENIERIA"
+        # doc["B3"]="SALAS DE INFORMATICA TRIMESTRE II"
+        # doc["B4"]="PERIODO COMPRENDIDO ENTRE EL 1 DE ABRIL HASTA EL 30 DE ABRIL DEL 2020"
+            
+        return Response(
+            save_virtual_workbook(xlsx),
+            headers={
+            'Content-Disposition': 'attachment; filename=Prueba.xlsx',
+            'Content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+        )
+
+    def excelHorarios_DiasSemanaVsHoras(self):
+        elemento = mongo.db.temporalExcelFilterDate
+        
+        xlsx = Workbook()
+        doc = xlsx.active
+        doc.title = "InformeHorarios"    
+
+        header = ["Asignatura","Docente","Grupo","Sala","Dia","Horario","Fecha"]
+        data = []
+
+        for item in elemento.find().limit(35):
+            data.append([item["Asignatura"],item["Docente"],item["Grupo"],item["Sala"],item["Dia"],item["Horario"],item["Fecha "]])
+        
+        doc.append(header)    
+        for row in data:
+            doc.append(row)
+
+        for col in doc.iter_cols(min_col=1,max_col=doc.max_column,min_row=1,max_row=1):
+            for col_index in col:
+                col_index.alignment = Alignment(horizontal='center',vertical='center') 
+
+        marginLeft = 1
+        marginTop = 1
+        doc.insert_cols(1,marginLeft)
+        doc.insert_rows(1,marginTop)
+
+        posX = get_column_letter(marginLeft+1)+str(marginTop+1)
+        posY = get_column_letter(doc.max_column)+str(doc.max_row)
+
+        table = Table(displayName="Tabla1", ref=posX+":"+posY)
+
+        style = TableStyleInfo(name="TableStyleLight10", showFirstColumn=False,
+                showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
+        table.tableStyleInfo = style
+
+        doc.add_table(table)
+
+        thin_border = Border(left=Side(style='thin'), 
+                     right=Side(style='thin'), 
+                     top=Side(style='thin'), 
+                     bottom=Side(style='thin'))
+
+        inicioTablaGrafico = doc.max_column+4
+        finalTablaGrafico = inicioTablaGrafico+4
+
+        posInicial = get_column_letter(inicioTablaGrafico) + str(2)
+        posFinal = get_column_letter(finalTablaGrafico) + str(2)
+
+        doc[posInicial].border = thin_border
+        doc.merge_cells(posInicial+":"+posFinal)
+        doc[posInicial] = "HORAS DE CLASE POR DIA DE LA SEMANA"
+        doc[posInicial].alignment = Alignment(horizontal='center',vertical='center')
+        
+        dias = ["Lunes","Martes","Miercoles","Jueves","Viernes"]
+        cantidad_dias = []
+        
+        for row in doc.iter_rows(min_col=inicioTablaGrafico,max_col=finalTablaGrafico,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = dias[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_dias.append(elemento.find({"Dia":dias[index]}).count()*2)
+
+        for row in doc.iter_rows(min_col=inicioTablaGrafico,max_col=finalTablaGrafico,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_dias[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(doc,min_col=inicioTablaGrafico,min_row=3,max_col=finalTablaGrafico)      
+        data = Reference(doc,min_col=inicioTablaGrafico,min_row=4,max_col=finalTablaGrafico)      
+
+        chart = BarChart()
+        chart.type = "bar" 
+        chart.y_axis.title = "Cantidad de horas"  
+        chart.title = "Cantidad de horas al día por la semana"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.legend = None
+        chart.varyColors = True
+        doc.add_chart(chart,"J6")  
+
+        tab2 = xlsx.create_sheet("SalasVsHoras")    
+        salas = ["500","501","502","503","504"]
+        cantidad_horas = []
+
+        tab2['B2'].border = thin_border
+        tab2['B2'].alignment = Alignment(horizontal='center',vertical='center')
+        tab2['B2'] = "HORAS DE CLASE A LA SEMANA POR SALA"
+        tab2.merge_cells('B2:F2')
+
+        for row in tab2.iter_rows(min_col=2,max_col=6,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = salas[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_horas.append(elemento.find({"Sala":salas[index]}).count()*2)
+
+        for row in tab2.iter_rows(min_col=2,max_col=6,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_horas[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(tab2,min_col=2,max_col=6,min_row=3)
+        data = Reference(tab2,min_col=2,max_col=6,min_row=4)      
+
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = "Cantidad de horas a la semana por sala"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.legend = None
+        chart.varyColors = True
+        chart.x_axis.title = "Número de la sala"  
+        chart.y_axis.title = "Cantidad de horas"  
+        # chart.style = 7
+        tab2.add_chart(chart,"B6")         
+
+        if 'temporalExcelFilterDate' in mongo.db.list_collection_names():
+            temporalExcelFilterDate = mongo.db.temporalExcelFilterDate
+            temporalExcelFilterDate.drop()
+
+        return Response(
+            save_virtual_workbook(xlsx),
+            headers={
+            'Content-Disposition': 'attachment; filename=Prueba.xlsx',
+            'Content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+        )
 
     def post(self, accion):
         mensaje = "error"
@@ -610,6 +913,10 @@ class Usuario(Resource):
             mensaje = self.consultabanco()
         elif accion == "registrarMant":
             mensaje = self.registrarMant()
+        elif accion == "excelTemporalElementos":
+            mensaje = self.excelTemporalElementos()
+        elif accion == "excelTemporalFilterDate":
+            mensaje = self.excelTemporalFilterDate()
         else:
             self.status = 2
             mensaje = "Error en la peticion"
@@ -649,27 +956,17 @@ class Usuario(Resource):
         elif accion == "getToken":
             mensaje = self.token
 
+        # Este caso es para obtener la base de datos
+        elif accion == "obtenerElementosExcel":
+            respuesta = self.obtenerElementosExcel()
+            mensaje = respuesta['mensaje']
+            self.datos = respuesta['data']          
 
-        ############### Pruebas Excel ###########################
         elif accion == "createExcel":
-            libro = Workbook()
-            docExcel = libro["Sheet"]
-
-            docExcel.merge_cells('B2:I2')
-            docExcel.merge_cells('B3:I3')
-            docExcel.merge_cells('B4:I4')
-
-            docExcel["B2"]="MANTENIMIENTOS LABORATORIOS DE INGENIERIA"
-            docExcel["B3"]="SALAS DE INFORMATICA TRIMESTRE II"
-            docExcel["B4"]="PERIODO COMPRENDIDO ENTRE EL 1 DE ABRIL HASTA EL 30 DE ABRIL DEL 2020"
-            
-            return Response(
-                save_virtual_workbook(libro),
-                headers={
-                'Content-Disposition': 'attachment; filename=Prueba.xlsx',
-                'Content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                }
-            )          
+            # Retorno de tipo Response para mandar documento al servidor
+            return self.createExcel()          
+        elif accion == "excelHorarios_DiasSemanaVsHoras":
+            return self.excelHorarios_DiasSemanaVsHoras()      
         else:
             self.status = 2
             mensaje = "Error en la peticion"

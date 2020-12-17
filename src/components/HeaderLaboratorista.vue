@@ -251,7 +251,10 @@ export default {
       ["Nueva Sanción", ""],
       ["Gestionar Sanciones", ""]
     ],
-    Reports: [["Informes elementos", "/informesElementos"]],
+    Reports: [
+      ["Informes Elementos", "/informesElementos"],
+      ["Informes Horarios", "/informesHorarios"],
+    ],
     GestionProfiles: [
       ["Editar datos", "/editprofilelab"],
       ["Cambiar contraseña", "/labpass"]
