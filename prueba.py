@@ -17,7 +17,7 @@ from openpyxl import Workbook, cell
 from openpyxl.writer.excel import save_virtual_workbook
 from openpyxl.styles import Alignment, Border, Side
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.chart import BarChart, Reference, Series
+from openpyxl.chart import BarChart, PieChart, Reference, Series
 
 
 app = Flask(__name__)
@@ -621,7 +621,44 @@ class Usuario(Resource):
             mensaje = "No hay elementos que coincidan con los datos de busqueda."    
 
         return mensaje
+    
+    def excelTemporalFilterDateBancosSala(self):
+        # Se toman las fechas y se separan los caracteres en un vector [dia, mes, año]
+        startDate = request.json['startDate'].split('/')
+        endDate = request.json['endDate'].split('/')
 
+        # Variable que tiene asociada el nombre del elemento asociado a la fecha en la base de datos
+        nameKeyDate = request.json['nameKeyDate']
+
+        # Se borra la base de datos temporal
+        if 'temporalExcelFilterDate' in mongo.db.list_collection_names():
+            temporalExcelFilterDate = mongo.db.temporalExcelFilterDate
+            temporalExcelFilterDate.drop()
+
+        # Se crea la base de datos temporal
+        temporalExcelFilterDate = mongo.db["temporalExcelFilterDate"]
+
+        # Se obtiene la base de datos segun el nombre que llega en la peticion
+        elemento = mongo.db.get_collection(request.json['dataBase'])
+
+        for (index,item) in enumerate(elemento.find().limit(35)):
+            # La fecha tiene un espacio...
+            # Se toma la fecha del elemento y se separa en un vector [dia,mes,año]
+            dateElement = item[nameKeyDate].split('/')
+            # Se valida si la fecha del elemento esta en el rango de busqueda
+            if startDate[2] <= dateElement[2] and dateElement[2] <= endDate[2] and startDate[1] <= dateElement[1] and dateElement[1] <= endDate[1] and startDate[0] <= dateElement[0] and dateElement[0] <= endDate[0]:
+                if item["Sala"] == request.json["sala"]:
+                    temporalExcelFilterDate.insert_one(item)
+
+        if (temporalExcelFilterDate.find().count()!=0):
+            self.status = 1    
+            mensaje = "Se creo la base de datos temporal"    
+        else:
+            self.status = 3   
+            mensaje = "No hay elementos que coincidan con los datos de busqueda."    
+
+        return mensaje
+    
     def obtenerElementosExcel(self):
         elemento = mongo.db.Elementos
         sede = "FICC01"
@@ -854,6 +891,359 @@ class Usuario(Resource):
             'Content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             }
         )
+    
+    def excelPrestamos(self):
+        elemento = mongo.db.temporalExcelFilterDate
+        
+        xlsx = Workbook()
+        tab1 = xlsx.active
+        tab1.title = "InformePrestamos"    
+
+        header = ["Usuario","Código","Sala","Banco","Día","Hora","Fecha adicional","Fecha de reserva","Estado"]
+        data = []
+
+        for item in elemento.find():
+            data.append([item["Usuario"],item["Codigo"],item["Sala"],item["Banco"],item["Dia"],item["Hora"],item["Fecha_Adicional"],item["Fecha_reserva"],item["Estado"]])
+        
+        tab1.append(header) 
+           
+        for row in data:
+            tab1.append(row)
+
+        for col in tab1.iter_cols(min_col=1,max_col=tab1.max_column,min_row=1,max_row=1):
+            for col_index in col:
+                col_index.alignment = Alignment(horizontal='center',vertical='center') 
+
+        marginLeft = 1
+        marginTop = 1
+        tab1.insert_cols(1,marginLeft)
+        tab1.insert_rows(1,marginTop)
+
+        posX = get_column_letter(marginLeft+1)+str(marginTop+1)
+        posY = get_column_letter(tab1.max_column)+str(tab1.max_row)
+
+        table = Table(displayName="Tabla1", ref=posX+":"+posY)
+
+        style = TableStyleInfo(name="TableStyleLight10", showFirstColumn=False,
+                showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
+        table.tableStyleInfo = style
+
+        tab1.add_table(table)
+
+        # Para ajustar estilos del borde de la celda en las tablas de los graficos
+        thin_border = Border(left=Side(style='thin'), 
+                     right=Side(style='thin'), 
+                     top=Side(style='thin'), 
+                     bottom=Side(style='thin'))
+
+
+        # Segunda hoja, primer grafico: dias de la semana vs cantidad de prestamos
+        tab2 = xlsx.create_sheet("Prestamos por día")    
+        dias = ["Monday","Tuesday","Wednesday","Thursday","Friday"]
+        cantidad_prestamos = []
+
+        lengDatas = len(dias)+1
+
+        tab2['B2'].border = thin_border
+        tab2['B2'].alignment = Alignment(horizontal='center',vertical='center')
+        tab2['B2'] = "Cantidad de prestamos por día de la semana"
+        tab2.merge_cells('B2:'+get_column_letter(lengDatas)+'2')
+
+        for row in tab2.iter_rows(min_col=2,max_col=lengDatas,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = dias[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_prestamos.append(elemento.find({"Dia":dias[index]}).count())
+
+        for row in tab2.iter_rows(min_col=2,max_col=lengDatas,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_prestamos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(tab2,min_col=2,max_col=lengDatas,min_row=3)
+        data = Reference(tab2,min_col=2,max_col=lengDatas,min_row=4)      
+
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = "Cantidad de prestamos por día de la semana"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.legend = None
+        chart.varyColors = True
+        chart.x_axis.title = "Día de la semana"  
+        chart.y_axis.title = "Cantidad de prestamos"  
+        tab2.add_chart(chart,"B6")         
+
+        # Tercera hoja, segundo grafico: sala de laboratorio vs cantidad de prestamos
+        tab3 = xlsx.create_sheet("Prestamos por sala")    
+        salasLab = ["Circuitos","Comunicaciones","Digitales","Electronica A","Electronica B","Fisica 509","Fisica 510","Maquinas","Electronica Básica"]
+        cantidad_prestamos = []
+
+        lengDatas = len(salasLab)+1
+
+        tab3['B2'].border = thin_border
+        tab3['B2'].alignment = Alignment(horizontal='center',vertical='center')
+        tab3['B2'] = "Prestamos por sala de laboratorio"
+        tab3.merge_cells('B2:'+get_column_letter(lengDatas)+'2')
+
+        for row in tab3.iter_rows(min_col=2,max_col=lengDatas,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = salasLab[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_prestamos.append(elemento.find({"Sala":salasLab[index]}).count())
+
+        for row in tab3.iter_rows(min_col=2,max_col=lengDatas,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_prestamos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(tab3,min_col=2,max_col=lengDatas,min_row=3)
+        data = Reference(tab3,min_col=2,max_col=lengDatas,min_row=4)      
+
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = "Cantidad de prestamos por sala de laboratorio"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.legend = None
+        chart.varyColors = True
+        chart.y_axis.title = "Cantidad de prestamos"  
+        chart.x_axis.title = "Sala del laboratorio"
+        tab3.add_chart(chart,"B6")
+
+        # Cuarta hoja, tercer grafico: hora de prestamo vs cantidad de prestamos
+        tab4 = xlsx.create_sheet("Prestamos por hora")    
+        horas = ["6:00","8:00","10:00","12:00","14:00","16:00","18:00","20:00","22:00"]
+        cantidad_prestamos = []
+
+        lengDatas = len(horas)+1
+
+        tab4['B2'].border = thin_border
+        tab4['B2'].alignment = Alignment(horizontal='center',vertical='center')
+        tab4['B2'] = "Prestamos por hora"
+        tab4.merge_cells('B2:'+get_column_letter(lengDatas)+'2')
+
+        for row in tab4.iter_rows(min_col=2,max_col=lengDatas,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = horas[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_prestamos.append(elemento.find({"Hora":horas[index]}).count())
+
+        for row in tab4.iter_rows(min_col=2,max_col=lengDatas,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_prestamos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(tab4,min_col=2,max_col=lengDatas,min_row=3)
+        data = Reference(tab4,min_col=2,max_col=lengDatas,min_row=4)      
+
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = "Cantidad de prestamos según el horario del adicional"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.legend = None
+        chart.varyColors = True
+        chart.y_axis.title = "Cantidad de prestamos"  
+        chart.x_axis.title = "Horario del adicional"
+        tab4.add_chart(chart,"B6")
+
+        # Quinta hoja, cuarto grafico: estado del prestamo vs cantidad de prestamos
+        tab5 = xlsx.create_sheet("Estado de los prestamos")    
+        estados = ["APROBADO","PENDIENTE","CANCELADO","RECHAZADO"]
+        cantidad_prestamos = []
+
+        lengDatas = len(estados)+1
+
+        tab5['B2'].border = thin_border
+        tab5['B2'].alignment = Alignment(horizontal='center',vertical='center')
+        tab5['B2'] = "Estado de los prestamos"
+        tab5.merge_cells('B2:'+get_column_letter(lengDatas)+'2')
+
+        for row in tab5.iter_rows(min_col=2,max_col=lengDatas,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = estados[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_prestamos.append(elemento.find({"Estado":estados[index]}).count())
+
+        for row in tab5.iter_rows(min_col=2,max_col=lengDatas,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_prestamos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        for row in tab5.iter_rows(min_col=2,max_col=lengDatas,min_row=5,max_row=5):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_prestamos[index]/(sum(cantidad_prestamos))*100
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(tab5,min_col=2,max_col=lengDatas,min_row=3)
+        data = Reference(tab5,min_col=2,max_col=lengDatas,min_row=5)      
+
+        chart = PieChart()        
+        chart.title = "Estado de los prestamos"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.varyColors = True
+        chart.legend.position = 'b'
+        tab5.add_chart(chart,"B7")
+
+        # Sexta hoja, quinto grafico: estado del prestamo vs cantidad de prestamos
+        tab6 = xlsx.create_sheet("Uso de bancos en Electronica B")    
+        bancos = ["Banco 1","Banco 2","Banco 3","Banco 4","Banco 5","Banco 6"]
+        cantidad_prestamos = []  
+
+        lengDatas = len(bancos)+1
+
+        tab6['B2'].border = thin_border
+        tab6['B2'].alignment = Alignment(horizontal='center',vertical='center')
+        tab6['B2'] = "Uso de los bancos en Electrónica B"
+        tab6.merge_cells('B2:'+get_column_letter(lengDatas)+'2')
+
+        for row in tab6.iter_rows(min_col=2,max_col=lengDatas,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = bancos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_prestamos.append(elemento.find({"Banco":str(index+1),"Sala":"Electronica B"}).count())
+
+        for row in tab6.iter_rows(min_col=2,max_col=lengDatas,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_prestamos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(tab6,min_col=2,max_col=lengDatas,min_row=3)
+        data = Reference(tab6,min_col=2,max_col=lengDatas,min_row=4)      
+
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = "Cantidad de prestamos para los bancos de Electronica B"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.legend = None
+        chart.varyColors = True
+        chart.y_axis.title = "Cantidad de prestamos"  
+        chart.x_axis.title = "Bancos de la sala de Electrónica B"
+        tab6.add_chart(chart,"B6")
+
+        if 'temporalExcelFilterDate' in mongo.db.list_collection_names():
+            temporalExcelFilterDate = mongo.db.temporalExcelFilterDate
+            temporalExcelFilterDate.drop()
+
+        return Response(
+            save_virtual_workbook(xlsx),
+            headers={
+            'Content-Disposition': 'attachment; filename=Prueba.xlsx',
+            'Content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+        )
+
+    def excelPrestamosBancosSala(self):
+        elemento = mongo.db.temporalExcelFilterDate
+        
+        xlsx = Workbook()
+        tab1 = xlsx.active
+        tab1.title = "InformePrestamos"    
+
+        header = ["Usuario","Código","Sala","Banco","Día","Hora","Fecha adicional","Fecha de reserva","Estado"]
+        data = []
+
+        for item in elemento.find():
+            data.append([item["Usuario"],item["Codigo"],item["Sala"],item["Banco"],item["Dia"],item["Hora"],item["Fecha_Adicional"],item["Fecha_reserva"],item["Estado"]])
+        
+        tab1.append(header) 
+           
+        for row in data:
+            tab1.append(row)
+
+        for col in tab1.iter_cols(min_col=1,max_col=tab1.max_column,min_row=1,max_row=1):
+            for col_index in col:
+                col_index.alignment = Alignment(horizontal='center',vertical='center') 
+
+        marginLeft = 1
+        marginTop = 1
+        tab1.insert_cols(1,marginLeft)
+        tab1.insert_rows(1,marginTop)
+
+        posX = get_column_letter(marginLeft+1)+str(marginTop+1)
+        posY = get_column_letter(tab1.max_column)+str(tab1.max_row)
+
+        table = Table(displayName="Tabla1", ref=posX+":"+posY)
+
+        style = TableStyleInfo(name="TableStyleLight10", showFirstColumn=False,
+                showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
+        table.tableStyleInfo = style
+
+        tab1.add_table(table)
+
+        # Para ajustar estilos del borde de la celda en las tablas de los graficos
+        thin_border = Border(left=Side(style='thin'), 
+                     right=Side(style='thin'), 
+                     top=Side(style='thin'), 
+                     bottom=Side(style='thin'))
+
+
+        # Sexta hoja, quinto grafico: 
+        tab2 = xlsx.create_sheet("Uso de bancos en Electronica B")    
+        bancos = ["Banco 1","Banco 2","Banco 3","Banco 4","Banco 5","Banco 6"]
+        cantidad_prestamos = []  
+
+        lengDatas = len(bancos)+1
+
+        tab2['B2'].border = thin_border
+        tab2['B2'].alignment = Alignment(horizontal='center',vertical='center')
+        tab2['B2'] = "Uso de los bancos en Electrónica B"
+        tab2.merge_cells('B2:'+get_column_letter(lengDatas)+'2')
+
+        for row in tab2.iter_rows(min_col=2,max_col=lengDatas,min_row=3,max_row=3):
+            for (index,cell) in enumerate(row):
+                cell.value = bancos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+                cantidad_prestamos.append(elemento.find({"Banco":str(index+1)}).count())
+
+        for row in tab2.iter_rows(min_col=2,max_col=lengDatas,min_row=4,max_row=4):
+            for (index,cell) in enumerate(row):
+                cell.value = cantidad_prestamos[index]
+                cell.alignment = Alignment(horizontal='center',vertical='center')
+                cell.border = thin_border
+
+        labels = Reference(tab2,min_col=2,max_col=lengDatas,min_row=3)
+        data = Reference(tab2,min_col=2,max_col=lengDatas,min_row=4)      
+
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = "Cantidad de prestamos para los bancos de Electronica B"
+        chart.add_data(data,from_rows=True)
+        chart.set_categories(labels)
+        chart.legend = None
+        chart.varyColors = True
+        chart.y_axis.title = "Cantidad de prestamos"  
+        chart.x_axis.title = "Bancos de la sala de Electrónica B"
+        tab2.add_chart(chart,"B6")
+
+        if 'temporalExcelFilterDate' in mongo.db.list_collection_names():
+            temporalExcelFilterDate = mongo.db.temporalExcelFilterDate
+            temporalExcelFilterDate.drop()
+
+        return Response(
+            save_virtual_workbook(xlsx),
+            headers={
+            'Content-Disposition': 'attachment; filename=Prueba.xlsx',
+            'Content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+        )
 
     def post(self, accion):
         mensaje = "error"
@@ -917,6 +1307,9 @@ class Usuario(Resource):
             mensaje = self.excelTemporalElementos()
         elif accion == "excelTemporalFilterDate":
             mensaje = self.excelTemporalFilterDate()
+        elif accion == "excelTemporalFilterDateBancosSala":
+            mensaje = self.excelTemporalFilterDateBancosSala()
+
         else:
             self.status = 2
             mensaje = "Error en la peticion"
@@ -955,18 +1348,20 @@ class Usuario(Resource):
             self.datos = respuesta['data']           
         elif accion == "getToken":
             mensaje = self.token
-
-        # Este caso es para obtener la base de datos
         elif accion == "obtenerElementosExcel":
             respuesta = self.obtenerElementosExcel()
             mensaje = respuesta['mensaje']
-            self.datos = respuesta['data']          
+            self.datos = respuesta['data']     
 
+        # Funciones para los informes en excel. El return debe ser de tipo response (Flask)
         elif accion == "createExcel":
-            # Retorno de tipo Response para mandar documento al servidor
             return self.createExcel()          
         elif accion == "excelHorarios_DiasSemanaVsHoras":
             return self.excelHorarios_DiasSemanaVsHoras()      
+        elif accion == "excelPrestamos":
+            return self.excelPrestamos()
+        elif accion == "excelPrestamosBancosSala":
+            return self.excelPrestamosBancosSala()
         else:
             self.status = 2
             mensaje = "Error en la peticion"

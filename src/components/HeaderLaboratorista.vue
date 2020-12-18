@@ -254,6 +254,7 @@ export default {
     Reports: [
       ["Informes Elementos", "/informesElementos"],
       ["Informes Horarios", "/informesHorarios"],
+      ["Informes Prestamos", "/informesPrestamos"],
     ],
     GestionProfiles: [
       ["Editar datos", "/editprofilelab"],
