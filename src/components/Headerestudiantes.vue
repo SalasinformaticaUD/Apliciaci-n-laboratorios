@@ -33,6 +33,11 @@
               <p class="display-1 text-center">Estudiantes</p>
             </v-card>
           </div>
+
+        <div class="text-center">
+          <p>{{usuario}}</p>
+        </div>
+
           <v-card color="red darken-4">
             <v-list-item to="/reservaestudiante">
               <v-list-item-icon>
@@ -71,13 +76,77 @@
 <script>
 export default {
   data: () => ({
-    drawer: false
+    drawer: false,
+    token:"",
+    usuario:"",
+    codigoLab:"",
   }),
-  methods:{
-    cerrarSesion(){
+  mounted(){
+    this.usuario = localStorage.usuario,
+    this.initialize();
+  },
+  
+  methods: {
+    initialize() {
+    this.buscar();
+    },
+    cerrarSesion() {
       localStorage.autorizado = null;
-      this.$router.replace({name:'home'});
-    }
-  }
+      this.$router.replace({ name: "home" });
+    },
+    buscar() {
+      
+      let objeto = this;
+      objeto.token = localStorage.cdcb0830cc2dd220;
+      
+      var encrypted = objeto.$cookies.get("user_session");      
+      var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+      var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+      //objeto.codigoLab = localStorage.identificacion;
+      
+      
+      
+      console.log("Método buscar header laboratorista linea 277");
+      console.log("token: ",objeto.token)
+      console.log("ENCRYPTED 1: ",objeto.encrypted);
+      console.log("ENCRYPTED 2: ",objeto.$cookies.get("user_session"));
+      console.log("DESENCRYPTED 1: ",objeto.desen);
+      console.log("DESENCRYPTED 2: ",objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token));
+      console.log("codlab 1: ",objeto.codlab);
+      console.log("codigolab : ",objeto.codigoLab);
+      //console.log("codlab 2: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
+      objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+      console.log("AQUÍ EL CODIGO $: ",objeto.codigoLab);
+      //console.log("AQUÍ EL CODIGO: ",objeto.codigoLab)
+      
+      this.axios
+        .post(
+          "http://" +
+            objeto.$serverURI +
+            ":" +
+            objeto.$serverPort +
+            "/Usuario/consultaeditlabo",
+          {
+            codigo: objeto.codigoLab,
+            tipo: "Estudiante",                      
+          },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(function(response) {
+          
+          localStorage.usuario = response.data.data[0].usuario;  
+          console.log("AUYUDAAA VUE");
+
+        })
+        .catch(function(error) {
+          objeto.output = error;
+        });
+    },
+  },
 };
 </script>

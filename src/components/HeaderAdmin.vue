@@ -70,7 +70,7 @@
               </v-list-group>
             </v-card>
 
-            <v-card color="red darken-4">
+<!--            <v-card color="red darken-4">
               <v-list-group
                 no-action
                 sub-group
@@ -87,6 +87,25 @@
                   <v-list-item-icon>
                     <v-icon v-text="Report[1]"></v-icon>
                   </v-list-item-icon>
+                </v-list-item>
+              </v-list-group>
+            </v-card> -->
+
+            <v-card color="red darken-4">
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
+                <template v-slot:activator>
+                  <v-list-item-content>
+                    <v-list-item-title>Informes</v-list-item-title>
+                  </v-list-item-content>
+                </template>
+
+                <v-list-item 
+                  v-for="(item, i) in Reports"
+                  :key="i" 
+                  link
+                  router
+                  :to="item[1]">
+                  <v-list-item-title v-text="item[0]"></v-list-item-title>
                 </v-list-item>
               </v-list-group>
             </v-card>
@@ -145,7 +164,11 @@ export default {
       ["Deshabilitar Articulos", ""],
       ["Modificación de Articulo", ""]
     ],
-    Reports: [["Generación de informes", ""]],
+    Reports: [
+      ["Informes Elementos", "/informesElementos"],
+      ["Informes Horarios", "/informesHorarios"],
+      ["Informes Prestamos", "/informesPrestamos"],
+    ],
     GestionProfiles: [
       ["Crear usuario", '/registrouser'],
       ["Modificar usuario",  '/edituser'],

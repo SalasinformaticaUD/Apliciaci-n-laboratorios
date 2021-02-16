@@ -112,6 +112,7 @@ export default {
       { text: "Banco", value: "banco" },
       { text: "Elemento", value: "elemento" },
       { text: "Estado", value: "estado" },
+      { text: "Práctica", value: "practica" },
       { text: "Actions", value: "actions", sortable: false }
     ],
     Elementos: [
@@ -235,7 +236,7 @@ export default {
               fecha_reserva: this.fecha_reserva,
               sala: this.sala,
               banco: this.banco,
-              elemento: this.elemento
+              elemento: this.elemento              
             },
             {
               headers: {

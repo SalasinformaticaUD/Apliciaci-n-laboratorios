@@ -85,6 +85,13 @@
           <v-combobox v-model="form.Elemento" :items="Elementos" label="Seleccionar..." multiple
           ></v-combobox>
 
+          <p
+            align="justify"
+          >5. Seleccione la práctica:</p>
+
+          <v-combobox v-model="form.Practica" :items="Practicas" label="Seleccionar..." 
+          ></v-combobox>
+
           <p class="red--text" v-if="errors.length">
             <b>Errore(s):</b>
             <ul>
@@ -134,6 +141,14 @@ export default {
       "Luxómetro",
       "Variac"
     ],
+    Practicas: [
+      "Motores",
+      "Com. Digitales",
+      "Electrónica 1",
+      "Electrónica 2",
+      "Electrónica 3",
+      "Circuitos 1"      
+    ],
     errors:[],
     date: new Date().toISOString().substr(0, 10),
     dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
@@ -149,14 +164,16 @@ export default {
     valid: true,
     tipo: "success",
     Codigo: "",
-    Usuario: "",
     value: "",
     bandera: "1",
     form: {
     Hora: "",
     Laboratorio: "",
     Banco: "",
-    Elemento: []
+    Practica: "",
+    Elemento: [],
+    codigoLab:"",
+    usuario: "",
     },
     rules:{
       required: value => !!value || "Este espacio es requerido.",
@@ -246,18 +263,30 @@ export default {
         this.dateFormatted &&
         this.bandera
       ){
-      let objeto = this;
+      
+      // Desencriptar el código del usuario
+      let objeto = this;      
+      this.usuario=localStorage.usuario;
+      objeto.token = localStorage.cdcb0830cc2dd220;
+      
+      var encrypted = objeto.$cookies.get("user_session");      
+      var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+      var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+      objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+
       this.axios
         .post(
           "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/reserva",
           {
             hora: this.form.Hora,
             fecha_adicional: this.dateFormatted,
-            codigo: "20201195009",
-            usuario: "MANUEL ROMERO PEÑA",
+            codigo: objeto.codigoLab,
+            usuario: this.usuario,
             sala: this.form.Laboratorio,
             banco: this.form.Banco,
-            elemento: this.form.Elemento
+            elemento: this.form.Elemento,
+            practica: this.form.Practica
           },
           {
             headers: {

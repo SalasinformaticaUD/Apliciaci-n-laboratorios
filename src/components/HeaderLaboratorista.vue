@@ -308,7 +308,8 @@ export default {
             objeto.$serverPort +
             "/Usuario/consultaeditlabo",
           {
-            codigo: objeto.codigoLab,                      
+            codigo: objeto.codigoLab,    
+            tipo: "Laboratorista",                  
           },
           {
             headers: {

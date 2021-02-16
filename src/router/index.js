@@ -28,7 +28,6 @@ import clasesadd from "../views/clasesadd.vue";
 import prestamoequExt from "../views/prestamoequExt.vue";
 import prestamoequInt from "../views/prestamoequInt.vue";
 import consultareservalabstemp from "../views/consultareservalabstemp.vue";
-import CRUD from "../views/CRUD.vue";
 import informesElementos from "../views/informesElementos.vue";
 import informesHorarios from "../views/informesHorarios.vue";
 import informesPrestamos from "../views/informesPrestamos.vue";
@@ -40,11 +39,6 @@ const routes = [
     path: "/",
     name: "Home1",
     component: Home1
-  },
-  {
-    path: "/crud",
-    name: "CRUD",
-    component: CRUD
   },
   {
     path: "/homel",

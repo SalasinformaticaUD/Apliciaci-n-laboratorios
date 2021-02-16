@@ -49,8 +49,8 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="aprobarItem(item)">fas fa-check-circle</v-icon>
-        <v-icon small class="mr-2" @click="rechazarItem(item)">fas fa-times-circle</v-icon>
+        <v-icon small class="mr-2" @click="aprobarItem(item,true)">fas fa-check-circle</v-icon>
+        <v-icon small class="mr-2" @click="aprobarItem(item,false)">fas fa-times-circle</v-icon>
       </template>
       <template v-slot:[`item.estado`]="{ item }">
         <v-chip :color="getColor(item.estado)" dark>{{ item.estado }}</v-chip>
@@ -85,14 +85,22 @@ export default {
       { text: "Día", value: "dia" },
       { text: "Hora", value: "hora"},
       { text: "Fecha reserva", value: "fecha_reserva" },
-      { text: "Estado de la petición", value: "estado" },
+      { text: "Fecha adicional", value: "fecha_adicional" },
+      { text: "Laboratorio", value: "sala"},
+      { text: "Banco", value: "banco"},
+      { text: "Estado de la petición", value: "estado" },      
       { text: "Acción", value: "actions", sortable: false }
     ],
     reservalab: [],
     agregarUbicacionIndex: -1,
     agregarUbicacionItem: {},
     infoIndex: -1,
-    infoItem: {}
+    infoItem: {},
+    sala: '',
+    hora: '',
+    fecha_adicional:'',
+    banco:'',
+    aprobar:''
   }),
   // mounted(){
   // this.$verificarLogin();
@@ -130,10 +138,58 @@ export default {
       this.infoItem = Object.assign({}, item);
       this.dialog2 = true;
     },
-    aprobarItem(item) {
-      this.agregarUbicacionIndex = this.reservalab.indexOf(item);
-      this.agregarUbicacionItem = Object.assign({}, item);
-      this.dialog = true;
+    aprobarItem(item,opc) {
+      let objeto = this;
+
+      if (opc){
+        this.aprobar='APROBADO';
+      }else{
+        this.aprobar='CANCELADO';
+      }
+
+      
+      console.log("APROBAR??");
+      console.log(this.aprobar);
+
+      const index = this.reservalab.indexOf(item);
+      //  this.agregarUbicacionItem = Object.assign({}, item);
+      //  this.dialog = true;
+      
+      this.hora = this.reservalab[index].hora;
+      this.sala = this.reservalab[index].sala;
+      this.fecha_adicional = this.reservalab[index].fecha_adicional;
+      this.banco = this.reservalab[index].banco;
+      
+      console.log(index, this.sala);
+
+      
+        this.axios
+          .post(
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/aprobarreserva",
+            {
+              fecha_adicional: this.fecha_adicional,
+              sala: this.sala,
+              hora: this.hora,
+              banco: this.banco,
+              aprobar: this.aprobar
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(function(response) {
+            var respuesta = response.data.mensaje;
+            var status = response.data.status;
+            if (status == "1") {
+              alert(respuesta);
+              objeto.reservalab.splice(index, 1);
+            }
+          })
+          .catch(function(error) {
+            alert(error);
+          });      
     },
     rechazarItem(item) {},
 
