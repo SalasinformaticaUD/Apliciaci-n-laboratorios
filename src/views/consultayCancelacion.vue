@@ -50,9 +50,20 @@
           </v-dialog>
         </v-toolbar>
       </template>
-      <template>
-        <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
-        <v-icon small @click="deleteItem(item)">fas fa-trash</v-icon>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon
+          small
+          class="mr-2"
+          @click="editItem(item)"
+        >
+          fas fa-edit
+        </v-icon>
+        <v-icon
+          small
+          @click="deleteItem(item)"
+        >
+          fas fa-trash
+        </v-icon>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -95,8 +106,10 @@ export default {
       "Variac"
     ],
     usuariolab: [],
-    codigo: "20201195009",
+    codigo: "20201195009", //QUITAR ESTE
     editedIndex: -1,
+    codigoLab:"",
+    usuario: "",
     editedItem: {
       elemento: "",
     },
@@ -145,16 +158,29 @@ export default {
         const index = this.usuariolab.indexOf(item);
         this.sala = this.usuariolab[index].sala;
         this.banco = this.usuariolab[index].banco;
+        this.fecha_adicional = this.usuariolab[index].fecha_adicional;
+        this.hora = this.usuariolab[index].hora;
         
 
         let objeto = this;
+        
+        objeto.token = localStorage.cdcb0830cc2dd220;
+        
+        var encrypted = objeto.$cookies.get("user_session");      
+        var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+        var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+        objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+        objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+
         this.axios
           .post(
             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/borrarreserva",
             {
-              codigo: "20201195009",
-              sala: objeto.sala,
-              banco: objeto.banco,
+              codigo: objeto.codigoLab,
+              sala: this.sala,
+              banco: this.banco,
+              fecha_adicional: this.fecha_adicional,
+              hora: this.hora
             },
             {
               headers: {
@@ -196,11 +222,20 @@ export default {
       
       if (confirmacion) {
         let objeto = this;
+        
+        objeto.token = localStorage.cdcb0830cc2dd220;
+      
+        var encrypted = objeto.$cookies.get("user_session");      
+        var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+        var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+        objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+        objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+
         this.axios
           .post(
             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editarreserva",
             {
-              codigo: "20201195009",
+              codigo: this.codigoLab,
               hora: this.hora,
               dia: this.dia,
               fecha_adicional: this.fecha_adicional,
@@ -232,11 +267,21 @@ export default {
     },
     buscar() {
       let objeto = this;
+      
+      
+      objeto.token = localStorage.cdcb0830cc2dd220;
+      
+      var encrypted = objeto.$cookies.get("user_session");      
+      var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+      var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+      objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+
       this.axios
         .post(
           "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/buscarreserva",
           {
-            codigo: "20201195009"
+            codigo: objeto.codigoLab
           },
           {
             headers: {

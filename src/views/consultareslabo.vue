@@ -108,6 +108,7 @@ export default {
       { text: "Hora", value: "hora" },
       { text: "Dia", value: "dia" },
       { text: "Fecha Reserva", value: "fecha_reserva" },
+      { text: "Fecha Adicional", value: "fecha_adicional" },
       { text: "Sala", value: "sala" },
       { text: "Banco", value: "banco" },
       { text: "Elemento", value: "elemento" },
@@ -174,16 +175,31 @@ export default {
         const index = this.usuariolab.indexOf(item);
         this.sala = this.usuariolab[index].sala;
         this.banco = this.usuariolab[index].banco;
+        this.fecha_adicional = this.usuariolab[index].fecha_adicional;
+        this.hora = this.usuariolab[index].hora;
         
 
         let objeto = this;
+        
+        objeto.token = localStorage.cdcb0830cc2dd220;
+        
+        var encrypted = objeto.$cookies.get("user_session");      
+        var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+        var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+        objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+        objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+
+        console.log("ELIMINACIÓN AAAAA");
+
         this.axios
           .post(
             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/borrarreserva",
             {
-              codigo: "20201195009",
-              sala: objeto.sala,
-              banco: objeto.banco,
+              codigo: objeto.codigoLab,
+              sala: this.sala,
+              banco: this.banco,
+              fecha_adicional: this.fecha_adicional,
+              hora: this.hora
             },
             {
               headers: {
