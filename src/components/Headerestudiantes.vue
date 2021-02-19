@@ -93,6 +93,7 @@ export default {
     cerrarSesion() {
       localStorage.autorizado = null;
       this.$router.replace({ name: "home" });
+      localStorage.user= null;
     },
     buscar() {
       

@@ -51,6 +51,8 @@
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="aprobarItem(item,true)">fas fa-check-circle</v-icon>
         <v-icon small class="mr-2" @click="aprobarItem(item,false)">fas fa-times-circle</v-icon>
+        <v-icon small class="mr-2" @click="aprobarItem(item,true)">fas fa-edit</v-icon>
+        <v-icon small class="mr-2" @click="deleteItem(item)">fas fa-trash</v-icon>
       </template>
       <template v-slot:[`item.estado`]="{ item }">
         <v-chip :color="getColor(item.estado)" dark>{{ item.estado }}</v-chip>
@@ -151,27 +153,79 @@ export default {
       console.log("APROBAR??");
       console.log(this.aprobar);
 
-      const index = this.reservalab.indexOf(item);
-      //  this.agregarUbicacionItem = Object.assign({}, item);
-      //  this.dialog = true;
-      
-      this.hora = this.reservalab[index].hora;
-      this.sala = this.reservalab[index].sala;
-      this.fecha_adicional = this.reservalab[index].fecha_adicional;
-      this.banco = this.reservalab[index].banco;
-      
-      console.log(index, this.sala);
+      var confirmacion = confirm("¿Esta seguro de marcar este laboratorio como "+this.aprobar+"?");
 
+      if (confirmacion) {
+
+        const index = this.reservalab.indexOf(item);
+        //  this.agregarUbicacionItem = Object.assign({}, item);
+        //  this.dialog = true;
       
+        this.hora = this.reservalab[index].hora;
+        this.sala = this.reservalab[index].sala;
+        this.fecha_adicional = this.reservalab[index].fecha_adicional;
+        this.banco = this.reservalab[index].banco;
+      
+        console.log(index, this.sala);
+
+        
+          this.axios
+            .post(
+              "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/aprobarreserva",
+              {
+                fecha_adicional: this.fecha_adicional,
+                sala: this.sala,
+                hora: this.hora,
+                banco: this.banco,
+                aprobar: this.aprobar
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json"
+                }
+              }
+            )
+            .then(function(response) {
+              var respuesta = response.data.mensaje;
+              var status = response.data.status;
+              if (status == "1") {
+                alert(respuesta);
+                objeto.reservalab.splice(index, 1);
+              }
+            })
+            .catch(function(error) {
+            alert(error);
+          });      
+      }
+    },
+
+    deleteItem(item) {
+      var confirmacion = confirm("¿Esta seguro de eliminar este laboratorio?");
+
+      if (confirmacion) {
+        console.log("Entra a confirmación");
+        const index = this.reservalab.indexOf(item);
+        this.sala = this.reservalab[index].sala;
+        this.banco = this.reservalab[index].banco;
+        this.fecha_adicional = this.reservalab[index].fecha_adicional;
+        this.hora = this.reservalab[index].hora;
+        this.codigo = this.reservalab[index].codigo;
+        
+        console.log("Antes de definir OBJ");        
+
+        let objeto = this;
+
+
+
         this.axios
           .post(
-            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/aprobarreserva",
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/borrarreserva",
             {
-              fecha_adicional: this.fecha_adicional,
+              codigo: this.codigo,
               sala: this.sala,
-              hora: this.hora,
               banco: this.banco,
-              aprobar: this.aprobar
+              fecha_adicional: this.fecha_adicional,
+              hora: this.hora
             },
             {
               headers: {
@@ -181,16 +235,20 @@ export default {
           )
           .then(function(response) {
             var respuesta = response.data.mensaje;
-            var status = response.data.status;
+            var status = response.data.status;            
             if (status == "1") {
               alert(respuesta);
               objeto.reservalab.splice(index, 1);
             }
+            
+            console.log("Status: ", status, "Mensaje: ", respuesta);
           })
           .catch(function(error) {
             alert(error);
-          });      
+          });
+      }
     },
+
     rechazarItem(item) {},
 
     close() {

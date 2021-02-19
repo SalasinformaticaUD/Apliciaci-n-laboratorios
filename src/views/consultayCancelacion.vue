@@ -172,6 +172,8 @@ export default {
         objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
         objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
 
+        console.log(objeto.codigoLab,this.sala,this.banco,this.fecha_adicional,this.hora);
+
         this.axios
           .post(
             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/borrarreserva",

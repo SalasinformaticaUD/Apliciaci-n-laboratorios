@@ -214,7 +214,8 @@ class Usuario(Resource):
             mensaje = "Ya tiene tres laboratorios"
         else:
             nuevaReserva = user.insert({'Hora': hora, 'Dia': dia, 'Fecha_Adicional': fecha_adicional, 'Fecha_reserva': fecha_reserva,
-                                        'Codigo': codigo, 'Usuario': usuario, 'Sala': practica
+                                        'Codigo': codigo, 'Usuario': usuario, 'Sala': sala
+                                        , 'practica': practica
                                         , 'Banco': banco
                                         , 'Elemento': elemento, 'Estado': estado})
             mensaje = "Laboratorio Registrado correctamente"
@@ -228,9 +229,14 @@ class Usuario(Resource):
         fecha_adicional = request.json['fecha_adicional']
         sala = request.json['sala']
         banco = request.json['banco']
+        estado = "PENDIENTE"
+        estado2 = "APROBADO"
         pregunta = user.find_one({"$and": [{'Sala': sala}, {'Hora': hora}, {
-                                 'Fecha_Adicional': fecha_adicional}, {'Banco': banco}]})
-        if pregunta != None:
+                                 'Fecha_Adicional': fecha_adicional}, {'Banco': banco},{'Estado':estado}]})
+        pregunta2 = user.find_one({"$and": [{'Sala': sala}, {'Hora': hora}, {
+                                 'Fecha_Adicional': fecha_adicional}, {'Banco': banco},{'Estado':estado2}]})                                 
+                                
+        if pregunta2 != None or pregunta != None:
             self.status = 1
             mensaje = "banco ocupado"
         return mensaje
@@ -242,7 +248,7 @@ class Usuario(Resource):
         self.status = 1
         mensaje = "Encontrado"
         for u in user.find({"Codigo": codigo}):
-            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],
+            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'practica': u['practica'],
                            'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento']})
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
@@ -252,7 +258,7 @@ class Usuario(Resource):
         self.status = 1
         mensaje = "Encontrado"
         for u in user.find():
-            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_reserva': u['Fecha_reserva'],
+            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_reserva': u['Fecha_reserva'], 'practica': u['practica'], 'fecha_adicional': u['Fecha_Adicional'],
                            'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'], 'codigo': u['Codigo'], 'usuario': u['Usuario'], 'estado': u['Estado']})
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
@@ -261,31 +267,62 @@ class Usuario(Resource):
         codigo = request.json['codigo']
         sala = request.json['sala']
         banco = request.json['banco']
-        borrar = user.delete_one(
-            {"$and": [{'Codigo': codigo}, {'Sala': sala}, {'Banco': banco}]})
+        fecha_adicional = request.json['fecha_adicional']
+        hora = request.json['hora']
+        mensaje = "Operación fallida"
         print(codigo)
+        print(sala)
+        print(banco)
+        print(fecha_adicional)
+        print(hora)
+        borrar = user.delete_one({"$and": [{'Codigo': codigo}, {'Sala': sala}, {'Banco': banco}, {'Fecha_Adicional':fecha_adicional}, {'Hora':hora}]})
         if borrar:
+            print("Entro al if")
             self.status = 1
+            print("Pasó el Status:",self.status)
             mensaje = "usuarios eliminados"
+        print("el mensaje: ",mensaje)
         return mensaje
 
     def editarreserva(self):
         user = mongo.db.Prestamo
-        codigo = request.json['codigo']
-        hora = request.json['hora']
-        fecha_adicional = request.json['fecha_adicional']
-        fecha_reserva = request.json['fecha_reserva']
         dia = request.json['dia']
+        hora = request.json['hora']
         sala = request.json['sala']
-        banco = request.json['banco']
-        elemento = request.json['elemento']
-        mensaje = "Reserva actualizada"
+        fecha_adicional = request.json['fecha_adicional']
+        banco = request.json['banco']        
+        mensaje = "Reserva aprobada"
         actualizardatos = user.update({"$and": [{'Sala': sala}, {'Hora': hora}, {'Dia': dia}, {'Fecha_Adicional': fecha_adicional}, {
                                       'Fecha_reserva': fecha_reserva}, {'Banco': banco}, {'Codigo': codigo}]}, {"$set": {"Elemento": elemento}})
         print(actualizardatos)
         if actualizardatos:
             self.status = 1
             mensaje
+        return mensaje
+
+    def aprobarreserva(self):
+        user = mongo.db.Prestamo
+        hora = request.json['hora']
+        sala = request.json['sala']
+        fecha_adicional = request.json['fecha_adicional']
+        banco = request.json['banco']        
+        mensaje = "Operación realizada"
+        aprobar = request.json['aprobar']
+        print("APROBAR: ",type(aprobar))
+        aprobado = "APROBADO"
+        cancelado = "CANCELADO"
+        print("aprobado: ",type(aprobado))
+        print(hora,sala,fecha_adicional,banco,aprobar,mensaje)
+        actualizardatos = user.update({"$and": [{'Sala': sala}, {'Hora': hora}, {'Fecha_Adicional': fecha_adicional},
+                                      {'Banco': banco}]}, {"$set": {"Estado": aprobar}})
+        print(actualizardatos)
+        if actualizardatos:
+            self.status = 1
+            if (aprobar==aprobado):
+                mensaje = "PRÁCTICA APROBADA"
+            if (aprobar==cancelado):
+                mensaje = "PRÁCTICA CANCELADA"
+
         return mensaje
 
     def buscarhorarios(self):
@@ -313,7 +350,7 @@ class Usuario(Resource):
         print("HOLA AUXILIO")#BORRAR ESTO
         usuario = mongo.db.Usuarios
         codigo = request.json['codigo'] #NO ESTA LLEGANDO EL CÓDIGO DEL USUARIO        
-        tipo = "Laboratorista"
+        tipo = request.json['tipo']
         output = []
         self.status = 1
         mensaje = "Encontrado"
@@ -1287,6 +1324,8 @@ class Usuario(Resource):
             mensaje = self.borrarreserva()
         elif accion == "editarreserva":
             mensaje = self.editarreserva()
+        elif accion == "aprobarreserva":
+            mensaje = self.aprobarreserva()
         elif accion == "consultaeditlabo":
             respuesta = self.consultaeditlabo()
             mensaje = respuesta['mensaje']
