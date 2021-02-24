@@ -28,6 +28,9 @@
             <v-icon dark class="fas fa-user-circle"></v-icon>
           </v-avatar>
         </div>
+        <div class="text-center">
+          <p>{{usuario}}</p>
+        </div>
       </v-card>
 
       <v-list nav dense>
@@ -204,7 +207,7 @@ export default {
       
       
       
-      console.log("Método buscar header laboratorista linea 277");
+      console.log("Método buscar header ADMIN linea 207");
       console.log("token: ",objeto.token)
       console.log("ENCRYPTED 1: ",objeto.encrypted);
       console.log("ENCRYPTED 2: ",objeto.$cookies.get("user_session"));
@@ -226,7 +229,7 @@ export default {
             "/Usuario/consultaeditlabo",
           {
             codigo: objeto.codigoLab,    
-            tipo: "Laboratorista",                  
+            tipo: "Administrador",                  
           },
           {
             headers: {

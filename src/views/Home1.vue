@@ -228,7 +228,7 @@ export default {
         )
         .then(function(response) {
           var respuesta = response.data.mensaje;
-          localStorage.identificacion= usuarioL; //TENER CUIDADO PARA PRUEBA
+          //localStorage.identificacion= usuarioL; //TENER CUIDADO PARA PRUEBA
           
           let encriptado = objeto.$Crypto.AES.encrypt(
             //objeto.usuarioL,

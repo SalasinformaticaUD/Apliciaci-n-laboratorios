@@ -48,9 +48,99 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
+
+          <v-dialog v-model="dialogFicha" max-width="700px">
+            <v-card>
+              <v-card-title>
+                <span class="headline">Ficha de laboratorio</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col cols="12" sm="3">
+                      <v-text-field
+                        v-model="infoItem.fecha_adicional"
+                        :disabled="true"
+                        label="Fecha adicional"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="3">
+                      <v-text-field
+                        v-model="infoItem.hora"
+                        :disabled="true"
+                        label="Hora del adicional"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="3">
+                      <v-text-field
+                        v-model="infoItem.sala"
+                        :disabled="true"
+                        label="Laboratorio adicional"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="3">
+                      <v-text-field
+                        v-model="infoItem.banco"
+                        :disabled="true"
+                        label="Banco del laboratorio"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-divider></v-divider>
+                  <v-row no-gutters class="pa-1">
+                    <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
+                      No.
+                    </v-col>
+                    <v-col></v-col>
+                    <v-col cols="12" sm="8" class="font-weight-black">
+                      Elementos
+                    </v-col>
+                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
+                      Eliminar
+                    </v-col>
+                  </v-row>
+                  <v-row no-gutters>
+                    <v-col v-for= "(item,index) in infoItem.elemento" :key="index" cols="12" sm="12">
+                      <v-divider></v-divider>  
+                      <v-row no-gutters class="pa-1">
+                        <v-col cols="12" sm="1" class="text-sm-center">
+                          {{index+1}}.
+                        </v-col>
+                        <v-col></v-col>
+                        <v-col cols="12" sm="8">
+                          {{item}}
+                        </v-col>
+                        <v-col cols="12" sm="2" class="text-sm-center">
+                          <v-icon 
+                            small 
+                            @click="infoItem.elemento = infoItem.elemento.filter((i) => i !== item)"
+                          > 
+                            fas fa-trash-alt</v-icon>
+                          </v-col>
+                      </v-row>
+                    </v-col>                  
+                  </v-row>
+                  <v-divider></v-divider>  
+                </v-container>
+                <v-card-actions class="justify-end">
+                  <v-btn rounded color="primary" dark @click="guardarFichaEdit()">
+                    Guardar     
+                    </v-btn>
+                </v-card-actions>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
         </v-toolbar>
       </template>
+
       <template v-slot:[`item.actions`]="{ item }">
+        <v-icon 
+          class="mr-2" 
+          small 
+          @click="fichaItem(item)"
+        >
+          fas fa-info-circle
+        </v-icon>
         <v-icon
           small
           class="mr-2"
@@ -95,7 +185,7 @@ export default {
       { text: "Sala", value: "sala" },
       { text: "Banco", value: "banco" },
       { text: "Elemento", value: "elemento" },
-      { text: "Actions", value: "actions", sortable: false }
+      { text: "Acciones", value: "actions", sortable: false }
     ],
     Elementos: [
       "Osciloscopio",
@@ -119,7 +209,11 @@ export default {
       fat: 0,
       carbs: 0,
       protein: 0
-    }
+    },
+
+    dialogFicha: false,
+    infoIndex: -1,
+    infoItem: {},
   }),
   // mounted(){
   // this.$verificarLogin();
@@ -150,7 +244,31 @@ export default {
       this.editedItem = Object.assign({},item);
       this.dialog = true;
     },
-
+    fichaItem(item) {
+      var date = new Date();
+      var hour = date.getHours();
+      var minutes = date.getMinutes();
+      date = date.getTime();
+      // var date = this.conversionDate(new Date(date));
+      this.infoIndex = this.usuariolab.indexOf(item);
+      this.infoItem = Object.assign({}, item);
+      this.dialogFicha = true;
+      console.log(new Date(this.parseDate(this.infoItem.fecha_adicional)))
+      // console.log(date.getTime() - new Date("2021-02-25").getTime())
+      if(this.infoItem.fecha_adicional===date && this.infoItem.hora>(hour+1)){
+        console.log("Misma fecha")
+      }
+      
+      console.log(date)
+      console.log(hour+1)
+      console.log(minutes)
+      console.log(this.infoItem.hora)
+    },
+    parseDate(date) {
+      if (!date) return null
+      const [day, month, year] = date.split('/')
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+    },
     deleteItem(item) {
       var confirmacion = confirm("¿Esta seguro de eliminar este laboratorio?");
 
@@ -212,16 +330,17 @@ export default {
       });
     },
 
-    save() {
+    guardarFichaEdit() {
       var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
-      this.elemento = this.editedItem.elemento;
-      this.hora = this.editedItem.hora;
-      this.dia = this.editedItem.dia;
-      this.fecha_adicional = this.editedItem.fecha_adicional;
-      this.fecha_reserva = this.editedItem.fecha_reserva;
-      this.sala = this.editedItem.sala;
-      this.banco = this.editedItem.banco;
-      
+      this.elemento = this.infoItem.elemento;
+      this.hora = this.infoItem.hora;
+      this.dia = this.infoItem.dia;
+      this.fecha_adicional = this.infoItem.fecha_adicional;
+      this.fecha_reserva = this.infoItem.fecha_reserva;
+      this.sala = this.infoItem.sala;
+      this.banco = this.infoItem.banco;
+    
+
       if (confirmacion) {
         let objeto = this;
         
@@ -257,6 +376,7 @@ export default {
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
+              objeto.dialogFicha = false;
               objeto.buscar();
               //   objeto.usuariolab.splice(index, 1);
             }

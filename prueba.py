@@ -209,9 +209,14 @@ class Usuario(Resource):
         elemento = request.json['elemento']
         estado = "PENDIENTE"
         reservas = user.find({'Codigo': codigo}).count()
+        cruceHora = user.find({'Fecha_Adicional':fecha_adicional, 'Hora':hora}).count()        
+
         if (reservas == 3):
             self.status = 2
             mensaje = "Ya tiene tres laboratorios"
+        elif (cruceHora>0):
+            self.status = 2
+            mensaje = "Ya tiene un adicional pendiente en este horario"
         else:
             nuevaReserva = user.insert({'Hora': hora, 'Dia': dia, 'Fecha_Adicional': fecha_adicional, 'Fecha_reserva': fecha_reserva,
                                         'Codigo': codigo, 'Usuario': usuario, 'Sala': sala
@@ -240,6 +245,7 @@ class Usuario(Resource):
             self.status = 1
             mensaje = "banco ocupado"
         return mensaje
+
 
     def buscarreserva(self):
         user = mongo.db.Prestamo
@@ -286,12 +292,15 @@ class Usuario(Resource):
 
     def editarreserva(self):
         user = mongo.db.Prestamo
+        codigo = request.json['codigo']
         dia = request.json['dia']
         hora = request.json['hora']
         sala = request.json['sala']
         fecha_adicional = request.json['fecha_adicional']
-        banco = request.json['banco']        
-        mensaje = "Reserva aprobada"
+        fecha_reserva = request.json['fecha_reserva']
+        banco = request.json['banco']   
+        elemento = request.json['elemento']     
+        mensaje = "Reserva modificada"
         actualizardatos = user.update({"$and": [{'Sala': sala}, {'Hora': hora}, {'Dia': dia}, {'Fecha_Adicional': fecha_adicional}, {
                                       'Fecha_reserva': fecha_reserva}, {'Banco': banco}, {'Codigo': codigo}]}, {"$set": {"Elemento": elemento}})
         print(actualizardatos)
@@ -333,6 +342,19 @@ class Usuario(Resource):
         for u in user.find():
             output.append({'asignatura': u['Asignatura'], 'docente': u['Docente'], 'proyecto': u['Proyecto'], 'grupo': u['Grupo'],
                            'dia': u['Dia'], 'horario': u['Horario'], 'sala': u['Sala'], 'fecha': u['Fecha ']})
+        return {'status': self.status, 'mensaje': mensaje, 'data': output}
+
+    def consultartipo(self):
+        print("CONSULTAR TIPO")
+        mensaje = "error"
+        usuario = mongo.db.Usuarios
+        codigo = request.json['codigo']
+        output = []    
+        self.status = 1
+        mensaje = "Encontrado"
+        for u in usuario.find({"Código_usuario":codigo}):
+            output.append({"tipo": u['Tipo']})
+        print(output)
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def consultarLabo(self):
@@ -1328,6 +1350,10 @@ class Usuario(Resource):
             mensaje = self.aprobarreserva()
         elif accion == "consultaeditlabo":
             respuesta = self.consultaeditlabo()
+            mensaje = respuesta['mensaje']
+            self.datos = respuesta['data']
+        elif accion == "consultartipo":
+            respuesta = self.consultartipo()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
         elif accion == "consultaeditadmin":

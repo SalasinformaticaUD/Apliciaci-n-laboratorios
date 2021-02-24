@@ -1,8 +1,12 @@
-<template>
-  <v-container fluid>
+<template >
+  <v-container fluid v-if="(tipoUsuario === 'Laboratorista') || (tipoUsuario === 'Administrador')">
 
-    <HeaderLaboratorista />
-    
+    <v-div v-if = "tipoUsuario === 'Laboratorista' ">
+      <HeaderLaboratorista />
+    </v-div>
+    <v-div v-if = "tipoUsuario === 'Administrador'">
+      <HeaderAdmin />
+    </v-div>
 
     <v-data-table :headers="headers" :items="equipolab" :search="search" class="elevation-1" color="background" dark>
       <template v-slot:top>
@@ -434,10 +438,16 @@
 </template>
 
 <script>
-import HeaderLaboratorista from "@/components/HeaderLaboratorista.vue";
+
+  import HeaderLaboratorista from "@/components/HeaderLaboratorista.vue";
+  import HeaderAdmin from "@/components/HeaderAdmin.vue";
+
 export default {
   components: {
-    HeaderLaboratorista
+    
+    HeaderLaboratorista,
+    HeaderAdmin
+    
   },
   data: () => ({
     ubicaciones: ["ALMACEN", "LABORATORIO DE CIRCUITOS", "LABORATORIO DE ELECTRONICA A","LABORATORIO DE ELECTRONICA B","LABORATORIO DE BASICA","LABORATORIO DE DIGITALES","LABORATORIO DE COMUNICACIONES","LABORATORIO DE CONTROL","LABORATORIO DE MAQUINAS","LABORATORIO FESTO","FISICA 509","FISICA 510","SALA DE SISTEMAS 500","SALA DE SISTEMAS 501","SALA DE SISTEMAS 502","SALA DE SISTEMAS 503","SALA DE SISTEMAS 504","SALA DE SISTEMAS 505","SALA DE SISTEMAS 506","SALA DE SISTEMAS 507","SALA DE SISTEMAS 508","SALA DE SISTEMAS 601","SALA DE SISTEMAS 701","SALA DE SISTEMAS 702","SALA DE SISTEMAS 703","SALA DE SISTEMAS 704","SALA DE SISTEMAS 706","SALA DE SISTEMAS 707"],
@@ -469,6 +479,8 @@ export default {
     editedItem: {},
     infoIndex: -1,
     infoItem: {},
+    tipoUsuario: '',
+    codigoLab:'',
 
     defaultItem: {
       name: "",
@@ -478,9 +490,10 @@ export default {
       protein: 0
     }
   }),
-  // mounted(){
-  // this.$verificarLogin();
-  // },
+  //  mounted(){
+  // // this.$verificarLogin();
+  //   this.buscartipo();
+  //  },
 
   computed: {
     formTitle() {
@@ -500,11 +513,48 @@ export default {
 
   methods: {
     initialize() {
+      this.buscartipo();
       (this.equipolab = []), this.buscar();
     },
 
+    buscartipo(){
+      console.log("TIPO USUARIO I:", this.tipoUsuario);
+      let objeto = this;
+      objeto.token = localStorage.cdcb0830cc2dd220;
+      
+      var encrypted = objeto.$cookies.get("user_session");      
+      var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+      var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);                  
+      objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+      console.log("AQUÍ EL CODIGO $: ",objeto.codigoLab);
+      
+      this.axios
+        .post(
+          "http://" +
+            objeto.$serverURI +
+            ":" +
+            objeto.$serverPort +
+            "/Usuario/consultartipo",
+          {
+            codigo: objeto.codigoLab,                        
+          },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(function(response) {          
+          objeto.tipoUsuario = response.data.data[0].tipo;          
+        })
+        .catch(function(error) {
+          objeto.output = error;          
+        });
+    },
+
     reset () {
-        this.$refs.form.reset(), this.initialize();
+        this.$refs.form.reset(), this.initialize();        
       },
 
     editItem(item) {

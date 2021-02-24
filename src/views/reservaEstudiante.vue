@@ -8,7 +8,7 @@
 
           <p
             align="justify"
-          >Siga los pasos que se muestran a continuación pra realizar la adición del laboratotio:</p>
+          >Siga los pasos que se muestran a continuación para realizar la adición del laboratotio:</p>
 
           <p align="justify">1. Escoja el día que desea realizar el adicional:</p>
 
@@ -20,7 +20,6 @@
             offset-y
             max-width="290px"
             min-width="290px"
-            v-on ="horasdisponibles(Horas,dateFormatted,hour,todaydate,HorasDis)"
           >
             <template v-slot:activator="{ on, attrs }" >
               <v-text-field
@@ -31,11 +30,11 @@
                 prepend-icon="far fa-calendar-minus"
                 v-bind="attrs"
                 v-on="on" 
+                readonly
               ></v-text-field>
             </template>
             <v-date-picker v-model="date" no-title @input="menu1 = false" 
-            :min= min max="2020-06-27"
-            ></v-date-picker>
+            :min=min :max="maxDateCalendar()" :allowed-dates="allowedDates(6)"></v-date-picker>
           </v-menu>
 
           <p align="justify" >2. Escoja el bloque de horas:</p>
@@ -82,14 +81,57 @@
             align="justify"
           >5. Seleccione los elementos adicionales que desee agregar al laboratorio:</p>
 
-          <v-combobox v-model="form.Elemento" :items="Elementos" label="Seleccionar..." multiple
-          ></v-combobox>
+          <v-row no-gutters>
+            <v-col cols="12" sm="10">
+              <v-text-field
+                label="Ingrese un elemento adicional"
+                hide-details="auto"
+                v-model = "inputElemento"
+                dense
+                @keyup.enter="agregarElementoAdicional()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="2" align-self="center" class="text-right">
+              <v-btn rounded color="primary" dark
+                @click="agregarElementoAdicional()"
+              >Agregar</v-btn>
+            </v-col>
+          </v-row>      
+          <p></p>
+          <v-card shaped elevation="5" color="grey darken-3" dark style="padding:30px" v-if="form.Elemento.length != 0">
+            <p align="justify" >Listado de los elementos adicionales: </p>
+            <v-row no-gutters v-for= "(item,index) in form.Elemento" :key="index">
+              <v-col cols="12" sm="10">
+                <v-divider></v-divider>
+                <ol>
+                  <dt align="left">
+                    {{index+1}}. {{item}}
+                  </dt>
+                </ol>
+              </v-col>
+              <v-col cols="12" sm="2">
+                <v-divider></v-divider>
+                  <v-icon 
+                    dark 
+                    small 
+                    @click="form.Elemento = form.Elemento.filter((i) => i !== item)"
+                  > 
+                  fas fa-trash-alt</v-icon>
+              </v-col>
+            </v-row>
+            <v-divider></v-divider>
+            <p></p>
+            <v-card-actions class="justify-end">
+              <v-btn rounded color="primary" dark @click="form.Elemento=[]">
+                Limpiar todo     
+                <v-icon dark small right> fas fa-trash-alt</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>          
+          <p></p>
+          <p align="justify">6. Seleccione la práctica:</p>
 
-          <p
-            align="justify"
-          >5. Seleccione la práctica:</p>
-
-          <v-combobox v-model="form.Practica" :items="Practicas" label="Seleccionar..." 
+          <v-combobox v-model="form.Practica" :items="Practicas" label="Seleccionar..."
           ></v-combobox>
 
           <p class="red--text" v-if="errors.length">
@@ -100,13 +142,13 @@
           </p>
 
           <div class="text-right">
-            <v-btn rounded color="primary" dark
+            <v-btn rounded color="primary" dark 
                v-on="verBanco(form)"
                @click="formSubmit(form)"
             >Siguiente</v-btn>
           </div>
           <v-col cols="12">
-            <v-alert :value="vista" type="success">{{ output }}</v-alert>
+            <v-alert :value="vista" :type="vistaType">{{ output }}</v-alert>
           </v-col>
         </v-card>
       </v-col>
@@ -130,7 +172,6 @@ export default {
       "Circuitos"
     ],
     Dias: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
-    Horas: [6, 8, 10, 12, 14, 16, 18, 20],
     HorasDis: [],
     Bancos: ["1","2","3","4","5","6"],
     Elementos: [
@@ -139,7 +180,8 @@ export default {
       "Fuente DC",
       "Multímetro",
       "Luxómetro",
-      "Variac"
+      "Variac",
+      "Caimanes"
     ],
     Practicas: [
       "Motores",
@@ -150,30 +192,33 @@ export default {
       "Circuitos 1"      
     ],
     errors:[],
-    date: new Date().toISOString().substr(0, 10),
-    dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
-    todaydate: vm.formatDate(new Date().toISOString().substr(0, 10)),
+    elementosBase: [],
+    inputElemento: "",
+    date: "",
+    dateFormatted: "",
+    todaydate: vm.formatDate(vm.conversionDate(new Date())),
     menu1: false,
     menu2: false,
-    min: vm.formatMin(new Date().toISOString().substr(0, 10)),
+    min: "",
     day: new Date().getDay(),
     hour: new Date().getHours(),
     output: "",
     output2: "",
+
     vista: false,
-    valid: true,
-    tipo: "success",
+    vistaType: "success",
+
     Codigo: "",
     value: "",
     bandera: "1",
     form: {
-    Hora: "",
-    Laboratorio: "",
-    Banco: "",
-    Practica: "",
-    Elemento: [],
-    codigoLab:"",
-    usuario: "",
+      Hora: "",
+      Laboratorio: "",
+      Banco: "",
+      Practica: "",
+      Elemento: [],
+      codigoLab:"",
+      usuario: "",
     },
     rules:{
       required: value => !!value || "Este espacio es requerido.",
@@ -181,47 +226,105 @@ export default {
     
   }),
   mounted(){
-  this.$verificarLogin();
+  // this.$verificarLogin();
+  },
+  created(){
+    // Se evalua si el dia actual es domingo. Si sí, se suma un día para que se tome la fecha del lunes. En caso contrario, se utiliza la fecha actual del sistema. Se le debe indicar las 00:00 para evitar qeu se corra el día debido a la diferencia de usa con el formato ISO.
+    // También en el caso de que en el día actual sean más de las 8pm, se aumenta en +1 el dia. 
+    let dateToday = new Date(this.parseDate(this.todaydate)+" 00:00");
+    if (dateToday.getDay() === 0 || this.hour > 20){
+      dateToday = dateToday.setDate(dateToday.getDate() + 1); 
+    }
+    this.dateFormatted = this.formatDate(this.conversionDate(new Date(dateToday)));
+    this.date = this.conversionDate(new Date(dateToday))
+    this.min = this.date;
   },
   computed: {
-    computedDateFormatted() {
+    computedDateFormatted(){
       return this.formatDate(this.date);
     }
   },
   watch: {
     date(val) {
       this.dateFormatted = this.formatDate(this.date);
-    }    
+    },
+    dateFormatted(val){
+      this.verificarHorasAdicional();     
+    },
+    hour(val){
+      this.verificarHorasAdicional();
+    }
   },
   methods: {
-    allowedDates: val => this.day != 7,
+    allowedDates(n) {
+      return val => ![n].includes(new Date(val).getDay());
+    },
+    conversionDate(date){
+      let year = date.getFullYear().toString();
+      let month = (date.getMonth()+1).toString();
+      let day = date.getDate().toString();
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+    },
     formatDate(date) {
       if (!date) return null;
       const [year, month, day] = date.split("-");
       return `${day}/${month}/${year}`;
     },
-    formatMin(date) {
-      if (!date) return null;
-      const [year, month, day] = date.split("-");
-      return `${year}-${month}-${day}`;
+    parseDate(date) {
+      // Esta funcion esta asociada a los v-text-input para modificar los v-calendar a partir de fechas ingresados por teclado.
+      if (!date) return null
+      const [day, month, year] = date.split('/')
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
     },
-    horasdisponibles(Horas,dateFormatted,hour,todaydate,HorasDis){
-    var a = 0
-    if (dateFormatted == todaydate){
-      for (var key in Horas){
-        if (Horas[key] > hour){
-          HorasDis[a] = Horas[key]
-          a++
-        }
+    maxDateCalendar(date){
+      var date = new Date();
+      date = date.setDate(date.getDate() + 7);
+      date = this.conversionDate(new Date(date));
+      return date;
+    },
+    verificarHorasAdicional(){
+      var n = 0;
+      let minutes = new Date().getMinutes();
+      let dayOfWeek = new Date(this.parseDate(this.dateFormatted)+" 00:00").getDay();
+      var horasAdicional = [];
+      this.form.Hora = "";
+      if(dayOfWeek!==6){
+        horasAdicional = [6, 8, 10, 12, 14, 16, 18, 20];
+      }else{
+        horasAdicional = [6, 8, 10, 12, 14];
+      }
+      if (this.dateFormatted === this.todaydate){
+        this.HorasDis = [];
+        for(var key in horasAdicional){
+          if(horasAdicional[key] > this.hour+1){   
+              this.HorasDis[n] = horasAdicional[key];
+              n++;
+          }else{
+            if(horasAdicional[key] === this.hour+1 && minutes<30){   
+              this.HorasDis[n] = horasAdicional[key];
+              n++;
+            }
           }
-    }
-    else {
-      this.HorasDis = Horas
-    }
-    console.log(HorasDis)
+        }
+      }
+      else {
+        this.HorasDis = horasAdicional;
+      }
+    },
+    agregarElementoAdicional(){
+      // Valida que el elemento agregado en el input del adicional no sea un espacio en blanco o vacío. 
+      if (this.inputElemento.length>0){
+        if(this.inputElemento.replace(/ /g, "").length>0){
+          this.form.Elemento.push(this.inputElemento);
+        }
+      }      
+      this.inputElemento = [];
     },
     verBanco(form){
       let objeto = this;
+      console.log(this.form.Elemento)
+      console.log(this.form.Hora)
+      console.log(this.HorasDis)
       this.axios
         .post(
           "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultabanco",
@@ -255,6 +358,7 @@ export default {
     },
     formSubmit(form) {
       this.verBanco(form)
+      this.vista = false;
       this.errors=[]
       if (
         this.form.Hora &&
@@ -296,12 +400,15 @@ export default {
         )
         .then(function(response) {
           if (response.data.status == 1) {
+            objeto.vistaType = "success";
             objeto.vista = true;
             objeto.output = response.data.mensaje;
           } else if (response.data.status == 2) {
+            objeto.vistaType = "error";
             objeto.vista = true;
             objeto.output = response.data.mensaje;
           } else {
+            objeto.vistaType = "error";
             objeto.vista = true;
             objeto.output = "Ha ocurrido un error";
           }
