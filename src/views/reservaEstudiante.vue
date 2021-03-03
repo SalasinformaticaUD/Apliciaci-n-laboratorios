@@ -114,7 +114,7 @@
                   <v-icon 
                     dark 
                     small 
-                    @click="form.Elemento = form.Elemento.filter((i) => i !== item)"
+                    @click="form.Elemento.splice(index,1)"
                   > 
                   fas fa-trash-alt</v-icon>
               </v-col>
@@ -232,7 +232,7 @@ export default {
     // Se evalua si el dia actual es domingo. Si sí, se suma un día para que se tome la fecha del lunes. En caso contrario, se utiliza la fecha actual del sistema. Se le debe indicar las 00:00 para evitar qeu se corra el día debido a la diferencia de usa con el formato ISO.
     // También en el caso de que en el día actual sean más de las 8pm, se aumenta en +1 el dia. 
     let dateToday = new Date(this.parseDate(this.todaydate)+" 00:00");
-    if (dateToday.getDay() === 0 || this.hour > 20){
+    if (dateToday.getDay() === 0 || this.hour > 18){
       dateToday = dateToday.setDate(dateToday.getDate() + 1); 
     }
     this.dateFormatted = this.formatDate(this.conversionDate(new Date(dateToday)));

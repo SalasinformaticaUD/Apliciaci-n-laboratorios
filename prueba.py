@@ -255,7 +255,7 @@ class Usuario(Resource):
         mensaje = "Encontrado"
         for u in user.find({"Codigo": codigo}):
             output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'practica': u['practica'],
-                           'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento']})
+                           'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'],'usuario': u['Usuario'], 'estado': u['Estado']})
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def buscarreservalabo(self):
@@ -333,6 +333,33 @@ class Usuario(Resource):
                 mensaje = "PRÁCTICA CANCELADA"
 
         return mensaje
+
+    def asistenciareserva(self):
+        user = mongo.db.Prestamo
+        hora = request.json['hora']
+        sala = request.json['sala']
+        fecha_adicional = request.json['fecha_adicional']
+        banco = request.json['banco']        
+        mensaje = "Operación realizada"
+        asistencia = request.json['aprobar']
+        print("ASISTIÓ: ",type(asistencia))
+
+        aprobado = "SI"
+        cancelado = "NO"
+        print("aprobado: ",type(asistencia))
+        print(hora,sala,fecha_adicional,banco,asistencia,mensaje)
+        actualizardatos = user.update({"$and": [{'Sala': sala}, {'Hora': hora}, {'Fecha_Adicional': fecha_adicional},
+                                      {'Banco': banco}]}, {"$set": {"Asistencia": asistencia}})
+        print(actualizardatos)
+        if actualizardatos:
+            self.status = 1
+            if (asistencia==aprobado):
+                mensaje = "EL USUARIO -SI- ASISTIÓ"
+            if (asistencia==cancelado):
+                mensaje = "EL USUARIO -NO- ASISTIÓ"
+
+        return mensaje
+
 
     def buscarhorarios(self):
         user = mongo.db.Horario
@@ -1348,6 +1375,8 @@ class Usuario(Resource):
             mensaje = self.editarreserva()
         elif accion == "aprobarreserva":
             mensaje = self.aprobarreserva()
+        elif accion == "asistenciareserva":
+            mensaje = self.asistenciareserva()            
         elif accion == "consultaeditlabo":
             respuesta = self.consultaeditlabo()
             mensaje = respuesta['mensaje']
@@ -1517,12 +1546,13 @@ if __name__ == '__main__':
     app.run(port='7001', ssl_context='adhoc')
 
 
-@app.route('/send-mail/')
+@app.route('/send_mail')
 def send_mail():
+    print("ENTRO A MAIL WIIII")
     msg = mail.send_message(
         'Send Mail tutorial!',
         sender='adminsalas@udistrital.edu.co',
-        recipients=['adminsalas@udistrital.edu.co'],
+        recipients=['rjchiaj@correo.udistrital.edu.co'],
         body="Prueba del correo."
     )
     return 'Mail sent'

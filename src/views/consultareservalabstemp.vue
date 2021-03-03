@@ -1,19 +1,32 @@
 <template>
   <v-container fluid>
     <HeaderLaboratorista />
-
+    <v-card>
+    <v-card-title>
+      Reservas
+      <v-spacer></v-spacer>
+      <v-text-field
+        v-model="search"
+        append-icon="fas far-search"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+    </v-card-title>
     <v-data-table
+      
       :headers="headers"
       :items="reservalab"
+      :search="search"
       class="elevation-1"
       color="background"
       dark
     >
+
       <template v-slot:top>
         <v-toolbar flat dark>
           <v-toolbar-title>Consulta reservas</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
-
           <v-dialog v-model="dialog" max-width="500px">
             <v-card dark>
               <v-card-title>
@@ -44,15 +57,160 @@
                 <v-btn color="blue darken-1" text @click="close">Cancelar</v-btn>
                 <v-btn color="blue darken-1" text @click="save(item)">Enviar</v-btn>
               </v-card-actions>
+
+              <v-card-asistencia>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="close">Cancelar</v-btn>
+                <v-btn color="blue darken-1" text @click="save(item)">Enviar</v-btn>
+              </v-card-asistencia>
+            </v-card>
+          </v-dialog>
+          <v-dialog ref="form" v-model="dialog2" max-width="1400px" >
+            <v-card dark>
+              <v-card-title>
+                <span class="headline">Información de la reserva</span>
+              </v-card-title>
+              
+              <v-card-text>
+                <v-container>
+                  <v-col class="col-sm-12 col-lg-12">
+                    <v-row>
+                      <v-col>
+                        <v-text-field v-model="infoItem.fecha_adicional" :disabled="true" label="Fecha del adicional"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.hora" :disabled="true" label="Hora"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.dia" :disabled="true" label="Sala"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.banco" :disabled="true" label="Banco"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field
+                          v-model="infoItem.practica"
+                          :disabled="true"
+                          label="Practica"
+                        ></v-text-field>
+                      </v-col>
+
+                    </v-row>     
+                    <v-row>
+                      <v-col>
+                        <v-text-field v-model="infoItem.codigo" :disabled="true" label="Código Usuario"></v-text-field>
+                      </v-col>                      
+                      <v-col>
+                        <v-text-field v-model="infoItem.usuario" :disabled="true" label="Nombre Usuario"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.estado" :disabled="true" label="Estado petición"></v-text-field>
+                      </v-col>    
+                      <v-col>
+                        <v-text-field v-model="infoItem.fecha_reserva" :disabled="true" label="Fecha de la reserva"></v-text-field>
+                      </v-col>                  
+                    </v-row>
+
+                    <v-row>                      
+                      <v-col>
+                        <v-text-field v-model="infoItem.elemento" :disabled="true" label="Elementos"></v-text-field>
+                      </v-col>
+                    </v-row>
+
+
+
+                    <v-divider></v-divider>
+                    <v-row no-gutters class="pa-1" align="center">
+                      <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
+                        No.
+                      </v-col>
+                      
+                      <v-col cols="12" sm="7" class="font-weight-black">
+                        Elementos
+                      </v-col>
+                      <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if=true>
+                        Acciones
+                      </v-col>
+                      <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if=true>
+                        Estado Item
+                      </v-col>
+                    </v-row>
+                    
+
+                    <v-row no-gutters align="center">
+                      <v-col v-for= "(item,index) in infoItem.elemento" :key="index" cols="12" sm="12">
+                        <v-divider></v-divider>  
+                        <v-row no-gutters class="pa-1" align="center">
+                          <v-col cols="12" sm="1" class="text-sm-center">
+                            {{index+1}}.
+                          </v-col>
+                          
+                          <v-col cols="12" sm="7">
+                            {{item}}
+                          </v-col>
+
+
+                          <v-col cols="12" sm="2" class="text-sm-center" v-if=true>
+                            <v-icon small class="mr-2" @click="aprobarReserva(index,true)">fas fa-check-circle</v-icon>
+                            <v-icon small class="mr-2" @click="aprobarReserva(index,false)">fas fa-times-circle</v-icon>
+                            <v-icon small class="mr-2" @click="eliminarElemento(index)">fas fa-trash-alt</v-icon>
+                                                       
+                          </v-col>
+                          
+                            <v-col cols="12" sm="2" class="text-sm-center" v-if=true>
+                            
+                            <v-text-field
+                              dense
+                              hide-details
+                              label="Pendiente"
+                              single-line
+                              v-model = "revisionElementos[index]"
+                            ></v-text-field>
+                            
+                                                       
+                          </v-col>
+
+                        </v-row>
+
+                      </v-col>                  
+                    </v-row>
+
+                    <v-divider></v-divider>
+                    <v-row>
+                      <v-col cols="12" sm="3" class="text-sm-center">
+                        <v-btn color="green" @click="mail()">Aprobar</v-btn>
+                      </v-col>
+                      <v-col cols="12" sm="3" class="text-sm-center">
+                        <v-btn color="primary" @click="informitem(item)">Cancelar</v-btn>
+                      </v-col>
+                      <v-col cols="12" sm="3" class="text-sm-center">
+                        <v-btn color="orangered" @click="informitem(item)">Revisar</v-btn>
+                      </v-col>              
+                      <v-col cols="12" sm="3" class="text-sm-center">
+                        <v-btn color="orange" @click="informitem(item)">Pendiente</v-btn>
+                      </v-col>           
+                    </v-row>
+
+                  </v-col>
+                </v-container>
+              </v-card-text>
+
+              
             </v-card>
           </v-dialog>
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
+        <v-icon small class="mr-2" @click="inforItem(item)">fas fa-info-circle</v-icon>
         <v-icon small class="mr-2" @click="aprobarItem(item,true)">fas fa-check-circle</v-icon>
         <v-icon small class="mr-2" @click="aprobarItem(item,false)">fas fa-times-circle</v-icon>
         <v-icon small class="mr-2" @click="aprobarItem(item,true)">fas fa-edit</v-icon>
         <v-icon small class="mr-2" @click="deleteItem(item)">fas fa-trash</v-icon>
+      </template>
+      <template v-slot:[`item.asistencia`]="{ item }">
+        <v-icon small class="mr-2" @click="asistencia(item,true)">fas fa-check-circle</v-icon>
+        <v-icon small class="mr-2" @click="asistencia(item,false)">fas fa-times-circle</v-icon>
+
       </template>
       <template v-slot:[`item.estado`]="{ item }">
         <v-chip :color="getColor(item.estado)" dark>{{ item.estado }}</v-chip>
@@ -60,7 +218,10 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
       </template>
+
+
     </v-data-table>
+    </v-card>
   </v-container>
 </template>
 
@@ -76,6 +237,9 @@ export default {
     },
     dialog: false,
     dialog2: false,
+    infoItem: {},
+    search: "",
+    revisionElementos:[],
     headers: [
       {
         text: "Código",
@@ -91,13 +255,15 @@ export default {
       { text: "Laboratorio", value: "sala"},
       { text: "Banco", value: "banco"},
       { text: "Estado de la petición", value: "estado" },      
-      { text: "Acción", value: "actions", sortable: false }
+      { text: "Acción", value: "actions", sortable: false },
+      { text: "Asistencia", value: "asistencia", sortable: false }
     ],
     reservalab: [],
+    infoIndex: -1,
     agregarUbicacionIndex: -1,
     agregarUbicacionItem: {},
     infoIndex: -1,
-    infoItem: {},
+
     sala: '',
     hora: '',
     fecha_adicional:'',
@@ -134,12 +300,65 @@ export default {
       (this.reservalab = []), this.buscar();
     },
 
+    aprobarReserva(item,opc){
+      console.log("ITEM: ", item);
+      console.log("Valor: ", opc);
+      this.revisionElementos[item]=opc;
+      console.log(this.revisionElementos);
+      
+      
+      //this.$refs.form.reset();
+      
+    },
+
+    mail(){
+      let objeto = this;
+      this.axios
+            .post(
+              "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/send_mail",
+              {
+                hola: "HOLA MAIL",
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json"
+                }
+              }
+            )
+            .then(function(response) {
+              var respuesta = response;
+              console.log(respuesta);
+              alert(respuesta);
+            })
+            .catch(function(error) {
+            alert(error);
+          });      
+    },
+
     inforItem(item) {
+      console.log("SOLICITA INFO");
+      
       this.infoIndex = this.reservalab.indexOf(item);
 
       this.infoItem = Object.assign({}, item);
       this.dialog2 = true;
+
+
+
+      this.revisionElementos = new Array(this.infoItem.elemento.length)
+      for (let i=0;i<this.revisionElementos.length;i++){
+        this.revisionElementos[i]="";
+      }
+
+
     },
+
+    eliminarElemento(index){
+      this.infoItem.elemento.splice(index,1);
+      this.revisionElementos.splice(index,1);
+      
+    },
+    
     aprobarItem(item,opc) {
       let objeto = this;
 
@@ -198,6 +417,67 @@ export default {
           });      
       }
     },
+
+    asistencia(item,opc) {
+      let objeto = this;
+
+      if (opc){
+        this.aprobar='SI';
+      }else{
+        this.aprobar='NO';
+      }
+
+      
+      console.log("ASISTIÓ??");
+      console.log(this.aprobar);
+
+      var confirmacion = confirm("¿Esta seguro que el usuario "+this.aprobar+" asistió?");
+
+      if (confirmacion) {
+
+        const index = this.reservalab.indexOf(item);
+        //  this.agregarUbicacionItem = Object.assign({}, item);
+        //  this.dialog = true;
+      
+        this.hora = this.reservalab[index].hora;
+        this.sala = this.reservalab[index].sala;
+        this.fecha_adicional = this.reservalab[index].fecha_adicional;
+        this.banco = this.reservalab[index].banco;
+      
+        console.log(index, this.sala);
+
+        
+          this.axios
+            .post(
+              "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/asistenciareserva",
+              {
+                fecha_adicional: this.fecha_adicional,
+                sala: this.sala,
+                hora: this.hora,
+                banco: this.banco,
+                aprobar: this.aprobar
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json"
+                }
+              }
+            )
+            .then(function(response) {
+              var respuesta = response.data.mensaje;
+              var status = response.data.status;
+              if (status == "1") {
+                alert(respuesta);
+                objeto.reservalab.splice(index, 1);
+              }
+            })
+            .catch(function(error) {
+            alert(error);
+          });      
+      }
+    },
+
+
 
     deleteItem(item) {
       var confirmacion = confirm("¿Esta seguro de eliminar este laboratorio?");

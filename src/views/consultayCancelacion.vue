@@ -16,52 +16,44 @@
           <v-toolbar-title>Edición y eliminación</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{ on }">
-              <v-btn
-                color="primary"
-                dark
-                class="mb-2"
-                v-on="on"
-                to="/reservaestudiante"
-              >Nueva reserva</v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
-
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-combobox v-model="editedItem.elemento" :items="Elementos" label="Seleccionar..." multiple
-                         ></v-combobox>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="save(item)">Save</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
 
           <v-dialog v-model="dialogFicha" max-width="700px">
             <v-card>
               <v-card-title>
                 <span class="headline">Ficha de laboratorio</span>
               </v-card-title>
+              <v-divider></v-divider>
               <v-card-text>
                 <v-container>
-                  <v-row>
+                  <v-row class="mt-n1">
+                    <v-col cols="12" sm="6">
+                      <v-text-field
+                        v-model="infoItem.usuario"
+                        :disabled="true"
+                        label="Nombre del estudiante"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="3">
+                      <v-text-field
+                        v-model="codigoLab"
+                        :disabled="true"
+                        label="Código del estudiante"
+                      ></v-text-field>
+                    </v-col>
                     <v-col cols="12" sm="3">
                       <v-text-field
                         v-model="infoItem.fecha_adicional"
                         :disabled="true"
-                        label="Fecha adicional"
+                        label="Fecha del adicional"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row class="mt-n6">
+                    <v-col cols="12" sm="3">
+                      <v-text-field
+                        v-model="infoItem.sala"
+                        :disabled="true"
+                        label="Laboratorio adicional"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="3">
@@ -73,21 +65,39 @@
                     </v-col>
                     <v-col cols="12" sm="3">
                       <v-text-field
-                        v-model="infoItem.sala"
-                        :disabled="true"
-                        label="Laboratorio adicional"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="3">
-                      <v-text-field
                         v-model="infoItem.banco"
                         :disabled="true"
                         label="Banco del laboratorio"
                       ></v-text-field>
                     </v-col>
+                    <v-col cols="12" sm="3">
+                      <v-text-field
+                        v-model="infoItem.estado"
+                        :disabled="true"
+                        label="Estado del adicional"
+                      ></v-text-field>
+                    </v-col>
                   </v-row>
+
+                  <v-row class="pb-2 ma-2 mt-n2" align="center" align-content="center" v-if="fichaEdit">
+                    <v-col cols="12" sm="10">
+                      <v-text-field
+                        label="Ingrese un elemento adicional"
+                        hide-details="auto"
+                        dense
+                        @keyup.enter="agregarElementoAdicional()"
+                        v-model = "inputElemento"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="2" align-self="center" class="text-right">
+                      <v-btn rounded color="primary" dark small
+                      @click="agregarElementoAdicional()"
+                      >Agregar</v-btn>
+                    </v-col>
+                  </v-row>      
+
                   <v-divider></v-divider>
-                  <v-row no-gutters class="pa-1">
+                  <v-row no-gutters class="pa-1" align="center">
                     <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
                       No.
                     </v-col>
@@ -95,14 +105,17 @@
                     <v-col cols="12" sm="8" class="font-weight-black">
                       Elementos
                     </v-col>
-                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
+                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if="fichaEdit">
                       Eliminar
                     </v-col>
+                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if="fichaPlacas">
+                      No. Placa
+                    </v-col>
                   </v-row>
-                  <v-row no-gutters>
+                  <v-row no-gutters align="center">
                     <v-col v-for= "(item,index) in infoItem.elemento" :key="index" cols="12" sm="12">
                       <v-divider></v-divider>  
-                      <v-row no-gutters class="pa-1">
+                      <v-row no-gutters class="pa-1" align="center">
                         <v-col cols="12" sm="1" class="text-sm-center">
                           {{index+1}}.
                         </v-col>
@@ -110,22 +123,40 @@
                         <v-col cols="12" sm="8">
                           {{item}}
                         </v-col>
-                        <v-col cols="12" sm="2" class="text-sm-center">
+                        <v-col cols="12" sm="2" class="text-sm-center" v-if="fichaEdit">
                           <v-icon 
                             small 
-                            @click="infoItem.elemento = infoItem.elemento.filter((i) => i !== item)"
+                            @click="infoItem.elemento.splice(index,1)"
                           > 
                             fas fa-trash-alt</v-icon>
-                          </v-col>
+                        </v-col>
+                        <v-col cols="12" sm="2" class="text-sm-center pl-6 pr-4" v-if="fichaPlacas">
+                          <v-text-field
+                            dense
+                            hide-details
+                            label="# Placa"
+                            single-line
+                            v-model = "placasElementos[index]"
+                          ></v-text-field>
+                        </v-col>
                       </v-row>
                     </v-col>                  
                   </v-row>
                   <v-divider></v-divider>  
                 </v-container>
-                <v-card-actions class="justify-end">
-                  <v-btn rounded color="primary" dark @click="guardarFichaEdit()">
-                    Guardar     
+                <v-card-actions v-if="fichaEdit">
+                  <v-row class="ma-3 justify-end">
+                    <v-btn rounded color="primary" dark @click="guardarFichaEdit()" small>
+                      Guardar     
                     </v-btn>
+                  </v-row>
+                </v-card-actions>
+                <v-card-actions v-if="fichaPlacas">
+                  <v-row class="ma-3 justify-end">
+                    <v-btn rounded color="primary" dark @click="guardarFichaPlacas()" small>
+                      Guardar     
+                    </v-btn>
+                  </v-row>
                 </v-card-actions>
               </v-card-text>
             </v-card>
@@ -139,13 +170,6 @@
           small 
           @click="fichaItem(item)"
         >
-          fas fa-info-circle
-        </v-icon>
-        <v-icon
-          small
-          class="mr-2"
-          @click="editItem(item)"
-        >
           fas fa-edit
         </v-icon>
         <v-icon
@@ -154,6 +178,9 @@
         >
           fas fa-trash
         </v-icon>
+      </template>
+      <template v-slot:[`item.estado`]="{ item }">
+        <v-chip :color="getColor(item.estado)" dark>{{ item.estado }}</v-chip>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -184,16 +211,8 @@ export default {
       { text: "Fecha Reserva", value: "fecha_reserva" },
       { text: "Sala", value: "sala" },
       { text: "Banco", value: "banco" },
-      { text: "Elemento", value: "elemento" },
+      { text: "Estado de la petición", value: "estado" },
       { text: "Acciones", value: "actions", sortable: false }
-    ],
-    Elementos: [
-      "Osciloscopio",
-      "Generador de Señales",
-      "Fuente DC",
-      "Multímetro",
-      "Luxómetro",
-      "Variac"
     ],
     usuariolab: [],
     codigo: "20201195009", //QUITAR ESTE
@@ -212,8 +231,12 @@ export default {
     },
 
     dialogFicha: false,
-    infoIndex: -1,
     infoItem: {},
+    inputElemento:"",
+
+    fichaEdit: false,
+    fichaPlacas: false,
+    placasElementos: []
   }),
   // mounted(){
   // this.$verificarLogin();
@@ -238,36 +261,76 @@ export default {
     initialize() {
       (this.usuariolab = []), this.buscar();
     },
-
-    editItem(item) {
-      this.editedIndex = this.usuariolab.indexOf(item);
-      this.editedItem = Object.assign({},item);
-      this.dialog = true;
-    },
     fichaItem(item) {
-      var date = new Date();
-      var hour = date.getHours();
-      var minutes = date.getMinutes();
-      date = date.getTime();
-      // var date = this.conversionDate(new Date(date));
-      this.infoIndex = this.usuariolab.indexOf(item);
+      // De acuerdo al adicional seleccionado se toma la información y se copia al objeto infoItem
       this.infoItem = Object.assign({}, item);
-      this.dialogFicha = true;
-      console.log(new Date(this.parseDate(this.infoItem.fecha_adicional)))
-      // console.log(date.getTime() - new Date("2021-02-25").getTime())
-      if(this.infoItem.fecha_adicional===date && this.infoItem.hora>(hour+1)){
-        console.log("Misma fecha")
-      }
+
+      // Se toman las fechas y con la función conversionDate se convierte al formato año-mes-dia sin tener en cuenta las horas. Luego, se obtienen los segundos transcurridos hasta esa fecha. En el caso de la fecha de adicional se utiliza la funcion parseDate para convertir el formato dia/mes/año a año-mes-dia. Luego, se realiza la resta en segundos de las dos fechas y se hace la conversión a días. Con esto se logra saber la diferencia en días del adicional y la fecha actual. 
+      let dateToday = this.conversionDate(new Date());
+      let dateTodayInSeconds = new Date(dateToday).getTime();
+
+      let dateAdicional = new Date(this.parseDate(this.infoItem.fecha_adicional)+" 00:00");
+      dateAdicional = this.conversionDate(dateAdicional);
+      let dateAdicionalInSeconds = new Date(dateAdicional).getTime();
+
+      // Diferencia en días de la fecha del adicional y la fecha actual
+      let difference = (dateAdicionalInSeconds-dateTodayInSeconds)/(1000*60*60*24);
+
+      // Hora y minutos actuales
+      var hour = new Date().getHours();
+      var minutes = new Date().getMinutes();
       
-      console.log(date)
-      console.log(hour+1)
-      console.log(minutes)
-      console.log(this.infoItem.hora)
+      // Se limpian e inicializan los input de los v-text de las dos fichas.
+      // Las variables fichaEdit y fichaPlacas es para distinguir entre las dos fichas
+      this.inputElemento = "";
+      this.placasElementos = new Array(this.infoItem.elemento.length)
+      for (let i=0;i<this.placasElementos.length;i++){
+        this.placasElementos[i]="";
+      }
+      this.fichaEdit = false;
+      this.fichaPlacas = false;
+
+      // Con la diferencia de fechas se hace una evaluación para determinar si puede o no editar la ficha de laboratorio. Solo podrá editar la ficha hasta 30 minutos antes del laboratorio. Luego de esto, unicamente puede llenar la ficha con la placa de los equipos. 
+
+      // dialogFicha => activa el v-dialog; fichaEdit => edicion de elementos; fichaPlacas => edicion de placas
+      if (difference>0){
+        this.fichaEdit = true;
+      }else if(difference==0){
+        if(this.infoItem.hora<(hour+1)){
+          this.fichaPlacas = true;
+        }else if(this.infoItem.hora===(hour+1) && 30<=minutes){
+          this.fichaPlacas = true;
+        }else{
+          this.fichaEdit = true;
+        }
+      }else{
+        this.fichaPlacas = true;
+      }
+      this.dialogFicha = true;
     },
     parseDate(date) {
       if (!date) return null
       const [day, month, year] = date.split('/')
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+    },
+    conversionDate(date){
+      let year = date.getFullYear().toString();
+      let month = (date.getMonth()+1).toString();
+      let day = date.getDate().toString();
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+    },
+    agregarElementoAdicional(){
+      if (this.inputElemento.length>0){
+        if(this.inputElemento.replace(/ /g, "").length>0){
+          this.infoItem.elemento.push(this.inputElemento);
+        }
+      }      
+      this.inputElemento = "";
+    },
+    getColor(estado) {
+      if (estado == "APROBADO") return "green";
+      else if (estado == "PENDIENTE") return "orange";
+      else if (estado == "CANCELADO") return "red";
     },
     deleteItem(item) {
       var confirmacion = confirm("¿Esta seguro de eliminar este laboratorio?");
@@ -330,6 +393,13 @@ export default {
       });
     },
 
+    guardarFichaPlacas(){
+      console.log("Esta es la funcion para mirar que se hace con el vector de placas")
+      console.log(this.infoItem.elemento)
+      console.log(this.placasElementos)
+      this.dialogFicha = false;
+    },
+
     guardarFichaEdit() {
       var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
       this.elemento = this.infoItem.elemento;
@@ -390,7 +460,7 @@ export default {
     buscar() {
       let objeto = this;
       
-      
+
       objeto.token = localStorage.cdcb0830cc2dd220;
       
       var encrypted = objeto.$cookies.get("user_session");      
