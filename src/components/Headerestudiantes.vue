@@ -82,8 +82,8 @@ export default {
     codigoLab:"",
   }),
   mounted(){
-    this.usuario = localStorage.usuario,
-    this.initialize();
+    
+    this.initialize();    
   },
   
   methods: {
@@ -93,7 +93,10 @@ export default {
     cerrarSesion() {
       localStorage.autorizado = null;
       this.$router.replace({ name: "home" });
-      localStorage.user= null;
+      localStorage.usuario= null;
+      let objeto = this;
+      objeto.$cookies.remove(objeto.token);      
+      objeto.$cookies.keys().forEach(cookie => objeto.$cookies.remove(cookie));
     },
     buscar() {
       
@@ -141,6 +144,7 @@ export default {
         .then(function(response) {
           
           localStorage.usuario = response.data.data[0].usuario;  
+          objeto.usuario = response.data.data[0].usuario;
           console.log("AUYUDAAA VUE");
 
         })

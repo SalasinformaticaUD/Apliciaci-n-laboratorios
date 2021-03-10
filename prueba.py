@@ -29,13 +29,20 @@ api = Api(app)
 
 mongo = PyMongo(app, 'mongodb://localhost:27017/Aplicacion')
 # print(dir(mongo.db.list_collection_names()))
-app.config.update(
-    MAIL_SERVER='smtp.gmail.com',
-    MAIL_PORT=587,
-    MAIL_USE_TLS = True,
-    MAIL_USERNAME = 'adminsalas@udistrital.edu.co',
-    MAIL_PASSWORD = 'ifucqwojzofscpzw'
-)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'jaimeparra.06@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Jaime1234567'
+app.config['MAIL_USE_TLS'] = True
+
+# app.config.update(
+#     MAIL_SERVER='smtp.gmail.com',
+#     MAIL_PORT=587,
+#     MAIL_USERNAME = 'adminsalas@udistrital.edu.co',
+#     MAIL_PASSWORD = 'ifucqwojzofscpzw'
+#     MAIL_USE_TLS = True,
+# )
 
 mail = Mail(app)
 
@@ -202,14 +209,18 @@ class Usuario(Resource):
         x = datetime.datetime.now()
         fecha_reserva = x.strftime("%d/%m/%Y")
         fecha_dt = datetime.datetime.strptime(fecha_adicional, '%d/%m/%Y')
-        dia = fecha_dt.strftime("%A")
+        dia = request.json['diaSemana']
         sala = request.json['sala']
         banco = request.json['banco']
         practica = request.json['practica']
         elemento = request.json['elemento']
         estado = "PENDIENTE"
         reservas = user.find({'Codigo': codigo}).count()
-        cruceHora = user.find({'Fecha_Adicional':fecha_adicional, 'Hora':hora}).count()        
+        cruceHora = user.find({'Fecha_Adicional':fecha_adicional, 'Hora':hora}).count()
+        asistencia = ""        
+        estadoElemento = [""]*len(elemento)
+        placaElemento = [""]*len(elemento)
+        observacionesGenerales = ""
 
         if (reservas == 3):
             self.status = 2
@@ -222,7 +233,7 @@ class Usuario(Resource):
                                         'Codigo': codigo, 'Usuario': usuario, 'Sala': sala
                                         , 'practica': practica
                                         , 'Banco': banco
-                                        , 'Elemento': elemento, 'Estado': estado})
+                                        , 'Elemento': elemento, 'Estado': estado, 'Asistencia': asistencia,'Estado_Elemento': estadoElemento,'Placa_Elemento':placaElemento,'Observaciones_Generales': observacionesGenerales})
             mensaje = "Laboratorio Registrado correctamente"
             self.status = 1
         return mensaje
@@ -254,7 +265,8 @@ class Usuario(Resource):
         self.status = 1
         mensaje = "Encontrado"
         for u in user.find({"Codigo": codigo}):
-            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'practica': u['practica'],
+        	#'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],
+            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'practica': u['practica'],'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],
                            'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'],'usuario': u['Usuario'], 'estado': u['Estado']})
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
@@ -300,9 +312,13 @@ class Usuario(Resource):
         fecha_reserva = request.json['fecha_reserva']
         banco = request.json['banco']   
         elemento = request.json['elemento']     
+        estadoElemento = request.json['estadoElemento']     
+        placaElemento = request.json['placaElemento']     
+        observacionesGenerales = request.json['observacionesGenerales']     
+
         mensaje = "Reserva modificada"
         actualizardatos = user.update({"$and": [{'Sala': sala}, {'Hora': hora}, {'Dia': dia}, {'Fecha_Adicional': fecha_adicional}, {
-                                      'Fecha_reserva': fecha_reserva}, {'Banco': banco}, {'Codigo': codigo}]}, {"$set": {"Elemento": elemento}})
+                                      'Fecha_reserva': fecha_reserva}, {'Banco': banco}, {'Codigo': codigo}]}, {"$set": {'Elemento': elemento,'Estado_Elemento':estadoElemento,'Placa_Elemento':placaElemento,'Observaciones_Generales':observacionesGenerales}})
         print(actualizardatos)
         if actualizardatos:
             self.status = 1
@@ -358,6 +374,23 @@ class Usuario(Resource):
             if (asistencia==cancelado):
                 mensaje = "EL USUARIO -NO- ASISTIÓ"
 
+        return mensaje
+
+    def send_mail(self):            
+        usuario = request.json['usuario']
+        fecha = request.json['fecha_adicional']
+        laboratorio = request.json['laboratorio']
+        horas = request.json['hora']
+
+        email = "jaimeparra_06@hotmail.com"    
+
+        subject = "Reserva de adicional aprobada."
+        msg = "Se le informa al estudiante " + usuario + " que la reserva de adicional para el día " + fecha + " en el laboratorio de " + laboratorio + " a las " + str(horas) + " horas " + "ha sido aprobada. Para mayor información consultar la página: https://labing.udistrital.edu.co/"
+        message = Message(subject,sender="jaimeparra.06@gmail.com",recipients=[email])
+        message.body = msg
+        mail.send(message)
+        self.status = 1
+        mensaje = "Email enviado correctamente"
         return mensaje
 
 
@@ -1403,6 +1436,8 @@ class Usuario(Resource):
             mensaje = self.excelTemporalFilterDate()
         elif accion == "excelTemporalFilterDateBancosSala":
             mensaje = self.excelTemporalFilterDateBancosSala()
+        elif accion == "send_mail":
+            mensaje = self.send_mail()
 
         else:
             self.status = 2
@@ -1546,14 +1581,14 @@ if __name__ == '__main__':
     app.run(port='7001', ssl_context='adhoc')
 
 
-@app.route('/send_mail')
-def send_mail():
-    print("ENTRO A MAIL WIIII")
-    msg = mail.send_message(
-        'Send Mail tutorial!',
-        sender='adminsalas@udistrital.edu.co',
-        recipients=['rjchiaj@correo.udistrital.edu.co'],
-        body="Prueba del correo."
-    )
-    return 'Mail sent'
+# @app.route('/send_mail')
+# def send_mail():
+#     print("ENTRO A MAIL WIIII")
+#     msg = mail.send_message(
+#         'Send Mail tutorial!',
+#         sender='adminsalas@udistrital.edu.co',
+#         recipients=['rjchiaj@correo.udistrital.edu.co'],
+#         body="Prueba del correo."
+#     )
+#     return 'Mail sent'
 

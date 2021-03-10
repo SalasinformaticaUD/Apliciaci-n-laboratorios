@@ -187,7 +187,7 @@ export default {
   }),
 
   mounted(){
-    this.usuario = localStorage.usuario,
+    
     this.initialize();
   },
   methods:{
@@ -239,7 +239,8 @@ export default {
         )
         .then(function(response) {
           
-          localStorage.usuario = response.data.data[0].usuario;  
+          localStorage.usuario = response.data.data[0].usuario;
+          objeto.usuario = localStorage.usuario;  
           console.log("AUYUDAAA VUE");
 
         })
@@ -250,6 +251,9 @@ export default {
     cerrarSesion(){
       localStorage.autorizado = null;
       this.$router.replace({name:'home'});
+      let objeto = this;
+      objeto.$cookies.remove(objeto.token);      
+      objeto.$cookies.keys().forEach(cookie => objeto.$cookies.remove(cookie));
     }
   }
 };

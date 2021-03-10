@@ -34,7 +34,7 @@
               ></v-text-field>
             </template>
             <v-date-picker v-model="date" no-title @input="menu1 = false" 
-            :min=min :max="maxDateCalendar()" :allowed-dates="allowedDates(6)"></v-date-picker>
+            :min=minCalendar :max="maxDateCalendar()" :allowed-dates="allowedDates(6)"></v-date-picker>
           </v-menu>
 
           <p align="justify" >2. Escoja el bloque de horas:</p>
@@ -130,9 +130,23 @@
           </v-card>          
           <p></p>
           <p align="justify">6. Seleccione la práctica:</p>
-
-          <v-combobox v-model="form.Practica" :items="Practicas" label="Seleccionar..."
+          
+          <v-combobox v-if="showInputPractica==false" v-model="practicaSelect" :items="Practicas" label="Seleccionar..."
           ></v-combobox>
+          <v-row no-gutters v-if="showInputPractica" align="center">
+            <v-col cols="12" sm="2">
+              <v-combobox v-model="practicaSelect" :items="Practicas" label="Seleccionar..."
+              ></v-combobox>
+            </v-col>
+            <v-col cols="12" sm="10" class="pl-5 mb-1">
+              <v-text-field
+                label="Ingrese el nombre de la práctica"
+                hide-details="auto"
+                v-model = "inputPractica"
+                dense
+              ></v-text-field>
+            </v-col>
+          </v-row>
 
           <p class="red--text" v-if="errors.length">
             <b>Errore(s):</b>
@@ -171,46 +185,45 @@ export default {
       "Comunicaciones",
       "Circuitos"
     ],
-    Dias: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+    Dias: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sabado", "Domingo"],
+    diaSemana: "",
     HorasDis: [],
     Bancos: ["1","2","3","4","5","6"],
-    Elementos: [
-      "Osciloscopio",
-      "Generador de Señales",
-      "Fuente DC",
-      "Multímetro",
-      "Luxómetro",
-      "Variac",
-      "Caimanes"
-    ],
+    errors:[],
+
+    inputElemento: "",
+
+    date: "",                                                   // Fecha para el v-model del calendar
+    dateFormatted: "",                                          // Fecha para el v-model del v-text
+    todaydate: vm.formatDate(vm.conversionDate(new Date())),    // Fecha actual en formato dia/mes/año
+    menu1: false,                                               // Menu del v-calendar   
+    minCalendar: "",                                            // Fecha mínima permitida en el v-calendar
+    day: new Date().getDay(),                                   // Día actual
+    hour: new Date().getHours(),                                // Hora actual
+
+
+    output: "",                                                 // Respuesta de la peticion a reserva     
+    output2: "",                                                // Respuesta de la petición a consultabanco
+    vista: false,                                               // Validacion de la vista output
+    vistaType: "success",                                       // Formatos de la vista output 
+    bandera: "1",                                               // Para verificar si el banco esta ocupado
+
+    value: "",
+
     Practicas: [
       "Motores",
       "Com. Digitales",
       "Electrónica 1",
       "Electrónica 2",
       "Electrónica 3",
-      "Circuitos 1"      
+      "Circuitos 1",
+      "Proyecto de Grado",
+      "Otro"  
     ],
-    errors:[],
-    elementosBase: [],
-    inputElemento: "",
-    date: "",
-    dateFormatted: "",
-    todaydate: vm.formatDate(vm.conversionDate(new Date())),
-    menu1: false,
-    menu2: false,
-    min: "",
-    day: new Date().getDay(),
-    hour: new Date().getHours(),
-    output: "",
-    output2: "",
+    practicaSelect: "",                                          
+    showInputPractica: "",
+    inputPractica: "",
 
-    vista: false,
-    vistaType: "success",
-
-    Codigo: "",
-    value: "",
-    bandera: "1",
     form: {
       Hora: "",
       Laboratorio: "",
@@ -229,67 +242,79 @@ export default {
   // this.$verificarLogin();
   },
   created(){
-    // Se evalua si el dia actual es domingo. Si sí, se suma un día para que se tome la fecha del lunes. En caso contrario, se utiliza la fecha actual del sistema. Se le debe indicar las 00:00 para evitar qeu se corra el día debido a la diferencia de usa con el formato ISO.
-    // También en el caso de que en el día actual sean más de las 8pm, se aumenta en +1 el dia. 
+    // Se evalua si el dia actual es domingo. Si sí, se suma un día para que se tome la fecha del lunes. En caso contrario, se utiliza la fecha actual del sistema. Se le debe indicar las 00:00 para evitar que se corra el día debido a la diferencia horaria que utilizada con el formato ISO.
+    // También en el caso de que en el día actual sean más de las 6pm, se aumenta en +1 el dia. 
     let dateToday = new Date(this.parseDate(this.todaydate)+" 00:00");
-    if (dateToday.getDay() === 0 || this.hour > 18){
+    if (dateToday.getDay() === 0 || 18 <= this.hour){
       dateToday = dateToday.setDate(dateToday.getDate() + 1); 
     }
     this.dateFormatted = this.formatDate(this.conversionDate(new Date(dateToday)));
     this.date = this.conversionDate(new Date(dateToday))
-    this.min = this.date;
-  },
-  computed: {
-    computedDateFormatted(){
-      return this.formatDate(this.date);
-    }
+    this.minCalendar = this.date;
   },
   watch: {
     date(val) {
+      // Watcher de la variable date (v-model del calendar) para detectar el cambio de día en la fecha y modificar también en el v-text del formulario. 
       this.dateFormatted = this.formatDate(this.date);
     },
     dateFormatted(val){
+      // Watcher de la variable dateFormatted (v-model del v-text del calendar) para detectar el cambio de fecha y automáticamente validar las horas disponibles de laboratorio
+      // Por otro lado se identifica el día de la semana
       this.verificarHorasAdicional();     
     },
     hour(val){
+      // Watcher de la variable hour (hora actual) para detectar el cambio de hora y automáticamente validar las horas disponibles en el laboratorio
       this.verificarHorasAdicional();
+    },
+    practicaSelect(val){    
+      // Watcher para el v-model del seleccionador de la práctica. En caso de seleccionar la opción "Otro" se debe mostrar un input para ingresar una opción de texto abierta. Esto se realiza habilitando la variable showInputPractica. 
+      if(this.practicaSelect==="Otro"){
+        this.showInputPractica = true;
+      }else{
+        this.showInputPractica = false;
+      }   
     }
   },
   methods: {
     allowedDates(n) {
+      // Esta función recibe un número entero n para restringir la selección dle día domingo en el v-calendar
       return val => ![n].includes(new Date(val).getDay());
     },
     conversionDate(date){
+      // Esta función toma una fecha dada la función Date() de JS y retorna una fecha en el formato año-mes-dia. Esto se realiza para evitar utilizar la función Date().toISOString ya que esta última no tiene en cuenta la zona horaria y en horas de la noche toma la fecha como la del dia siguiente. 
       let year = date.getFullYear().toString();
       let month = (date.getMonth()+1).toString();
       let day = date.getDate().toString();
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
     },
     formatDate(date) {
+      // Esta función toma una fecha en el formato año-mes-dia (formato v-calendar) y la convierte al formato dia/mes/año (formato utilizado en el proyecto)
       if (!date) return null;
       const [year, month, day] = date.split("-");
       return `${day}/${month}/${year}`;
     },
     parseDate(date) {
-      // Esta funcion esta asociada a los v-text-input para modificar los v-calendar a partir de fechas ingresados por teclado.
+      // Esta funcion toma una fecha en el formato dia/mes/año (formato utilizado en el proyecto) y la convierte al formato año-mes-dia (formato v-calendar)
       if (!date) return null
       const [day, month, year] = date.split('/')
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
     },
-    maxDateCalendar(date){
+    maxDateCalendar(){
+      // Esta función limita la selección máxima de días en el calendario. A la fecha actual se le suman 7 días y se retorna la fecha en formato año-mes-dia (formato v-calendar).
       var date = new Date();
       date = date.setDate(date.getDate() + 7);
       date = this.conversionDate(new Date(date));
       return date;
     },
     verificarHorasAdicional(){
+      // Esta función toma el día de la semana actual e identifica si es o no sabado para hacer la asignación de horasAdicional. Luego, dependiendo si es el mismo día o no hace la asignación de las horas disponibles del adicional teniendo en cuenta que solo se puede seleccionar una franja horaria hasta 30 minutos antes de la hora. 
       var n = 0;
       let minutes = new Date().getMinutes();
       let dayOfWeek = new Date(this.parseDate(this.dateFormatted)+" 00:00").getDay();
       var horasAdicional = [];
       this.form.Hora = "";
       if(dayOfWeek!==6){
-        horasAdicional = [6, 8, 10, 12, 14, 16, 18, 20];
+        horasAdicional = [6, 8, 10, 12, 14, 16, 18];
       }else{
         horasAdicional = [6, 8, 10, 12, 14];
       }
@@ -310,9 +335,11 @@ export default {
       else {
         this.HorasDis = horasAdicional;
       }
+      // Se toma el día de la semana en la que se reserva el adicional
+      this.diaSemana = this.Dias[dayOfWeek-1];
     },
     agregarElementoAdicional(){
-      // Valida que el elemento agregado en el input del adicional no sea un espacio en blanco o vacío. 
+      // Valida que el elemento agregado en el input del adicional no sea un espacio en blanco o vacío. Luego, lo agrega al vector Elemento del formulario. Finalmente vacía el input para poder agregar otro elemento
       if (this.inputElemento.length>0){
         if(this.inputElemento.replace(/ /g, "").length>0){
           this.form.Elemento.push(this.inputElemento);
@@ -321,10 +348,8 @@ export default {
       this.inputElemento = [];
     },
     verBanco(form){
+      // Esta función se encarga de validar que el banco no este ocupado por otro adicional. Se utiliza una bandera en '1' para indicar si se encuentra ya reservado o ha ocurrido un error. 
       let objeto = this;
-      console.log(this.form.Elemento)
-      console.log(this.form.Hora)
-      console.log(this.HorasDis)
       this.axios
         .post(
           "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultabanco",
@@ -343,7 +368,7 @@ export default {
         .then(function(response) {
           if (response.data.status == 1) {
             objeto.output2 = response.data.mensaje;
-              objeto.bandera = ""
+            objeto.bandera = ""
           } else if (response.data.status == 2) {
             objeto.output2 = response.data.status;
             objeto.bandera = "1"
@@ -357,74 +382,86 @@ export default {
         });
     },
     formSubmit(form) {
+      // Se valida si el nombre de la practica ha sido ingresada por el input (opcion otro) o es una de las seleccionadas del vector Practicas.  
+      // Se valida que ningún campo se encuentre vacío y que la bandera sea diferente a '1' para indicar que el banco se encuentra disponible
       this.verBanco(form)
       this.vista = false;
-      this.errors=[]
-      if (
+      this.errors=[];
+      if(this.showInputPractica==true){
+        this.form.Practica = this.inputPractica;
+      }else{
+        this.form.Practica = this.practicaSelect;
+      }
+      if(
         this.form.Hora &&
         this.form.Laboratorio &&
         this.form.Banco &&
         this.dateFormatted &&
+        this.form.Practica &&
         this.bandera
       ){
+        // Desencriptar el código del usuario
+        let objeto = this;      
+        this.usuario=localStorage.usuario;
+        objeto.token = localStorage.cdcb0830cc2dd220;
       
-      // Desencriptar el código del usuario
-      let objeto = this;      
-      this.usuario=localStorage.usuario;
-      objeto.token = localStorage.cdcb0830cc2dd220;
-      
-      var encrypted = objeto.$cookies.get("user_session");      
-      var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
-      var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
-      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
-      objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+        var encrypted = objeto.$cookies.get("user_session");      
+        var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+        var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+        objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+        objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
 
-      this.axios
-        .post(
-          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/reserva",
-          {
-            hora: this.form.Hora,
-            fecha_adicional: this.dateFormatted,
-            codigo: objeto.codigoLab,
-            usuario: this.usuario,
-            sala: this.form.Laboratorio,
-            banco: this.form.Banco,
-            elemento: this.form.Elemento,
-            practica: this.form.Practica
-          },
-          {
-            headers: {
-              "Content-Type": "application/json"
+        this.axios
+          .post(
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/reserva",
+            {
+              hora: this.form.Hora,
+              fecha_adicional: this.dateFormatted,
+              codigo: objeto.codigoLab,
+              usuario: this.usuario,
+              sala: this.form.Laboratorio,
+              banco: this.form.Banco,
+              elemento: this.form.Elemento,
+              practica: this.form.Practica,
+              diaSemana: this.diaSemana
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
             }
-          }
-        )
-        .then(function(response) {
-          if (response.data.status == 1) {
-            objeto.vistaType = "success";
-            objeto.vista = true;
-            objeto.output = response.data.mensaje;
-          } else if (response.data.status == 2) {
-            objeto.vistaType = "error";
-            objeto.vista = true;
-            objeto.output = response.data.mensaje;
-          } else {
-            objeto.vistaType = "error";
-            objeto.vista = true;
-            objeto.output = "Ha ocurrido un error";
-          }
-        })
-        .catch(function(error) {
-          objeto.output = error;
-        });
+          )
+          .then(function(response) {
+            if (response.data.status == 1) {
+              // Si el laboratorio fue registrado correctamente
+              objeto.vistaType = "success";
+              objeto.vista = true;
+              objeto.output = response.data.mensaje;
+            } else if (response.data.status == 2) {
+              // Si el usuario ya cuenta con más de tres adicionales pendientes o si el usuario ya ha solicitado un adicional para la misma franja horaria. 
+              objeto.vistaType = "error";
+              objeto.vista = true;
+              objeto.output = response.data.mensaje;
+            } else {
+              // Error con el servidor
+              objeto.vistaType = "error";
+              objeto.vista = true;
+              objeto.output = "Ha ocurrido un error";
+            }
+          })
+          .catch(function(error) {
+            objeto.output = error;
+          });
+      }
+      else {
+          if (!this.form.Hora) this.errors.push("Hora requerida.")
+          if (!this.dateFormatted) this.errors.push("Fecha requerida.")
+          if (!this.form.Laboratorio) this.errors.push("Laboratorio requerido.")
+          if (!this.form.Banco) this.errors.push("Banco requerido.")
+          if (!this.form.Practica) this.errors.push("Práctica requerida.")
+          if (!this.bandera) this.errors.push("Banco Ocupado.")
+      } 
     }
-     else {
-        if (!this.form.Hora) this.errors.push("Hora requerida.")
-        if (!this.dateFormatted) this.errors.push("Fecha requerida.")
-        if (!this.form.Laboratorio) this.errors.push("Laboratorio requerido.")
-        if (!this.form.Banco) this.errors.push("Banco requerido.")
-        if (!this.bandera) this.errors.push("Banco Ocupado.")
-      }
-      }
-  }
+  } 
 };
 </script>

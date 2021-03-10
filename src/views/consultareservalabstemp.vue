@@ -177,17 +177,14 @@
 
                     <v-divider></v-divider>
                     <v-row>
-                      <v-col cols="12" sm="3" class="text-sm-center">
-                        <v-btn color="green" @click="mail()">Aprobar</v-btn>
+                      <v-col cols="12" sm="4" class="text-sm-center">
+                        <v-btn color="green" @click="aprobarItem(objItem,'1')">Aprobar</v-btn>
                       </v-col>
-                      <v-col cols="12" sm="3" class="text-sm-center">
-                        <v-btn color="primary" @click="informitem(item)">Cancelar</v-btn>
-                      </v-col>
-                      <v-col cols="12" sm="3" class="text-sm-center">
-                        <v-btn color="orangered" @click="informitem(item)">Revisar</v-btn>
-                      </v-col>              
-                      <v-col cols="12" sm="3" class="text-sm-center">
-                        <v-btn color="orange" @click="informitem(item)">Pendiente</v-btn>
+                      <v-col cols="12" sm="4" class="text-sm-center">
+                        <v-btn color="primary" @click="aprobarItem(objItem,'2')">Cancelar</v-btn>
+                      </v-col>          
+                      <v-col cols="12" sm="4" class="text-sm-center">
+                        <v-btn color="orange" @click="aprobarItem(objItem,'3')">Pendiente</v-btn>
                       </v-col>           
                     </v-row>
 
@@ -202,9 +199,7 @@
       </template>
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="inforItem(item)">fas fa-info-circle</v-icon>
-        <v-icon small class="mr-2" @click="aprobarItem(item,true)">fas fa-check-circle</v-icon>
-        <v-icon small class="mr-2" @click="aprobarItem(item,false)">fas fa-times-circle</v-icon>
-        <v-icon small class="mr-2" @click="aprobarItem(item,true)">fas fa-edit</v-icon>
+        <v-icon small class="mr-2" @click="ficha()">fas fa-edit</v-icon>
         <v-icon small class="mr-2" @click="deleteItem(item)">fas fa-trash</v-icon>
       </template>
       <template v-slot:[`item.asistencia`]="{ item }">
@@ -260,6 +255,7 @@ export default {
     ],
     reservalab: [],
     infoIndex: -1,
+    objItem: "",
     agregarUbicacionIndex: -1,
     agregarUbicacionItem: {},
     infoIndex: -1,
@@ -310,36 +306,39 @@ export default {
       //this.$refs.form.reset();
       
     },
-
-    mail(){
+    ficha(){
+      alert("AQUI VA LA FICHA");
+    },
+    mail(infoItem){
       let objeto = this;
       this.axios
-            .post(
-              "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/send_mail",
-              {
-                hola: "HOLA MAIL",
-              },
-              {
-                headers: {
-                  "Content-Type": "application/json"
-                }
+          .post(
+            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/send_mail",
+            {
+              usuario: infoItem.usuario,
+              fecha_adicional: infoItem.fecha_adicional,
+              laboratorio: infoItem.sala,
+              hora: infoItem.hora
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
               }
-            )
-            .then(function(response) {
-              var respuesta = response;
-              console.log(respuesta);
-              alert(respuesta);
-            })
-            .catch(function(error) {
-            alert(error);
-          });      
+            }
+          )
+          .then(function(response) {
+            var respuesta = response.data;
+            console.log(respuesta.mensaje);
+          })
+          .catch(function(error) {
+          alert(error);
+        });      
     },
 
     inforItem(item) {
       console.log("SOLICITA INFO");
-      
+      this.objItem=item;
       this.infoIndex = this.reservalab.indexOf(item);
-
       this.infoItem = Object.assign({}, item);
       this.dialog2 = true;
 
@@ -362,14 +361,17 @@ export default {
     aprobarItem(item,opc) {
       let objeto = this;
 
-      if (opc){
+      if (opc == '1'){
         this.aprobar='APROBADO';
-      }else{
+      }
+      if (opc == '2'){
         this.aprobar='CANCELADO';
       }
-
+      if (opc == '3'){
+        this.aprobar='PENDIENTE';
+      }
+      console.log("# ITEM: ",this.reservalab.indexOf(item));
       
-      console.log("APROBAR??");
       console.log(this.aprobar);
 
       var confirmacion = confirm("¿Esta seguro de marcar este laboratorio como "+this.aprobar+"?");

@@ -29,7 +29,7 @@
           </v-avatar>
         </div>
         <div class="text-center">
- <p>{{usuario}}</p>
+          <p>{{usuario}}</p>
         </div>
         
       </v-card>
@@ -262,9 +262,10 @@ export default {
     ],
     drawer: false
   }),
-    mounted(){
-    this.usuario = localStorage.usuario,
+    mounted(){    
     this.initialize();
+    this.buscar();
+    
   },
   methods: {
     initialize() {
@@ -272,7 +273,11 @@ export default {
     },
     cerrarSesion() {
       localStorage.autorizado = null;
+      localStorage.usuario= null;
       this.$router.replace({ name: "home" });
+      let objeto = this;
+      objeto.$cookies.remove(objeto.token);      
+      objeto.$cookies.keys().forEach(cookie => objeto.$cookies.remove(cookie));
     },
     buscar() {
       
@@ -320,6 +325,7 @@ export default {
         .then(function(response) {
           
           localStorage.usuario = response.data.data[0].usuario;  
+          objeto.usuario = response.data.data[0].usuario;  
           console.log("AUYUDAAA VUE");
 
         })

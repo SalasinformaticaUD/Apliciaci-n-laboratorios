@@ -63,7 +63,7 @@
                         label="Hora del adicional"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="3">
+                    <v-col cols="12" sm="3">                      
                       <v-text-field
                         v-model="infoItem.banco"
                         :disabled="true"
@@ -97,7 +97,7 @@
                   </v-row>      
 
                   <v-divider></v-divider>
-                  <v-row no-gutters class="pa-1" align="center">
+                  <v-row no-gutters class="pa-1" align="center" v-if="fichaEdit">
                     <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
                       No.
                     </v-col>
@@ -105,15 +105,12 @@
                     <v-col cols="12" sm="8" class="font-weight-black">
                       Elementos
                     </v-col>
-                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if="fichaEdit">
+                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
                       Eliminar
                     </v-col>
-                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if="fichaPlacas">
-                      No. Placa
-                    </v-col>
                   </v-row>
-                  <v-row no-gutters align="center">
-                    <v-col v-for= "(item,index) in infoItem.elemento" :key="index" cols="12" sm="12">
+                  <v-row no-gutters align="center" v-if="fichaEdit">
+                    <v-col v-for= "(itemElemento,index) in infoItem.elemento" :key="index" cols="12" sm="12">
                       <v-divider></v-divider>  
                       <v-row no-gutters class="pa-1" align="center">
                         <v-col cols="12" sm="1" class="text-sm-center">
@@ -121,18 +118,52 @@
                         </v-col>
                         <v-col></v-col>
                         <v-col cols="12" sm="8">
-                          {{item}}
+                          {{itemElemento}}
                         </v-col>
-                        <v-col cols="12" sm="2" class="text-sm-center" v-if="fichaEdit">
+                        <v-col cols="12" sm="2" class="text-sm-center">
                           <v-icon 
                             small 
                             @click="infoItem.elemento.splice(index,1)"
                           > 
                             fas fa-trash-alt</v-icon>
                         </v-col>
-                        <v-col cols="12" sm="2" class="text-sm-center pl-6 pr-4" v-if="fichaPlacas">
+                      </v-row>
+                    </v-col>                  
+                  </v-row>
+
+                  <v-row no-gutters class="pa-1" align="center" v-if="fichaPlacas">
+                    <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
+                      No.
+                    </v-col>
+                    <v-col></v-col>
+                    <v-col cols="12" sm="6" class="font-weight-black">
+                      Elementos
+                    </v-col>              
+                    <v-col cols="12" sm="2" class="font-weight-black">
+                      Observaciones
+                    </v-col>                          
+                    <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
+                      No. Placa
+                    </v-col>
+                  </v-row>
+                  <v-row no-gutters align="center" v-if="fichaPlacas">
+                    <v-col v-for= "(item,index) in infoItem.elemento" :key="index" cols="12" sm="12">
+                      <v-divider></v-divider>  
+                      <v-row no-gutters class="pa-1" align="center">
+                        <v-col cols="12" sm="1" class="text-sm-center">
+                          {{index+1}}.
+                        </v-col>
+                        <v-col></v-col>
+                        <v-col cols="12" sm="6">
+                          {{item}}
+                        </v-col>
+                        <v-col cols="12" sm="2">
+                          {{infoItem.estadoElemento[index]}}
+                        </v-col>
+                        <v-col cols="12" sm="2" class="text-sm-center pl-5 pr-5">
                           <v-text-field
                             dense
+                            class="centered-input"
                             hide-details
                             label="# Placa"
                             single-line
@@ -142,6 +173,16 @@
                       </v-row>
                     </v-col>                  
                   </v-row>
+                  <v-row no-gutters align="center" v-if="fichaPlacas">
+                    <v-col cols="12" sm="12" v-if="infoItem.observacionesGenerales.length > 0">
+                      <v-text-field
+                        v-model="infoItem.observacionesGenerales"
+                        :disabled="true"
+                        label="Observaciones Generales"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+
                   <v-divider></v-divider>  
                 </v-container>
                 <v-card-actions v-if="fichaEdit">
@@ -174,7 +215,7 @@
         </v-icon>
         <v-icon
           small
-          @click="deleteItem(item)"
+          @click="cancelarAdicional(item)"
         >
           fas fa-trash
         </v-icon>
@@ -190,6 +231,12 @@
     </v-row>
   </v-container>
 </template>
+
+<style scoped>
+    .centered-input >>> input {
+      text-align: center
+    }
+</style>
 
 <script>
 import Headerestudiantes from "@/components/Headerestudiantes.vue";
@@ -263,18 +310,9 @@ export default {
     },
     fichaItem(item) {
       // De acuerdo al adicional seleccionado se toma la información y se copia al objeto infoItem
-      this.infoItem = Object.assign({}, item);
-
-      // Se toman las fechas y con la función conversionDate se convierte al formato año-mes-dia sin tener en cuenta las horas. Luego, se obtienen los segundos transcurridos hasta esa fecha. En el caso de la fecha de adicional se utiliza la funcion parseDate para convertir el formato dia/mes/año a año-mes-dia. Luego, se realiza la resta en segundos de las dos fechas y se hace la conversión a días. Con esto se logra saber la diferencia en días del adicional y la fecha actual. 
-      let dateToday = this.conversionDate(new Date());
-      let dateTodayInSeconds = new Date(dateToday).getTime();
-
-      let dateAdicional = new Date(this.parseDate(this.infoItem.fecha_adicional)+" 00:00");
-      dateAdicional = this.conversionDate(dateAdicional);
-      let dateAdicionalInSeconds = new Date(dateAdicional).getTime();
-
-      // Diferencia en días de la fecha del adicional y la fecha actual
-      let difference = (dateAdicionalInSeconds-dateTodayInSeconds)/(1000*60*60*24);
+      this.infoItem = JSON.parse(JSON.stringify(item));
+      // Se calcula la diferencia en días de la fecha adicional y la fecha actual del sistema
+      let difference = this.differenceDays(this.infoItem.fecha_adicional);
 
       // Hora y minutos actuales
       var hour = new Date().getHours();
@@ -285,15 +323,19 @@ export default {
       this.inputElemento = "";
       this.placasElementos = new Array(this.infoItem.elemento.length)
       for (let i=0;i<this.placasElementos.length;i++){
-        this.placasElementos[i]="";
+        if(this.infoItem.placaElemento.length==0){
+          this.placasElementos[i]="";
+        }else{
+          this.placasElementos[i]=this.infoItem.placaElemento[i];
+        }
       }
       this.fichaEdit = false;
       this.fichaPlacas = false;
 
-      // Con la diferencia de fechas se hace una evaluación para determinar si puede o no editar la ficha de laboratorio. Solo podrá editar la ficha hasta 30 minutos antes del laboratorio. Luego de esto, unicamente puede llenar la ficha con la placa de los equipos. 
+      // Con la diferencia de fechas se hace una evaluación para determinar si puede o no editar la ficha de laboratorio. Solo podrá editar la ficha hasta 30 minutos antes del laboratorio siempre y cuando siga pendiente. Luego de esto, unicamente puede llenar la ficha con la placa de los equipos y ver las observaciones agregadas por el laboratorista. 
 
       // dialogFicha => activa el v-dialog; fichaEdit => edicion de elementos; fichaPlacas => edicion de placas
-      if (difference>0){
+      if (difference>0 && this.infoItem.estado=="PENDIENTE"){
         this.fichaEdit = true;
       }else if(difference==0){
         if(this.infoItem.hora<(hour+1)){
@@ -307,6 +349,18 @@ export default {
         this.fichaPlacas = true;
       }
       this.dialogFicha = true;
+    },
+    differenceDays(dateAdicional){
+      // Se toman las fechas y con la función conversionDate se convierte al formato año-mes-dia sin tener en cuenta las horas. Luego, se obtienen los segundos transcurridos hasta esa fecha. En el caso de la fecha de adicional se utiliza la funcion parseDate para convertir el formato dia/mes/año a año-mes-dia. Luego, se realiza la resta en segundos de las dos fechas y se hace la conversión a días. Con esto se logra saber la diferencia en días del adicional y la fecha actual. 
+      let dateToday = this.conversionDate(new Date());
+      let dateTodayInSeconds = new Date(dateToday).getTime();
+
+      let date = new Date(this.parseDate(dateAdicional)+" 00:00");
+      date = this.conversionDate(date);
+      let dateAdicionalInSeconds = new Date(date).getTime();
+
+      // Diferencia en días de la fecha del adicional y la fecha actual
+      return (dateAdicionalInSeconds-dateTodayInSeconds)/(1000*60*60*24);
     },
     parseDate(date) {
       if (!date) return null
@@ -332,8 +386,79 @@ export default {
       else if (estado == "PENDIENTE") return "orange";
       else if (estado == "CANCELADO") return "red";
     },
+    cancelarAdicional(item){
+      // Toma la fecha actual del sistema y la resta con la fecha del adicional para saber la diferencia en días. El estudiante solo puede cancelar un adicional solo hasta una hora antes del mismo y solo si este se encuentra en estado aprobado o pendiente
+      const difference = this.differenceDays(item.fecha_adicional)
+      const hora_adicional = item.hora;
+      const actualHour = new Date().getHours();
+
+      if(item.estado=="APROBADO" || item.estado=="PENDIENTE"){
+        if (difference>0){
+          console.log("Puede cancelar por que aún faltan dias")
+        }else if(difference == 0){
+          if(hora_adicional<=(actualHour+1)){
+            console.log("Ya no puede cancelar debido a que el adicional ya paso o falta 1 hora para el adicional")
+          }else{
+            this.deleteItem(item);
+          }
+        }else{
+          console.log("No puede cancelar porque ya paso el dia")
+        }
+      }else{
+        console.log("No puede cancelar debido a que el adicional ya esta cancelado")
+      }
+    },
     deleteItem(item) {
-      var confirmacion = confirm("¿Esta seguro de eliminar este laboratorio?");
+      var confirmacion = confirm("¿Esta seguro que desea cancelar este laboratorio?");
+
+      if (confirmacion) {
+        const index = this.usuariolab.indexOf(item);
+        this.sala = this.usuariolab[index].sala;
+        this.banco = this.usuariolab[index].banco;
+        this.fecha_adicional = this.usuariolab[index].fecha_adicional;
+        this.hora = this.usuariolab[index].hora;
+        
+        let objeto = this;
+        
+        objeto.token = localStorage.cdcb0830cc2dd220;
+        
+        var encrypted = objeto.$cookies.get("user_session");      
+        var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
+        var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
+        objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
+        objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
+
+        this.axios
+            .post(
+              "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/aprobarreserva",
+              {
+                fecha_adicional: this.fecha_adicional,
+                sala: this.sala,
+                hora: this.hora,
+                banco: this.banco,
+                aprobar: "CANCELADO"
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json"
+                }
+              }
+            )
+            .then(function(response) {
+              var respuesta = response.data.mensaje;
+              var status = response.data.status;
+              if (status == "1") {
+                alert(respuesta);
+                objeto.buscar();
+              }
+            })
+            .catch(function(error) {
+            alert(error);
+          });      
+      }
+    },
+    deleteItemOld(item) {
+      var confirmacion = confirm("¿Esta seguro que desea cancelar este laboratorio?");
 
       if (confirmacion) {
         const index = this.usuariolab.indexOf(item);
@@ -394,22 +519,14 @@ export default {
     },
 
     guardarFichaPlacas(){
-      console.log("Esta es la funcion para mirar que se hace con el vector de placas")
-      console.log(this.infoItem.elemento)
-      console.log(this.placasElementos)
+      this.infoItem.placaElemento = this.placasElementos;
+      this.placasElementos = "";
+      this.guardarFichaEdit();
       this.dialogFicha = false;
     },
 
     guardarFichaEdit() {
       var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
-      this.elemento = this.infoItem.elemento;
-      this.hora = this.infoItem.hora;
-      this.dia = this.infoItem.dia;
-      this.fecha_adicional = this.infoItem.fecha_adicional;
-      this.fecha_reserva = this.infoItem.fecha_reserva;
-      this.sala = this.infoItem.sala;
-      this.banco = this.infoItem.banco;
-    
 
       if (confirmacion) {
         let objeto = this;
@@ -427,13 +544,16 @@ export default {
             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editarreserva",
             {
               codigo: this.codigoLab,
-              hora: this.hora,
-              dia: this.dia,
-              fecha_adicional: this.fecha_adicional,
-              fecha_reserva: this.fecha_reserva,
-              sala: this.sala,
-              banco: this.banco,
-              elemento: this.elemento
+              hora: objeto.infoItem.hora,
+              dia: objeto.infoItem.dia,
+              fecha_adicional: objeto.infoItem.fecha_adicional,
+              fecha_reserva: objeto.infoItem.fecha_reserva,
+              sala: objeto.infoItem.sala,
+              banco: objeto.infoItem.banco,
+              elemento: objeto.infoItem.elemento,
+              estadoElemento: objeto.infoItem.estadoElemento,
+              placaElemento: objeto.infoItem.placaElemento,
+              observacionesGenerales: objeto.infoItem.observacionesGenerales,
             },
             {
               headers: {
@@ -448,7 +568,6 @@ export default {
               alert(respuesta);
               objeto.dialogFicha = false;
               objeto.buscar();
-              //   objeto.usuariolab.splice(index, 1);
             }
           })
           .catch(function(error) {
@@ -469,6 +588,8 @@ export default {
       objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
       objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
 
+      console.log("Buscar reserva: ",objeto.codigoLab);
+
       this.axios
         .post(
           "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/buscarreserva",
@@ -483,7 +604,7 @@ export default {
         )
         .then(function(response) {
           objeto.usuariolab = response.data.data;
-          console.log(objeto.usuariolab);
+          console.log("Respuesta Busqueda: ",objeto.usuariolab);
         })
         .catch(function(error) {
           objeto.output = error;
