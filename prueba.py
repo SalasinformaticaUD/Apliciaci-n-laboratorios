@@ -1,5 +1,5 @@
 
-from flask import Flask, Response
+from flask import Flask, Response, send_file
 from flask import jsonify
 from flask import request
 from flask import session
@@ -19,6 +19,9 @@ from openpyxl.styles import Alignment, Border, Side
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.chart import BarChart, PieChart, Reference, Series
 
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 
 app = Flask(__name__)
 CORS(app)
@@ -32,8 +35,8 @@ mongo = PyMongo(app, 'mongodb://localhost:27017/Aplicacion')
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = 'jaimeparra.06@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Jaime1234567'
+app.config['MAIL_USERNAME'] = 'rjchiaj@correo.udistrital.edu.co'
+app.config['MAIL_PASSWORD'] = 'At3QM$por/'
 app.config['MAIL_USE_TLS'] = True
 
 # app.config.update(
@@ -216,8 +219,8 @@ class Usuario(Resource):
         elemento = request.json['elemento']
         estado = "PENDIENTE"
         reservas = user.find({'Codigo': codigo}).count()
-        cruceHora = user.find({'Fecha_Adicional':fecha_adicional, 'Hora':hora}).count()
-        asistencia = ""        
+        cruceHora = user.find({'Fecha_Adicional':fecha_adicional, 'Hora':hora, 'Codigo': codigo}).count()
+        asistencia = "PENDIENTE"        
         estadoElemento = [""]*len(elemento)
         placaElemento = [""]*len(elemento)
         observacionesGenerales = ""
@@ -257,7 +260,6 @@ class Usuario(Resource):
             mensaje = "banco ocupado"
         return mensaje
 
-
     def buscarreserva(self):
         user = mongo.db.Prestamo
         codigo = request.json['codigo']
@@ -268,6 +270,24 @@ class Usuario(Resource):
         	#'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],
             output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'practica': u['practica'],'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],
                            'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'],'usuario': u['Usuario'], 'estado': u['Estado']})
+        return {'status': self.status, 'mensaje': mensaje, 'data': output}
+    
+    def getReservasLaboratorio(self):
+        user = mongo.db.Prestamo
+        fecha = request.json['fecha_laboratorio']
+        sala = request.json['sala_laboratorio']
+        hora = request.json['hora_laboratorio']
+        output = []        
+        registros = user.find({'Fecha_Adicional': fecha, 'Hora': hora, 'Sala': sala})
+        if registros.count()>0:
+            self.status = 1
+            mensaje = "Encontrado"
+            for u in registros:
+                output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'codigo': u['Codigo'],'practica': u['practica'],'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'],'usuario': u['Usuario'], 'estado': u['Estado']})
+        else:
+            self.status = 2
+            mensaje = "No hay adicionales registrados para el día " + str(fecha) + " en el laboratorio de " + str(sala) + " durante la franja de " + str(hora) + " - " + str(hora+2)
+            
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def buscarreservalabo(self):
@@ -323,6 +343,21 @@ class Usuario(Resource):
         if actualizardatos:
             self.status = 1
             mensaje
+        return mensaje
+    
+    def editarAdicional(self):
+        user = mongo.db.Prestamo
+        datos = request.json['datos']
+        for item in datos:
+            user.update({"$and": [{'Codigo': item['codigo']}, {'Hora': item['hora']}, {'Dia': item['dia']}, 
+                                  {'Fecha_Adicional': item['fecha_adicional']}, {'Fecha_reserva': item['fecha_reserva']}, 
+                                  {'Banco': item['banco']}, {'Codigo': item['codigo']}]}, 
+                        {"$set": {'Elemento': item['elemento'], 'Estado_Elemento':item['estadoElemento'], 
+                                  'Placa_Elemento': item['placaElemento'], 'Asistencia': item['asistencia'],
+                                  'Observaciones_Generales': item['observacionesGenerales']}})
+
+        self.status = 1
+        mensaje = "Reserva modificada"
         return mensaje
 
     def aprobarreserva(self):
@@ -381,13 +416,21 @@ class Usuario(Resource):
         fecha = request.json['fecha_adicional']
         laboratorio = request.json['laboratorio']
         horas = request.json['hora']
+        estado = request.json['opcion']
+        print("Aquí el estado de la petición: ")
+        print(estado)
 
-        email = "jaimeparra_06@hotmail.com"    
+        email = "adminsalas@udistrital.edu.co"    
+        sender="rjchiaj@correo.udistrital.edu.co"
 
-        subject = "Reserva de adicional aprobada."
-        msg = "Se le informa al estudiante " + usuario + " que la reserva de adicional para el día " + fecha + " en el laboratorio de " + laboratorio + " a las " + str(horas) + " horas " + "ha sido aprobada. Para mayor información consultar la página: https://labing.udistrital.edu.co/"
-        message = Message(subject,sender="jaimeparra.06@gmail.com",recipients=[email])
+        subject = "Estado de la reserva de adicional."
+        msg = "Se le informa al estudiante " + usuario + " que el estado de la reserva adicional para el día " + fecha + " en el laboratorio de " + laboratorio + " a las " + str(horas) + " horas " + "es: "+ estado+". Para mayor información consultar la página: https://labing.udistrital.edu.co/"
+        message = Message(subject,recipients=[email],sender = ('Richar Chia', sender),extra_headers={'Disposition-Notification-To': sender})
         message.body = msg
+        
+        with app.open_resource('PruebaAdjuntos.txt') as archivo:
+            message.attach('PruebaAdjuntos.txt', 'text/txt', archivo.read())
+
         mail.send(message)
         self.status = 1
         mensaje = "Email enviado correctamente"
@@ -680,6 +723,65 @@ class Usuario(Resource):
         if borrar:
             self.status = 1
             mensaje = " usuarios eliminados"
+        return mensaje
+
+    def altiumLogo(self):
+        return send_file(
+                'Licencias/altium-logo.jpg',
+                as_attachment=True,
+                attachment_filename='Licencias/altium-logo.jpg',
+                mimetype='image/jpeg'
+                )
+
+    def psimLogo(self):
+        return send_file(
+                'Licencias/psim-logo.jpg',
+                as_attachment=True,
+                attachment_filename='Licencias/psim-logo.jpg',
+                mimetype='image/jpeg'
+                )
+
+    def solidWorksLogo(self):
+        return send_file(
+                'Licencias/solidworks-logo.jpg',
+                as_attachment=True,
+                attachment_filename='Licencias/solidworks-logo.jpg',
+                mimetype='image/jpeg'
+                )
+
+    def xirioLogo(self):
+        return send_file(
+                'Licencias/xirio-logo.jpg',
+                as_attachment=True,
+                attachment_filename='Licencias/xirio-logo.jpg',
+                mimetype='image/jpeg'
+                )
+    
+    def licenciasEstudiantes(self):
+        # Configuracion de las credenciales
+        scope =["https://spreadsheets.google.com/feeds",
+                'https://www.googleapis.com/auth/spreadsheets',
+                "https://www.googleapis.com/auth/drive.file",
+                "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_name('Licencias/Sheets API key.json', scope)
+        client = gspread.authorize(creds)
+
+        # Se instancia la hoja del documento compartido
+        worksheet = client.open("Prueba Licencias").worksheet("Hoja 1")
+
+        form = request.json['form']
+
+        date  = datetime.datetime.now()
+        fecha = date.strftime("%d/%m/%Y")
+        hora = date.strftime("%H:%M")
+        
+        data = [fecha, hora, form['nombre'], form['codigo'], form['correo'], form['documento'], 
+                form['proyecto'], form['facultad'], form['software'], "", form['tipoUsuario'],
+                form['motivo'], "", "", ""]
+
+        worksheet.insert_row(data,2)
+        mensaje = "Licencia agregada "
+        print(mensaje)
         return mensaje
 
     ############### Metodos para crear documentos Excel ###########################
@@ -1402,10 +1504,16 @@ class Usuario(Resource):
             respuesta = self.buscarreserva()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
+        elif accion == "getReservasLaboratorio":
+            respuesta = self.getReservasLaboratorio()
+            mensaje = respuesta['mensaje']
+            self.datos = respuesta['data']
         elif accion == "borrarreserva":
             mensaje = self.borrarreserva()
         elif accion == "editarreserva":
             mensaje = self.editarreserva()
+        elif accion == "editarAdicional":
+            mensaje = self.editarAdicional()
         elif accion == "aprobarreserva":
             mensaje = self.aprobarreserva()
         elif accion == "asistenciareserva":
@@ -1438,6 +1546,8 @@ class Usuario(Resource):
             mensaje = self.excelTemporalFilterDateBancosSala()
         elif accion == "send_mail":
             mensaje = self.send_mail()
+        elif accion == "licenciasEstudiantes":
+            mensaje = self.licenciasEstudiantes()
 
         else:
             self.status = 2
@@ -1481,6 +1591,14 @@ class Usuario(Resource):
             respuesta = self.obtenerElementosExcel()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']     
+        elif accion == "altiumLogo":
+            return self.altiumLogo()
+        elif accion == "psimLogo":
+            return self.psimLogo()
+        elif accion == "solidWorksLogo":
+            return self.solidWorksLogo()
+        elif accion == "xirioLogo":
+            return self.xirioLogo()
 
         # Funciones para los informes en excel. El return debe ser de tipo response (Flask)
         elif accion == "createExcel":

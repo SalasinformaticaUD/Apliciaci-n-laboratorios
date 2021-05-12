@@ -132,6 +132,28 @@
               <v-list-group no-action sub-group active-class="white--text text--accent-4">
                 <template v-slot:activator>
                   <v-list-item-content>
+                    <v-list-item-title>Asignación Software</v-list-item-title>
+                  </v-list-item-content>
+                </template>
+
+                <v-list-item
+                  v-for="(consulta, i) in Software"
+                  :key="i"
+                  link
+                  router
+                  :to="consulta[1]"
+                >
+                  <v-list-item-title v-text="consulta[0]"></v-list-item-title>
+                  <v-list-item-icon>
+                    <v-icon v-text="consulta[2]"></v-icon>
+                  </v-list-item-icon>
+                </v-list-item>
+              </v-list-group>
+            </v-card>
+            <v-card color="red darken-4">
+              <v-list-group no-action sub-group active-class="white--text text--accent-4">
+                <template v-slot:activator>
+                  <v-list-item-content>
                     <v-list-item-title>Informes</v-list-item-title>
                   </v-list-item-content>
                 </template>
@@ -242,6 +264,10 @@ export default {
       
       ["Gestionar Prestamos", "/consultareservalabstemp"],
       ["Gestionar reserva", "/consultareslabo"]
+    ],
+    Software:[
+      ["Solicitudes Software","/LicenciasSoftware"],
+      ["Solicitudes VPN"]
     ],
     Consultasalas: [
       ["Nueva Sala", ""],

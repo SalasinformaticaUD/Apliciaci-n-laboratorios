@@ -36,9 +36,16 @@
 
         <div class="text-center">
           <p>{{usuario}}</p>
-        </div>
+        </div>          
 
           <v-card color="red darken-4">
+            <v-list-item to="/Monitores">
+              <v-list-item-icon>
+                <v-icon>fas fa-users</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Monitorias</v-list-item-title>
+            </v-list-item>  
+            
             <v-list-item to="/reservaestudiante">
               <v-list-item-icon>
                 <v-icon>fas fa-plus</v-icon>
@@ -51,6 +58,13 @@
                 <v-icon>far fa-calendar-alt</v-icon>
               </v-list-item-icon>
               <v-list-item-title>Consultar laboratorios</v-list-item-title>
+            </v-list-item>
+
+            <v-list-item to="/licenciasEstudiantes">
+              <v-list-item-icon>
+                <v-icon>fas fa-laptop-code</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Solicitud licencias</v-list-item-title>
             </v-list-item>
 
             <v-list-item to="/studentpass">

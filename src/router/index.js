@@ -31,6 +31,9 @@ import consultareservalabstemp from "../views/consultareservalabstemp.vue";
 import informesElementos from "../views/informesElementos.vue";
 import informesHorarios from "../views/informesHorarios.vue";
 import informesPrestamos from "../views/informesPrestamos.vue";
+import LicenciasSoftware from "../views/LicenciasSoftware.vue";
+import licenciasEstudiantes from "../views/licenciasEstudiantes.vue";
+import Monitores from "../views/vistaMonitores.vue";
 
 Vue.use(VueRouter);
 
@@ -64,6 +67,21 @@ const routes = [
     path: "/labpass",
     name: "labpass",
     component: labpass
+  },
+  {
+    path: "/LicenciasSoftware",
+    name: "LicenciasSoftware",
+    component: LicenciasSoftware,
+  },  
+  {
+    path: "/licenciasEstudiantes",
+    name: "licenciasEstudiantes",
+    component: licenciasEstudiantes,
+  },
+  {
+    path: "/Monitores",
+    name: "Monitores",
+    component: Monitores,
   },
   {
     path: "/editadmin",
@@ -256,8 +274,7 @@ const routes = [
       component: pruebaSelect2,
       meta: {
         requiresAuth: false
-      },
-      
+      },      
   },
 
   {
@@ -266,8 +283,7 @@ const routes = [
     component: consultareservalabstemp,
     meta: {
       requiresAuth: false
-    },
-    
+    },    
   },
 
   {
@@ -315,4 +331,3 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
-

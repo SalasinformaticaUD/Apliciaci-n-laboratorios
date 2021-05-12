@@ -82,7 +82,10 @@
                         <v-text-field v-model="infoItem.hora" :disabled="true" label="Hora"></v-text-field>
                       </v-col>
                       <v-col>
-                        <v-text-field v-model="infoItem.dia" :disabled="true" label="Sala"></v-text-field>
+                        <v-text-field v-model="infoItem.dia" :disabled="true" label="Día"></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-text-field v-model="infoItem.sala" :disabled="true" label="Sala"></v-text-field>
                       </v-col>
                       <v-col>
                         <v-text-field v-model="infoItem.banco" :disabled="true" label="Banco"></v-text-field>
@@ -318,7 +321,8 @@ export default {
               usuario: infoItem.usuario,
               fecha_adicional: infoItem.fecha_adicional,
               laboratorio: infoItem.sala,
-              hora: infoItem.hora
+              hora: infoItem.hora,
+              opcion: this.aprobar
             },
             {
               headers: {
@@ -363,9 +367,11 @@ export default {
 
       if (opc == '1'){
         this.aprobar='APROBADO';
+        this.mail(this.infoItem);
       }
       if (opc == '2'){
         this.aprobar='CANCELADO';
+        this.mail(this.infoItem);
       }
       if (opc == '3'){
         this.aprobar='PENDIENTE';
