@@ -19,26 +19,25 @@
       </v-card>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" absolute temporary dark>
+    <v-navigation-drawer v-model="drawer" absolute temporary dark color="background">
       <v-list nav dense>
         <v-list-item-group
      
           active-class="red darken-4--text text--accent-4"
         >
           <div class="text-center">
-            <v-card color="#373737" class="pa-2" dark>
+            <v-card :style="'border: 1px solid white'" color="#373737" class="pa-2" dark>
               <v-avatar>
                 <v-icon block>far fa-user</v-icon>
               </v-avatar>
-              <p class="display-1 text-center">Estudiantes</p>
+              <p class="display-1 text-center">Estudiante</p>
+              
+              <p class="px-5">{{usuario}}</p>
+              
             </v-card>
-          </div>
+          </div>        
 
-        <div class="text-center">
-          <p>{{usuario}}</p>
-        </div>          
-
-          <v-card color="red darken-4">
+          <v-card color="red darken-4" class="mt-4">
             <v-list-item to="/Monitores">
               <v-list-item-icon>
                 <v-icon>fas fa-users</v-icon>
@@ -95,14 +94,13 @@ export default {
     usuario:"",
     codigoLab:"",
   }),
-  mounted(){
-    
+  created(){
     this.initialize();    
   },
   
   methods: {
     initialize() {
-    this.buscar();
+      this.buscar();
     },
     cerrarSesion() {
       localStorage.autorizado = null;

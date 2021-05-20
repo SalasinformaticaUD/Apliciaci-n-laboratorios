@@ -284,7 +284,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogAsistencia" max-width="700px">
+    <v-dialog v-model="dialogAsistencia" max-width="800px">
       <v-card>
         <v-card-title>
           <span class="headline">Verificación de la asistencia en el laboratorio</span>
@@ -293,16 +293,19 @@
           <v-container>
             <v-divider></v-divider>
             <v-row no-gutters align="center">
-              <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
+              <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
                 No. Banco                
               </v-col>
-              <v-col cols="12" sm="4" class="text-sm-center font-weight-black">
+              <v-col cols="12" sm="3" class="text-sm-center font-weight-black">
                 Estudiante
               </v-col>
               <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
                 Código
               </v-col>
-              <v-col cols="12" sm="3" offset="1" class="text-sm-center font-weight-black">
+              <v-col cols="12" sm="3" class="text-sm-center font-weight-black">
+                Firma Monitor
+              </v-col>
+              <v-col cols="12" sm="3" class="text-sm-center font-weight-black">
                 Asistencia
               </v-col>
             </v-row>
@@ -310,21 +313,24 @@
             <v-row no-gutters align="center">
               <v-col v-for= "(item,index) in infoAsistencia" :key="index" cols="12" sm="12">
                 <v-row no-gutters class="py-3" align="center">
-                  <v-col cols="12" sm="2" class="text-sm-center">
+                  <v-col cols="12" sm="1" class="text-sm-center">
                     {{item.banco}}
                   </v-col>
-                  <v-col cols="12" sm="4" class="text-sm-center">
+                  <v-col cols="12" sm="3" class="text-sm-center px-5">
                     {{item.usuario}}
                   </v-col>
                   <v-col cols="12" sm="2" class="text-sm-center">
                     {{item.codigo}}
                   </v-col>
-                  <v-col cols="12" sm="1" offset="1" class="text-sm-center pl-5">
+                  <v-col cols="12" sm="3" class="text-sm-center px-5">
+                    {{item.monitor}}
+                  </v-col>
+                  <v-col cols="12" sm="1" offset="1" class="text-sm-left ml-12">
                     <v-btn @click="cambioAsistencia(index,1)" fab x-small :elevation="(item.asistencia == 'SI')? 10 : 0">
                       <v-icon large :color="(item.asistencia == 'SI') ? 'success':'grey lighten-1'">fas fa-check-circle</v-icon>
                     </v-btn>
                   </v-col>
-                  <v-col cols="12" sm="1" offset="1" class="text-sm-center ml-9">
+                  <v-col cols="12" sm="1" class="text-sm-left">
                     <v-btn @click="cambioAsistencia(index,2)" fab x-small :elevation="(item.asistencia == 'NO')? 10 : 0">
                     <v-icon large :color="(item.asistencia == 'NO') ? 'error':'grey lighten-1'">fas fa-times-circle</v-icon>
                     </v-btn>
@@ -410,6 +416,8 @@ export default {
       dialogoFicha: false,
       inputElemento:"",
 
+      usuario : "",
+
       // Reglas requeridas para el formulario
       rules:{
         required: value => !!value || "Este espacio es requerido.",
@@ -426,6 +434,8 @@ export default {
     this.dateFormatted = this.formatDate(this.conversionDate(new Date(dateToday)));
     this.date = this.conversionDate(new Date(dateToday))
     this.minCalendar = this.date;
+
+    this.usuario = localStorage.usuario;
   },
 
   mounted(){   
@@ -508,6 +518,7 @@ export default {
           usuario: infoBanco[0].usuario,
           codigo: infoBanco[0].codigo,
           asistencia: infoBanco[0].asistencia,
+          monitor: infoBanco[0].monitor,
         }
       }
       if (bancosOcupados.length > 0){
@@ -521,6 +532,7 @@ export default {
       }else{
         this.infoAsistencia[index].asistencia = "NO";        
       }
+      this.infoAsistencia[index].monitor = this.usuario;
       this.dialogAsistencia = false;
       this.dialogAsistencia = true;
     },
@@ -530,6 +542,7 @@ export default {
         for(let j=0;j<this.infoAsistencia.length;j++){
           if(this.registrosLaboratorio[i].codigo === this.infoAsistencia[j].codigo){
             this.registrosLaboratorio[i].asistencia = this.infoAsistencia[j].asistencia;
+            this.registrosLaboratorio[i].monitor = this.infoAsistencia[j].monitor;
           }
         }
       }
@@ -551,7 +564,6 @@ export default {
     },
     editarAdicional(){
       // Se hace una confirmación. En caso de ser verdadera, se toma la información modificada del infoItem y se envía al servidor. Si el status de la respuesta es 1 significa que se guardaron los cambios correctamente, entonces se cierra el v-dialog de la ficha y se hace nuevamente una busqueda en la base de datos para actualizar la información.
-      console.log(this.registrosLaboratorio);
       let confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
       if (confirmacion) {
         let objeto = this;
@@ -597,15 +609,17 @@ export default {
         })
       .then(function(response) {
         objeto.registrosLaboratorio = response.data.data;          
-        if (response.data.status==1){
+        if (response.data.status==1){          
           // El valor del 6 debe ser variable y depender de acuerdo a la cantidad de bancos de la sala
           objeto.infoBancos = new Array(6).fill([0]);
           for(let i=0;i<6;i++){
             if (objeto.registrosLaboratorio[i]){
-              let banco = objeto.registrosLaboratorio[i].banco;
-              let usuario = objeto.registrosLaboratorio[i].usuario;
-              let codigo = objeto.registrosLaboratorio[i].codigo;
-              objeto.infoBancos[banco-1] = [1,banco,usuario,codigo,i];
+              if(objeto.registrosLaboratorio[i].estado !== "CANCELADO"){
+                let banco = objeto.registrosLaboratorio[i].banco;
+                let usuario = objeto.registrosLaboratorio[i].usuario;
+                let codigo = objeto.registrosLaboratorio[i].codigo;
+                objeto.infoBancos[banco-1] = [1,banco,usuario,codigo,i];
+              }
             }          
           }
         }else{

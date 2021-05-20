@@ -35,6 +35,8 @@ import LicenciasSoftware from "../views/LicenciasSoftware.vue";
 import licenciasEstudiantes from "../views/licenciasEstudiantes.vue";
 import Monitores from "../views/vistaMonitores.vue";
 
+import agendaAdicionales from "../views/agendaAdicionales.vue";
+
 Vue.use(VueRouter);
 
 const routes = [
@@ -164,17 +166,17 @@ const routes = [
     },
   },
   {
-    path: "/reservatemp",
-    name: "reservatemp",
-    component: reservatemp,
+    path: "/agendaAdicionales",
+    name: "agendaAdicionales",
+    component: agendaAdicionales,
     meta: {
       requiresAuth: false
     },
   },
   {
-    path: "/clasesadd",
-    name: "clasesadd",
-    component: clasesadd,
+    path: "/reservatemp",
+    name: "reservatemp",
+    component: reservatemp,
     meta: {
       requiresAuth: false
     },

@@ -330,16 +330,18 @@ export default {
       
       if (
         this.fechaForm &&
-        this.fechaRealForm &&
+        
         this.placa &&
         this.codUsu &&
-        this.numInterno &&
+        
         this.nomUsu &&
         this.nomEqu &&
         this.sala &&
         this.Horario &&
         this.Estado &&
-        this.descDano &&
+        this.descDano 
+/*      this.numInterno &&
+        this.fechaRealForm &&   
         this.nomEmpresa &&
         this.nit &&
         this.tiempGar &&
@@ -350,7 +352,7 @@ export default {
         this.repuestos &&
         this.proxMant &&
         this.espMantReal &&
-        this.observaciones
+        this.observaciones */
       ) {
         let objeto = this;
         this.axios

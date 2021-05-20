@@ -22,13 +22,13 @@
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" absolute temporary color="background">
-      <v-card color="background" dense class="pa-5" dark>
+      <v-card :style="'border: 1px solid white'" color="#373737" class="ma-2 pa-4" dark>
         <div class="text-center">
           <v-avatar color="red" size="100">
             <v-icon dark class="fas fa-user-circle"></v-icon>
           </v-avatar>
         </div>
-        <div class="text-center">
+        <div class="text-center mt-3">
           <p>{{usuario}}</p>
         </div>
       </v-card>

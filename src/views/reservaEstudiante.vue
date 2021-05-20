@@ -423,7 +423,10 @@ export default {
               banco: this.form.Banco,
               elemento: this.form.Elemento,
               practica: this.form.Practica,
-              diaSemana: this.diaSemana
+              diaSemana: this.diaSemana,
+              date_user: this.todaydate,
+              hour_user: new Date().getHours(),
+              minutes_user: new Date().getMinutes()
             },
             {
               headers: {

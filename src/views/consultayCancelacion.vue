@@ -121,11 +121,9 @@
                           {{itemElemento}}
                         </v-col>
                         <v-col cols="12" sm="2" class="text-sm-center">
-                          <v-icon 
-                            small 
-                            @click="infoItem.elemento.splice(index,1)"
-                          > 
-                            fas fa-trash-alt</v-icon>
+                          <v-btn small @click="infoItem.elemento.splice(index,1)" icon>
+                            <v-icon> fas fa-trash-alt </v-icon>
+                          </v-btn>
                         </v-col>
                       </v-row>
                     </v-col>                  
@@ -206,19 +204,24 @@
       </template>
 
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon 
-          class="mr-2" 
-          small 
+        <v-btn 
           @click="fichaItem(item)"
+          :disabled="item.estado=='CANCELADO'?true:false" 
+          small 
+          icon
+          >
+          <v-icon class="mr-2">
+            fas fa-edit
+          </v-icon>
+        </v-btn>
+        <v-btn 
+          @click="cancelarAdicional(item)" 
+          :disabled="item.estado=='CANCELADO'?true:false" 
+          small 
+          icon
         >
-          fas fa-edit
-        </v-icon>
-        <v-icon
-          small
-          @click="cancelarAdicional(item)"
-        >
-          fas fa-trash
-        </v-icon>
+          <v-icon class="ml-2"> fas fa-trash</v-icon>
+        </v-btn>
       </template>
       <template v-slot:[`item.estado`]="{ item }">
         <v-chip :color="getColor(item.estado)" dark>{{ item.estado }}</v-chip>
@@ -394,7 +397,11 @@ export default {
 
       if(item.estado=="APROBADO" || item.estado=="PENDIENTE"){
         if (difference>0){
-          console.log("Puede cancelar por que aún faltan dias")
+          // De acuerdo al adicional seleccionado se toma la información y se copia al objeto infoItem
+          this.infoItem = JSON.parse(JSON.stringify(item));
+          this.infoItem.estado = "CANCELADO";
+          console.log(this.infoItem.estado);
+          this.editEstadoReserva();
         }else if(difference == 0){
           if(hora_adicional<=(actualHour+1)){
             console.log("Ya no puede cancelar debido a que el adicional ya paso o falta 1 hora para el adicional")
@@ -457,51 +464,32 @@ export default {
           });      
       }
     },
-    deleteItemOld(item) {
+    editEstadoReserva(item) {
       var confirmacion = confirm("¿Esta seguro que desea cancelar este laboratorio?");
 
-      if (confirmacion) {
-        const index = this.usuariolab.indexOf(item);
-        this.sala = this.usuariolab[index].sala;
-        this.banco = this.usuariolab[index].banco;
-        this.fecha_adicional = this.usuariolab[index].fecha_adicional;
-        this.hora = this.usuariolab[index].hora;
-        
-
+      if (confirmacion){
         let objeto = this;
-        
-        objeto.token = localStorage.cdcb0830cc2dd220;
-        
-        var encrypted = objeto.$cookies.get("user_session");      
-        var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
-        var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
-        objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
-        objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
-
-        console.log(objeto.codigoLab,this.sala,this.banco,this.fecha_adicional,this.hora);
-
-        this.axios
-          .post(
-            "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/borrarreserva",
-            {
-              codigo: objeto.codigoLab,
-              sala: this.sala,
-              banco: this.banco,
-              fecha_adicional: this.fecha_adicional,
-              hora: this.hora
-            },
-            {
-              headers: {
-                "Content-Type": "application/json"
+        this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/aprobarreserva",
+              {
+                fecha_adicional: this.infoItem.fecha_adicional,
+                sala: this.infoItem.sala,
+                hora: this.infoItem.hora,
+                banco: this.infoItem.banco,
+                aprobar: this.infoItem.estado
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json"
+                }
               }
-            }
           )
           .then(function(response) {
+            objeto.infoItem = {};
             var respuesta = response.data.mensaje;
             var status = response.data.status;
             if (status == "1") {
               alert(respuesta);
-              objeto.usuariolab.splice(index, 1);
+              objeto.buscar();
             }
           })
           .catch(function(error) {
