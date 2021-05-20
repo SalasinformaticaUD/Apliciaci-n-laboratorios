@@ -1,6 +1,6 @@
 <template>
   <v-toolbar
-     color="red darken-4"
+      color="red darken-4"
       cards
       dark
       flat

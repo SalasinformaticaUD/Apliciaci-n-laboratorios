@@ -2,9 +2,9 @@
   <v-container fluid>
     <Headerhome />
 
-    <v-row>
+    <v-row no-gutters>
       <!--INGRESO ESTUDIANTES-->
-      <v-col>
+      <v-col align="center" class="mt-4"> 
         <v-card color="#424242" style="padding-left:30px">
           <v-card-title
             class="justify-center"
@@ -58,7 +58,7 @@
 
 
   <!--INGRESO LABORATORISTA-->
-    <v-row>
+    <v-row class="mb-n1 mt-2">
       <v-col class="col-sm-12 col-lg-3">
         <v-card color="#424242" style="height:100%" dark>
           <v-card-title class="justify-center" style="color:#FFFFFF">Ingreso Laboratorista</v-card-title>

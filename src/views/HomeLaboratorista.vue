@@ -1,8 +1,7 @@
 <template>
   <v-container class="grey darken-4" dark fluid>
     <HeaderLaboratorista />
-    <v-row>
-      <v-col>
+      <v-col align="center">
         <v-col cols="12">
           <v-card color="#424242" dark class="mx-auto">
             <h1 align="center">Políticas Generales</h1>
@@ -23,7 +22,7 @@
               </p>
             </v-card-text>
           </v-card>
-          <v-row>
+          <v-row class="mt-3">
             <v-col class="col-sm-12 col-lg-4">
               <v-card color="#424242" dark>
                 <h1 align="center">Calendario</h1>
@@ -82,7 +81,6 @@
           </v-row>
         </v-col>
       </v-col>
-    </v-row>
   </v-container>
 </template>
 

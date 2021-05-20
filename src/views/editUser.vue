@@ -2,53 +2,55 @@
   <v-container fluid>
     <HeaderAdmin />
 
-    <v-data-table :headers="headers" :items="usuariolab" class="elevation-1" color="background">
-      <template v-slot:top>
-        <v-toolbar flat color="white">
-          <v-toolbar-title>Edición y eliminación</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{on}">
-              <v-btn color="primary" v-on="on" dark class="mb-2" to="/registrouser">Nuevo usuario</v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
+    <v-col align="center" class="mt-4">
+      <v-data-table :headers="headers" :items="usuariolab" class="elevation-1" color="background">
+        <template v-slot:top>
+          <v-toolbar flat color="white">
+            <v-toolbar-title>Edición y eliminación</v-toolbar-title>
+            <v-divider class="mx-4" inset vertical></v-divider>
+            <v-spacer></v-spacer>
+            <v-dialog v-model="dialog" max-width="500px">
+              <template v-slot:activator="{on}">
+                <v-btn color="primary" v-on="on" dark class="mb-2" to="/registrouser">Nuevo usuario</v-btn>
+              </template>
+              <v-card>
+                <v-card-title>
+                  <span class="headline">{{ formTitle }}</span>
+                </v-card-title>
 
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field v-model="editedItem.usuario" label="Nombre Laboratorista"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="editedItem.usuario" label="Nombre Laboratorista"></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card-text>
 
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">Cancelar</v-btn>
-                <v-btn color="blue darken-1" text @click="save(item)">Guardar</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
-        <v-icon small class="mr-2" @click="activeItem(item)">fas fa-check-circle</v-icon>
-        <v-icon small class="mr-2" @click="desactiveItem(item)">fas fa-times-circle</v-icon>
-        <v-icon small class="mr-2" @click="resetpass(item)">fas fa-key</v-icon>
-      </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
-      </template>
-    </v-data-table>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text @click="close">Cancelar</v-btn>
+                  <v-btn color="blue darken-1" text @click="save(item)">Guardar</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-toolbar>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-icon small class="mr-2" @click="editItem(item)">fas fa-edit</v-icon>
+          <v-icon small class="mr-2" @click="activeItem(item)">fas fa-check-circle</v-icon>
+          <v-icon small class="mr-2" @click="desactiveItem(item)">fas fa-times-circle</v-icon>
+          <v-icon small class="mr-2" @click="resetpass(item)">fas fa-key</v-icon>
+        </template>
+        <template v-slot:no-data>
+          <v-btn color="primary" @click="initialize">Reset</v-btn>
+        </template>
+      </v-data-table>
+    </v-col>
   </v-container>
 </template>
 

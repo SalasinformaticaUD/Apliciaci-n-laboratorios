@@ -1,8 +1,8 @@
 <template>
   <v-app>
-    <v-content style="background-color:#212121">
+    <v-main style="background-color:#212121">
       <router-view />
-    </v-content>
+    </v-main>
 
     <v-footer
       class="font-weight-medium"
@@ -13,7 +13,7 @@
     >
       <!-- src="C:\Users\Angie\Desktop\AplicaciónLabs\Prueba-monitor\src\assets\computadores.PNG" -->
       <!-- gradient="to top right, rgba(53,50,48), rgba(30,30,30)" -->
-      <v-row>
+      <v-row no-gutters>
         
         <v-col cols="3" class="text-justify">
           <v-img

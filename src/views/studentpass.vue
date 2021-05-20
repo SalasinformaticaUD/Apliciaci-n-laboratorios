@@ -2,9 +2,8 @@
   <v-container fluid>
     <Headerestudiantes />
 
-    <v-row align="center">
-      <v-col align="center">
-        <v-col class="col-sm-10 col-lg-6">
+    <v-row justify="center">
+        <v-col class="col-sm-10 col-lg-6" align="center">
           <v-card color="#424242" style="padding:30px">
             <v-card-title
               class="justify-center"
@@ -60,7 +59,6 @@
             >Guardar cambios</v-btn>
           </v-card>
         </v-col>
-      </v-col>
     </v-row>
   </v-container>
 </template>

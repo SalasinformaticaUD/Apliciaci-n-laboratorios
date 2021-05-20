@@ -2,7 +2,7 @@
   <v-container fluid>
     <HeaderLaboratorista />
 
-    <v-container fluid class="mt-5">
+    <v-container fluid> 
       <v-sheet
         tile
         height="80"
@@ -117,7 +117,7 @@
           >
             <v-toolbar-title class="font-weight-bold" v-html="createdEvent.name ? 'Laboratorio: ' + createdEvent.name : 'Laboratorio'"></v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn icon large @click="Close_menuCreatedEvent">
+            <v-btn icon large @click="menuCreatedEvent=false">
               <v-icon>fas fa-times</v-icon>
             </v-btn>
           </v-toolbar>
@@ -199,12 +199,12 @@ export default {
     return {    
       // Información de los laboratorios  
       labs:[
-        {name: "Electrónica A",      color: "red darken-3",           bancos:8},
-        {name: "Electrónica B",      color: "teal lighten-2",         bancos:6},
-        {name: "Máquinas",           color: "deep-purple darken-2",   bancos:8},
+        {name: "Electrónica A",      color: "red darken-2",           bancos:8},
+        {name: "Electrónica B",      color: "indigo darken-2",         bancos:6},
+        {name: "Máquinas",           color: "green darken-3",   bancos:8},
         {name: "Circuitos",          color: "amber darken-2",         bancos:12},
         {name: "Comunicaciones",     color: "cyan accent-4",          bancos:6},
-        {name: "Electrónica básica", color: "light-green darken-2",   bancos:8},        
+        {name: "Electrónica básica", color: "lime darken-2",   bancos:8},        
       ],
 
       // v-model del v-select de laboratorio. Por defecto se inicializar en Ver todos
@@ -288,6 +288,14 @@ export default {
     labSelect: function(){
       // Esta función hace el filtro asociado al v-select de Laboratorio
       this.selectShowEvents();
+    },
+    menuCreatedEvent: function(val){
+      if(val===false){
+        this.stringNameLabEnable = false;
+        this.flagEdicion = false;
+        this.stringNameLab = "";
+        this.stringHorario = "";
+      }
     }
   },
   methods:{
@@ -342,14 +350,6 @@ export default {
     createStringHorario(week,hour){
       // Se crea un string para mostrar en los v-dialog el horario seleccionado.
       this.stringHorario = week + " " + hour.toString() + ":00" + " - " + (hour+2).toString() + ":00";
-    },
-    Close_menuCreatedEvent(){
-      // Al cerrar la ventana de agregar el adicional, reinicia algunas de las variables.
-      this.menuCreatedEvent = false;
-      this.stringNameLabEnable = false;
-      this.flagEdicion = false;
-      this.stringNameLab = "";
-      this.stringHorario = "";
     },
     clickShowEvent ({ nativeEvent, event }) {
       // Define una función open local que se ejecuta en caso de que menuShowEvent sea false.
@@ -443,7 +443,7 @@ export default {
           }
         })
       .then(function(response) {        
-        objeto.Close_menuCreatedEvent();
+        objeto.menuCreatedEvent = false;
         objeto.menuShowEvent = false;
         alert(response.data.mensaje);
         objeto.getHorariosAdicionales();

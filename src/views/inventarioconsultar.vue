@@ -1,5 +1,5 @@
 <template >
-  <v-container fluid v-if="(tipoUsuario === 'Laboratorista') || (tipoUsuario === 'Administrador')">
+  <v-container fluid v-if="(tipoUsuario === 'Laboratorista') || (tipoUsuario === 'Administrador')">    
 
     <v-div v-if = "tipoUsuario === 'Laboratorista' ">
       <HeaderLaboratorista />
@@ -8,6 +8,8 @@
       <HeaderAdmin />
     </v-div>
 
+
+    <v-col align="center" class="mt-4">
     <v-data-table :headers="headers" :items="equipolab" :search="search" class="elevation-1" color="background" dark>
       <template v-slot:top>
         <v-toolbar flat dark>
@@ -22,7 +24,7 @@
             label="Buscar"
             single-line
             hide-details
-            
+            class="mr-2"
             dark
             @keyup.enter="initialize"
           ></v-text-field>
@@ -434,6 +436,7 @@
       </template>
       
     </v-data-table>
+    </v-col>
   </v-container>
 </template>
 

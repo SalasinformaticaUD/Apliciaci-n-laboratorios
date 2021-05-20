@@ -23,7 +23,7 @@
               </p>
             </v-card-text>
           </v-card>
-          <v-row>
+          <v-row class="mt-2">
             <v-col class="col-sm-12 col-lg-4">
               <v-card color="#424242" dark>
                 <h1 align="center">Calendario</h1>

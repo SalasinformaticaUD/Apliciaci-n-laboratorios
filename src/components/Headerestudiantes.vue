@@ -1,5 +1,5 @@
 <template fluid>
-  <v-row>
+  <v-row class="mb-3">
     <v-app-bar color="red darken-4" dense dark>
       <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
       <v-flex>

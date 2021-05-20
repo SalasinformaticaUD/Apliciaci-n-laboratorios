@@ -2,6 +2,7 @@
   <v-container fluid>
     <HeaderLaboratorista />
 
+    <v-col align="center">
     <v-data-table :headers="headers" :items="equipolab" :search="search" class="elevation-1" color="background" dark>
       <template v-slot:top>
         <v-toolbar flat dark>
@@ -487,6 +488,7 @@
         <v-btn color="primary" @click="initialize">Reset</v-btn>
       </template>
     </v-data-table>
+    </v-col>
   </v-container>
 </template>
 
