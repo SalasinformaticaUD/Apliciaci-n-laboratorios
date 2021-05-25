@@ -264,7 +264,7 @@ export default {
     Consultapres: [
       
       ["Gestionar Prestamos", "/consultareservalabstemp"],
-      ["Gestionar reserva", "/consultareslabo"]
+      ["Agenda de Adicionales", "/agendaadicionalesL"]
     ],
     Software:[
       ["Solicitudes Software","/LicenciasSoftware"],

@@ -63,6 +63,7 @@
             </v-card>
           </v-dialog>
 
+          <!-- Información del mantenimiento -->
           <v-dialog v-model="dialog2" max-width="1400px">
             <v-card dark>
               <v-card-title>
@@ -262,6 +263,9 @@
             </v-card>
           </v-dialog>
 
+
+
+          <!-- Edición mantenimiento -->
           <v-dialog v-model="dialog3" max-width="1400px">
             <v-card dark>
               <v-card-title>
@@ -276,78 +280,125 @@
                   <v-col class="col-sm-12 col-lg-10">
 
                     <v-row>
-                      <v-col class="col-sm-12 col-lg-6">
-                        <v-select
-                          v-model="Tipo_De_Mantenimiento"
-                          :items="mantenimientos"
-                          label="Tipo de Mantenimiento"
-                          solo
-                        ></v-select>
-                      </v-col>
-                    </v-row>
-
-                    <v-row>
                       <v-col>
                         <v-text-field
                           v-model="infoItem.placa"
-                          :disabled="false"
-                          label="Placa"
+                          :disabled="true"
+                          
+                          hint="Placa"
+                          persistent-hint
+                        ></v-text-field>
+                      </v-col>
+
+                      <v-col>
+                        <v-text-field
+                          v-model="numInterno"
+                          :disabled="true"
+                          :label="infoItem.numeroInterno"
+                          hint="Número Interno"
+                          persistent-hint
                         ></v-text-field>
                       </v-col>
 
 
+
+
                       <v-col>
-                        <v-select
-                          v-model="infoItem.tipoMantenimiento"
-                          :disabled="false"
-                          :items="mantenimientos"
-                          
-                          label="Tipo de Mantenimiento"
-                        ></v-select>
+
+                        <!-- <v-text-field
+                          v-model="infoItem.fechaMantenimiento"
+                          :disabled="false"                         
+                          :label="infoItem.fechaMantenimiento"
+                          hint="Fecha de Mantenimiento"
+                          persistent-hint
+                        ></v-text-field> -->
+
+                        <v-menu
+                          ref="menu1"
+                          v-model="menu1"
+                          :close-on-content-click="false"
+                          transition="scale-transition"
+                          offset-y
+                          max-width="290px"
+                          min-width="auto"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-text-field
+                              v-model="dateFormatted"
+                              label="MM/DD/YYYY"
+                              hint="Fecha de Mantenimiento"
+                              persistent-hint
+                              prepend-icon="mdi-calendar"
+                              v-bind="attrs"
+                              @blur="date = parseDate(this.infoItem.fechaMantenimiento)"
+                              v-on="on"
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="date"
+                            no-title
+                            @input="menu1 = false"
+                          ></v-date-picker>
+                        </v-menu>
+
+
+
+
                       </v-col>
+
+                      <v-col>
+                        <v-text-field
+                          v-model="Horario"
+                          :disabled="false"
+                          :label="infoItem.hora"
+                          hint="Hora"
+                          persistent-hint
+                        ></v-text-field>
+                      </v-col>
+
+                      <v-col>
+                        <v-text-field
+                          v-model="sala"
+                          :disabled="false"
+                          :label="infoItem.sala"
+                          hint="Sala"
+                          persistent-hint
+                        ></v-text-field>
+                      </v-col>
+
                       <v-col>
                         <v-text-field
                           v-model="infoItem.laboratorista"
-                          :disabled="true"
-                          label="Laboratorista"
+                          :disabled="true"                          
+                          hint="Laboratorista"
+                          persistent-hint
                         ></v-text-field>
                       </v-col>
                 
                     </v-row>                    
                     <v-row>
+
                       <v-col>
-                        <v-text-field
-                          v-model="infoItem.fechaMantenimiento"
-                          :disabled="true"
-                          label="Fecha Mantenimiento Laboratorista"
-                        ></v-text-field>
+                        <v-select
+                          v-model="infoItem.tipoMantenimiento"
+                          :disabled="false"
+                          label="Tipo de mantenimiento"
+                          :item-value="infoItem.tipoMantenimiento"
+                          :items="mantenimientos"
+                          
+                         
+                          
+                        ></v-select>
                       </v-col>
-                      <v-col>
-                        <v-text-field
-                          v-model="infoItem.hora"
-                          :disabled="true"
-                          label="Hora"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col>
-                        <v-text-field
-                          v-model="infoItem.sala"
-                          :disabled="true"
-                          label="Sala"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col>
-                        <v-text-field
-                          v-model="infoItem.numeroInterno"
-                          :disabled="true"
-                          label="Número Interno"
-                        ></v-text-field>
-                      </v-col>
+
+                      
+                      
                       <v-col>
                         <v-text-field
                           v-model="infoItem.estado"
-                          :disabled="true"
+                          :disabled="false"
                           label="Estado"
+                          
                         ></v-text-field>
                       </v-col>
                     </v-row>
@@ -355,8 +406,9 @@
                       <v-col>
                         <v-text-field
                           v-model="infoItem.dano"
-                          :disabled="true"
+                          :disabled="false"
                           label="Daño"
+                          
                         ></v-text-field>
                       </v-col>
        
@@ -367,6 +419,7 @@
               </v-card-title>
 
                     <v-row>
+
                       <v-col>
                         <v-text-field
                           v-model="infoItem.fechaReal"
@@ -374,24 +427,26 @@
                           label="Fecha Mantenimiento externo"
                         ></v-text-field>
                       </v-col>
+
                       <v-col>
                         <v-text-field
                           v-model="infoItem.nomEmpresa"
-                          :disabled="true"
+                          :disabled="false"
                           label="Nombre empresa contratada"
                         ></v-text-field>
                       </v-col>
+
                       <v-col>
                         <v-text-field
                           v-model="infoItem.NIT"
-                          :disabled="true"
+                          :disabled="false"
                           label="NIT"
                         ></v-text-field>
                       </v-col>
                       <v-col>
                         <v-text-field
                           v-model="infoItem.tiempGar"
-                          :disabled="true"
+                          :disabled="false"
                           label="Tiempo garantía"
                         ></v-text-field>
                       </v-col>                      
@@ -402,35 +457,35 @@
                       <v-col>
                         <v-text-field
                           v-model="infoItem.costMant"
-                          :disabled="true"
+                          :disabled="false"
                           label="Costo Mantenimiento COP"
                         ></v-text-field>
                       </v-col>
                       <v-col>
                         <v-text-field
                           v-model="infoItem.numOrdServ"
-                          :disabled="true"
+                          :disabled="false"
                           label="Número Orden de servicio"
                         ></v-text-field>
                       </v-col>
                       <v-col>
                         <v-text-field
                           v-model="infoItem.vigencia"
-                          :disabled="true"
+                          :disabled="false"
                           label="Vigencia"
                         ></v-text-field>                        
                       </v-col>
                       <v-col>
                         <v-text-field
                           v-model="infoItem.supervisor"
-                          :disabled="true"
+                          :disabled="false"
                           label="Supervisor"
                         ></v-text-field>                        
                       </v-col>
                       <v-col>
                         <v-text-field
                           v-model="infoItem.proxMant"
-                          :disabled="true"
+                          :disabled="false"
                           label="Proximo Mantenimiento"
                         ></v-text-field>                        
                       </v-col>
@@ -440,7 +495,7 @@
                       <v-col>
                         <v-text-field
                           v-model="infoItem.repuestos"
-                          :disabled="true"
+                          :disabled="false"
                           label="Repuestos"
                         ></v-text-field>                        
                       </v-col>
@@ -449,7 +504,7 @@
                       <v-col>
                         <v-text-field
                           v-model="infoItem.espMantReal"
-                          :disabled="true"
+                          :disabled="false"
                           label="Especificaciones del mantenimiento"
                         ></v-text-field>                        
                       </v-col>
@@ -457,7 +512,7 @@
                       <v-col>
                         <v-text-field
                           v-model="infoItem.observaciones"
-                          :disabled="true"
+                          :disabled="false"
                           label="Observaciones"
                         ></v-text-field>                        
                       </v-col>
@@ -498,10 +553,37 @@ export default {
   components: {
     HeaderLaboratorista
   },
-  data: () => ({
+  data: vm => ({
+      date: new Date().toISOString().substr(0, 10),
+      dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
+      //dateFormatted: this.infoItem.fechaMantenimiento,
+      menu1: false,
+      menu2: false,
     return: {
       search: "",
+      placa:'',
+      codUsu:'',
+      numInterno:'',
+      nomUsu:'',
+      nomEqu:'',
+      sala:'',
+      Horario:'',
+      Estado:'',
       Tipo_De_Mantenimiento:'',
+      descDano:'',
+      nomEmpresa:'',
+      nit:'',
+      tiempGar:'',
+      costMant:'',
+      numOrdServ:'',
+      vigencia:'',
+      supervisor:'',
+      repuestos:'',
+      proxMant:'',
+      espMantReal:'',
+      observaciones:'',
+
+
       
     },
     dialog: false,
@@ -543,13 +625,21 @@ export default {
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "New Item" : "Editar Ubicación";
-    }
+    },
+
+    computedDateFormatted () {
+      return this.formatDate(this.date)
+    },
   },
 
   watch: {
     dialog(val) {
       val || this.close();
-    }
+    },
+
+    date (val) {
+      this.dateFormatted = this.formatDate(this.date)
+    },  
   },
 
   created() {
@@ -557,6 +647,28 @@ export default {
   },
 
   methods: {
+      formatDate (date) {
+        if (!date) return null
+
+        const [year, month, day] = date.split('-')
+        return `${month}/${day}/${year}`
+      },
+      
+      FechaMant (){
+        let objeto = this;
+        return objeto.infoItem.infoItem.fechaMantenimiento;
+      },
+
+
+      parseDate (date) {
+        if (!date) return null
+
+        const [month, day, year] = date.split('/')
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+      },
+    
+
+
     initialize() {
       (this.equipolab = []);
        this.buscar();
@@ -565,6 +677,7 @@ export default {
     reset () {
       this.$refs.form.reset(), this.initialize();
     },
+
 
     inforItem(item) {
       this.infoIndex = this.equipolab.indexOf(item);
@@ -580,10 +693,39 @@ export default {
       this.dialog3 = true;
     },
 
+    BorrarValores(){
+      placa='';
+      codUsu='';
+      numInterno='';
+      nomUsu='';
+      nomEqu='';
+      sala='';
+      Horario='';
+      Estado='';
+      Tipo_De_Mantenimiento='';
+      descDano='';
+      nomEmpresa='';
+      nit='';
+      tiempGar='';
+      costMant='';
+      numOrdServ='';
+      vigencia='';
+      supervisor='';
+      repuestos='';
+      proxMant='';
+      espMantReal='';
+      observaciones='';
+
+    },
   
     close2() {
+      let obj=this;
       this.dialog2 = false;
       this.dialog3 = false;
+      console.log(obj.infoItem.dano);
+      BorrarValores();
+
+
       this.$nextTick(() => {
         this.infoItem = Object.assign({}, this.defaultItem);
         this.infoIndex = -1;

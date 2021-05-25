@@ -34,6 +34,8 @@ import informesPrestamos from "../views/informesPrestamos.vue";
 import LicenciasSoftware from "../views/LicenciasSoftware.vue";
 import licenciasEstudiantes from "../views/licenciasEstudiantes.vue";
 import Monitores from "../views/vistaMonitores.vue";
+import agendaadicionalesL from "../views/agendaAdicionalesLaboratorista.vue";
+import agendaadicionalesM from "../views/agendaAdicionalesEstudiantes.vue";
 
 import agendaAdicionales from "../views/agendaAdicionales.vue";
 
@@ -169,6 +171,22 @@ const routes = [
     path: "/agendaAdicionales",
     name: "agendaAdicionales",
     component: agendaAdicionales,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/agendaadicionalesL",
+    name: "agendaadicionalesL",
+    component: agendaadicionalesL,
+    meta: {
+      requiresAuth: false
+    },
+  },
+  {
+    path: "/agendaadicionalesM",
+    name: "agendaadicionalesM",
+    component: agendaadicionalesM,
     meta: {
       requiresAuth: false
     },
