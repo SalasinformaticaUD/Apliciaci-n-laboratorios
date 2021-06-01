@@ -257,6 +257,7 @@ export default {
       { text: "Asistencia", value: "asistencia", sortable: false }
     ],
     reservalab: [],
+    reservasLabAll: [],
     infoIndex: -1,
     objItem: "",
     agregarUbicacionIndex: -1,
@@ -269,9 +270,8 @@ export default {
     banco:'',
     aprobar:''
   }),
-  // mounted(){
-  // this.$verificarLogin();
-  // },
+  mounted(){
+  },
 
   computed: {
     formTitle() {
@@ -286,6 +286,7 @@ export default {
   },
 
   created() {
+    console.log("Este es el created");
     this.initialize();
   },
 
@@ -604,13 +605,27 @@ export default {
           }
         )
         .then(function(response) {
-          objeto.reservalab = response.data.data;
-
-           console.log(objeto.reservalab);
+          objeto.reservasLabAll = response.data.data;
+          objeto.verificarBusqueda();
         })
         .catch(function(error) {
           objeto.output = error;
         });
+    },
+    verificarBusqueda(){
+      console.log("Funcion desde la vista Consultar");
+      let date = this.$store.state.date;
+      let hour = this.$store.state.hour;
+      let banco = this.$store.state.banco;
+      if (date !== null && hour !== null && banco !== null){
+        this.reservalab = this.reservasLabAll.filter(item => item.fecha_adicional == date && item.hora == hour && item.banco == banco);
+        this.$store.state.hour = null;
+        this.$store.state.date = null;
+        this.$store.state.banco = null;
+      }else{
+        this.reservalab = this.reservasLabAll;
+      }
+      console.log(this.$store.state.date);
     }
   }
 };

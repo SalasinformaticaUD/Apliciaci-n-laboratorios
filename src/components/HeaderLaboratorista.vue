@@ -319,17 +319,17 @@ export default {
       
       
       
-      console.log("Método buscar header laboratorista linea 277");
-      console.log("token: ",objeto.token)
-      console.log("ENCRYPTED 1: ",objeto.encrypted);
-      console.log("ENCRYPTED 2: ",objeto.$cookies.get("user_session"));
-      console.log("DESENCRYPTED 1: ",objeto.desen);
-      console.log("DESENCRYPTED 2: ",objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token));
-      console.log("codlab 1: ",objeto.codlab);
-      console.log("codigolab : ",objeto.codigoLab);
+      // console.log("Método buscar header laboratorista linea 277");
+      // console.log("token: ",objeto.token)
+      // console.log("ENCRYPTED 1: ",objeto.encrypted);
+      // console.log("ENCRYPTED 2: ",objeto.$cookies.get("user_session"));
+      // console.log("DESENCRYPTED 1: ",objeto.desen);
+      // console.log("DESENCRYPTED 2: ",objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token));
+      // console.log("codlab 1: ",objeto.codlab);
+      // console.log("codigolab : ",objeto.codigoLab);
       //console.log("codlab 2: ",objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8));
       objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
-      console.log("AQUÍ EL CODIGO $: ",objeto.codigoLab);
+      // console.log("AQUÍ EL CODIGO $: ",objeto.codigoLab);
       //console.log("AQUÍ EL CODIGO: ",objeto.codigoLab)
       
       this.axios
@@ -353,7 +353,7 @@ export default {
           
           localStorage.usuario = response.data.data[0].usuario;  
           objeto.usuario = response.data.data[0].usuario;  
-          console.log("AUYUDAAA VUE");
+          // console.log("AUYUDAAA VUE");
 
         })
         .catch(function(error) {

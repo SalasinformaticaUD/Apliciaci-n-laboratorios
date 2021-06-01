@@ -2,32 +2,82 @@
   <v-container fluid>
     <Headerestudiantes/>
 
-    <v-sheet  tile  min-height="110px" class="d-flex mt-7">
-      <v-row no-gutters align="center"> 
-        <v-col cols="12" sm="3">          
-          <v-row class="mt-4 pl-5" no-gutters>
-            <p class="text-h6 font-weight-medium"> Laboratorios de Ingeniería</p>
-          </v-row>
-          <v-row class="mt-n5 pl-5" no-gutters>
-            <p class="text-h6 font-weight-medium"> Horarios Adicionales </p>
+    <v-sheet tile class="mt-7">
+      <v-row no-gutters class="text-h5 py-3" justify="center" align="center">
+        Laboratorios de Ingeniería - Horarios Adicionales
+      </v-row>
+      <v-divider></v-divider>
+      <v-row no-gutters align="center" class="py-2">
+        <v-col cols="12" sm="5" lg="5" class="pr-sm-10 pl-sm-3 pl-lg-5 text-body-2">          
+          1. Seleccione uno de los horarios disponibles para laboratorio adicional.
+          <br>
+          2. Verifique la disponibilidad de los bancos habilitados para reserva.
+          <br>
+          3. De click en "Solicitud de reserva" y complete la información.
+          <br>
+          4. La solicitud quedará en espera a la aprobación de un laboratorista.
+        </v-col>
+        <v-col cols="12" sm="3" v-if="$refs.calendarEstudiantes" class="ml-sm-n8">
+          <v-row no-gutters>
+            <v-col cols="12" sm="2" align-self="center" align="center">
+              <v-tooltip bottom nudge-top="10">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn 
+                    v-bind="attrs"
+                    v-on="on"
+                    icon 
+                    large 
+                    @click="changeWeek(0)"
+                    :disabled="actualWeek == weekCalendar ? true : false"
+                  >
+                    <v-icon>fas fa-chevron-left</v-icon>
+                  </v-btn>
+                </template>
+                <span>Semana anterior</span>
+              </v-tooltip>         
+            </v-col>      
+            <v-col cols="12" sm="8" align="center" class="text-h6 mx-lg-n2">
+              {{ formatTitle($refs.calendarEstudiantes.title) }} 
+              <br>
+              Semana {{weekCalendar}}
+            </v-col>    
+            <v-col cols="12" sm="2" align-self="center" align="center">
+              <v-tooltip bottom nudge-top="10">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn 
+                    v-bind="attrs"
+                    v-on="on"
+                    icon 
+                    large 
+                    @click="changeWeek(1)"
+                    :disabled="actualWeek+1 == weekCalendar ? true : false"
+                  >
+                    <v-icon>fas fa-chevron-right</v-icon>
+                  </v-btn>
+                </template>
+                <span>Semana siguiente</span>
+              </v-tooltip>
+            </v-col>
           </v-row>
         </v-col>
-        <v-divider vertical></v-divider>
-        <v-col cols="12" sm="6" class="pl-3">
-          <v-row no-gutters class="text-body-2">
-            1. Seleccione uno de los horarios disponibles para laboratorio adicional.
-          </v-row>
-          <v-row no-gutters class="text-body-2">
-            2. Verifique la disponibilidad de los bancos habilitados para reserva.
-          </v-row>
-          <v-row no-gutters class="text-body-2">
-            3. De click en "Solicitud de reserva" y complete la información.
-          </v-row>
-          <v-row no-gutters class="text-body-2">
-            4. La solicitud queda en espera a la aprobación de un laboratorista.
-          </v-row>
+        <v-col cols="12" sm="1" align="center" class="ml-sm-5">
+          <v-tooltip bottom nudge-top="5">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn 
+                v-bind="attrs"
+                v-on="on"
+                @click="gotoWeekNow" 
+                outlined 
+                elevation="1"
+              >
+                Hoy
+              </v-btn>
+            </template>
+            <span>Ir al día actual</span>
+          </v-tooltip> 
         </v-col>
-        <v-col cols="12" sm="3" class="mt-6 px-8">
+        <v-spacer></v-spacer>
+        <v-col cols="12" sm="3" class="mt-sm-6 px-sm-5">
           <v-select                
             v-model="labSelect"
             :items="labSelectArray"
@@ -38,12 +88,13 @@
           ></v-select>
         </v-col>
       </v-row>
-    </v-sheet>
-
+    </v-sheet> 
     <v-sheet tile>
       <v-calendar
+        ref="calendarEstudiantes"
+        v-model="modelCalendar"
         type="week"
-        :weekdays="[1,2,3,4,5,6,0]"
+        :weekdays="weekdaysCalendar"
         :short-weekdays="false"
         :events = "events"
         color = "primary"
@@ -54,7 +105,20 @@
         :show-interval-label="showIntervalLabel"
         :interval-format="intervalFormat"
         @click:event ="clickShowEvent"
+        class="botton"
       >
+        <template v-slot:day-body="{ date }">
+          <div
+            class="v-current-time"
+            :style="{ top: nowY, width: actualDate === date ? '100%' : '0%' }"
+          > 
+          </div>
+          <div
+            class="v-current-time2"
+            :style="{ top: nowY, position: actualDate === date ? 'absolute': 'relative'}"
+          >
+          </div>
+        </template>
       </v-calendar>
 
       <v-menu
@@ -297,17 +361,26 @@ export default {
   },
   data() {
     return {    
-      todaydate: "",    // Fecha actual en formato dia/mes/año
+      // v-model del calendar
+      modelCalendar: '',     
 
-      // Información de los laboratorios  
-      labs:[
-        {name: "Electrónica A",      color: "red darken-2",     bancos:8},
-        {name: "Electrónica B",      color: "indigo darken-2",  bancos:6},
-        {name: "Máquinas",           color: "green darken-3",   bancos:8},
-        {name: "Circuitos",          color: "amber darken-2",   bancos:12},
-        {name: "Comunicaciones",     color: "cyan accent-4",    bancos:6},
-        {name: "Electrónica básica", color: "lime darken-2",    bancos:8},        
-      ],
+      // Variable que identifica cuando ya se ha renderizado el calendario
+      readyCalendar: false,
+
+      // Fecha actual (variable fija)
+      actualDate: null,
+
+      // Numero de semana ISO actual (variable fija que retorna desde el servidor)
+      actualWeek: null,
+      
+      // No. de semana del calendar 
+      weekCalendar: null,
+
+      // Orden de los dias de la semana (Lunes - Domingo) en el v-calendar
+      weekdaysCalendar: [1,2,3,4,5,6,0],
+
+      // Información de los laboratorios  (se trae de vuex ./store/index.js)
+      labs:[],
 
       // v-model del v-select de laboratorio. Por defecto se inicializar en Ver todos
       labSelectArray: [],
@@ -335,6 +408,7 @@ export default {
       stringHorario: "",
 
       formReserva:{
+        start: "",
         fecha_adicional: "",
         sala: "",
         hora: "",
@@ -354,18 +428,25 @@ export default {
     }
   },
   created(){
-  },
+    // Trae la información de los laboratorios desde vuex
+    this.labs = this.$store.getters.infoLabs;
 
-  computed:{
-  },
+    // Se toman y convierten las fechas para los calendarios. Para el v-calendar en formato año-mes-dia; para el input y la base de datos en formato dia/mes/año
+    this.actualDate = this.conversionDate(new Date());
 
-  mounted(){   
-    // De acuerdo al vectos de labs, se toma el campo name para hacer el v-select de filtrado. También se agrega la opción de "Ver todos".
+    // Con la fecha actual, se identifica el número de la semana
+    this.gotoWeekNow();
+
+    // De acuerdo al vectos de labs, se toma el campo 'name' para hacer el v-select de filtrado. También se agrega la opción de "Ver todos".
     this.labSelectArray = this.labs.map(item => item.name);
     this.labSelectArray.push("Ver todos");
-    this.todaydate = this.formatDate(this.conversionDate(new Date()));
+  },
+  mounted(){   
     // Trae todos los adicionales de la base de datos
     this.getHorariosAdicionales();
+    
+    // Identifica que se ha renderizado el calendario
+    this.readyCalendar = true;
   },
   watch:{
     menuFormulario: function(val){
@@ -376,6 +457,14 @@ export default {
     labSelect: function(){
       // Esta función hace el filtro asociado al v-select de Laboratorio
       this.selectShowEvents();
+    },
+  },
+  computed: {
+    cal () {
+      return this.readyCalendar ? this.$refs.calendarEstudiantes : null
+    },
+    nowY () {
+      return this.cal ? this.cal.timeToY(this.cal.times.now) + 'px' : '-10px'
     },
   },
   methods:{
@@ -400,6 +489,38 @@ export default {
       // Esta función modifica el formato de visualización de las horas en el v-calendar a hh:mm
       return interval.time
     },
+    formatTitle(title){
+      // Funcion que pone la primera letra en mayús para el titulo del calendario
+      return title.charAt(0).toUpperCase() + title.slice(1);
+    },
+    searchWeek(year,month,day){
+      // Funcion que a partir de una fecha, identifica el número de la semana del año según ISO.
+      var date = new Date(year,month,day);
+      var nDay = (date.getDay() + 6) % 7;
+      date.setDate(date.getDate() - nDay + 3);
+      var n1stThursday = date.valueOf();
+      date.setMonth(0, 1);
+      if (date.getDay() !== 4) {
+        date.setMonth(0, 1 + ((4 - date.getDay()) + 7) % 7);
+      }
+      return 1 + Math.ceil((n1stThursday - date) / 604800000);
+    },
+    changeWeek(val){
+      // Funcion para los botones de cambiar la semana. Además se identifica el nùmero de la semana a la cual se cambia
+      if(val==0){
+        this.$refs.calendarEstudiantes.prev();
+      }else{
+        this.$refs.calendarEstudiantes.next();
+      }
+      let date = this.modelCalendar.split('-');
+      this.weekCalendar = this.searchWeek(date[0], date[1]-1, date[2]);
+    },
+    gotoWeekNow(){
+      // Funcion del boton 'Hoy' que regresa el calendario a la semana actual. Se limpia el model del calendar y ademàs se vuelve a identificar la semana del año actual
+      let now = new Date();
+      this.modelCalendar = '';
+      this.weekCalendar = this.searchWeek(now.getFullYear(),now.getMonth(),now.getDate());
+    },
     selectShowEvents(){
       // Se hace el filtro de los eventos de acuerdo al valor de labSelect
       if(this.labSelect !== "Ver todos"){
@@ -409,12 +530,12 @@ export default {
       }
     },    
     clickShowEvent ({ nativeEvent, event }){  
-      console.log("fcn clickShowEvent");
       // Define una función open local que se ejecuta en caso de que menuShowEvent sea false.
       const open = () => {        
         // Se toma en selectedEvent la información del evento seleccionado
         let fecha = event.start.split(" ")[0].split("-");
         this.selectedEvent = {
+          start: event.start,
           name: event.name,
           color: event.color,
           bancos: event.bancos,
@@ -462,6 +583,7 @@ export default {
     },
     solicitudReserva(){
       this.formReserva = {
+        start: this.selectedEvent.start,
         fecha_adicional: this.selectedEvent.fecha,
         sala: this.selectedEvent.name,
         hora: this.selectedEvent.hour,
@@ -505,7 +627,7 @@ export default {
           elemento: this.formReserva.elemento,
           practica: this.formReserva.practica,
           diaSemana: this.weekdays[this.formReserva.diaSemana-1],
-          date_user: this.todaydate,
+          date_user: this.actualDate,
           hour_user: new Date().getHours(),
           minutes_user: new Date().getMinutes()
         },
@@ -516,11 +638,10 @@ export default {
         }
       )
       .then(function(response) {
+        console.log(response.data.mensaje);
         if(response.data.status == 1){
-          objeto.selectedEvent.bancos[objeto.formReserva.banco - 1] = "Pendiente";
-          objeto.getEstadoBancos(objeto.selectedEvent);
+          objeto.actualizarDatos();
           objeto.menuFormulario = false;
-          objeto.addHorarioAdicional();
           alert(response.data.mensaje)
         }else{
           alert(response.data.mensaje)
@@ -530,94 +651,80 @@ export default {
         objeto.output = error;
       });
     },
-    addHorarioAdicional(){      
-      let objeto = this;
-      this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/addHorarioAdicional",
-        {
-          name: this.selectedEvent.name,
-          bancos: this.selectedEvent.bancos,
-          dia: this.selectedEvent.weekday,
-          hora: this.selectedEvent.hour
-        },
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-      .then(function(response) {        
-        objeto.getHorariosAdicionales();
-      })
-      .catch(function(error) {
-        objeto.output = error;
-      });
+    actualizarDatos(){
+      this.selectedEvent.bancos[this.formReserva.banco - 1] = "Pendiente";      
+
+      this.allEvents.filter(item => item.name == this.formReserva.sala && item.start == this.formReserva.start ? item.bancos == this.selectedEvent.bancos : item.bancos = item.bancos);
+
+      this.getEstadoBancos(this.selectedEvent);
     },
     getHorariosAdicionales(){
       let objeto = this;
-      this.axios.get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getHorariosAdicionales",
+      this.axios.get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getHorariosAdicionalesEstudiantes",
         {
           headers: {
             "Content-Type": "application/json"
           }
         })
       .then(function(response) {
-        objeto.allEvents = response.data.data;
-        objeto.enableEvents();
-        objeto.selectShowEvents();
+        if (response.data.data.length > 0){
+          objeto.actualWeek = response.data.status;
+          objeto.enableEvents(response.data.data);
+          objeto.selectShowEvents();
+        }else{
+          objeto.events = [];
+        }
       })
       .catch(function(error) {
         objeto.output = error;
       });
     },
-    enableEvents(){
-      console.log("enableEvents");
+    enableEvents(dataEvents){
+      // Funcion que identifica si el adicional ya no esta disponible. Se verificar hasta 15 minutos luego de la hora de inicio del adicional, se le pone un color más claro y se modifica un enable.
+      let dateNow = this.conversionDate(new Date());
+      let hourNow = new Date().getHours();
+      let minutesNow = new Date().getMinutes();
 
-      let weekday = new Date().getDay();
-      let hour = new Date().getHours();
-      let minutes = new Date().getMinutes();
+      for (let i=0; i < dataEvents.length; i++){
+        let dateAdicional = dataEvents[i].start.split(" ")[0];
+        let condition1 = (dateNow < dateAdicional);
+        let condition2 = (dateNow == dateAdicional &&  hourNow*60+minutesNow < dataEvents[i].hour*60+15);
 
-
-      for (let i=0;i<this.allEvents.length;i++){
-        let condition1 = (weekday < this.allEvents[i].weekday);
-        let condition2 = (weekday == this.allEvents[i].weekday &&  hour*60+minutes < (this.allEvents[i].hour*60)+20);
+        let infoSala = this.labs.find(item => item.name == dataEvents[i].name);
 
         if(condition1 || condition2){
-          this.allEvents[i].color = this.labs.find(item => item.name == this.allEvents[i].name).color;
-          this.allEvents[i].enable = true;
+          dataEvents[i].color = infoSala.color;
+          dataEvents[i].enable = true;
         }else{
-          this.allEvents[i].color = "grey darken-1";
-          this.allEvents[i].enable = false;
+          dataEvents[i].color = infoSala.colorLight;          
+          dataEvents[i].enable = false;
         }
-      } 
-
+      }
+      this.allEvents = dataEvents;
     },
   },
 };
 </script>
 
-<style>
-  .v-calendar-daily__interval-text{
-    font-weight: bold;
-    position: relative;
-    top: 1px;
-    font-size: 12px;
-  }
-  .v-calendar-daily__interval::after{
-    width: 15px;
-  }
-  .v-calendar-daily_head-weekday{
-    font-size: 12px;
-    text-transform: capitalize;
-  }
-  .v-card--reveal {
-    bottom: 0;
-    opacity: 1 !important;
+<style scoped>
+  .v-current-time {    
+    height: 3px;
+    background-color: #ea4335;
     position: absolute;
-    width: 100%;
+    right: 0px;
+    left: -1px;
+    pointer-events: none;
   }
-  .v-application .pl-1 {
-    padding-left: 6px !important;
+  .v-current-time2 {
+    content: '';
+    background-color: #ea4335;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-top: -5px;
+    margin-left: -6.5px;
   }
-  .scroll{
-    overflow-y: scroll
+  .botton >>> button{
+    font-size: 0.96rem;
   }
 </style>

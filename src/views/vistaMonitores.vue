@@ -380,14 +380,7 @@ export default {
       minCalendar: "",                               // Fecha mínima permitida en el v-calendar
 
       // Variable para seleccionar el laboratorio (los nombres deben coincidir con los campos de la base de datos). laboratorioAdicional es el v-model del v-select 
-      laboratorios: [
-        "Electronica A",
-        "Electronica B",
-        "Electronica Basica",
-        "Maquinas",
-        "Comunicaciones",
-        "Circuitos"
-      ],
+      laboratorios: [ ],
       laboratorioAdicional: "",
 
       // Variable para seleccionar la franja horaria. horaAdicional es el v-model del v-select
@@ -425,6 +418,7 @@ export default {
     }
   },
   created(){
+    this.laboratorios = this.$store.state.infoLabs.map(item => item.name);
     // Se evalua si el dia actual es domingo. Si sí, se suma un día para que se tome la fecha del lunes. En caso contrario, se utiliza la fecha actual del sistema. Se le debe indicar las 00:00 para evitar que se corra el día debido a la diferencia horaria que utilizada con el formato ISO.
     let todaydate = this.formatDate(this.conversionDate(new Date()));
     let dateToday = new Date(this.parseDate(todaydate)+" 00:00");
