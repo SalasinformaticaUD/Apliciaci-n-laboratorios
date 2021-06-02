@@ -27,6 +27,7 @@
               </p>
 
               <p align="justify">1. Ingrese su nombre completo</p>
+            <v-form ref="form" v-model="validForm" lazy-validation>
               <v-row no-gutters class="pa-2 mb-3 mt-n5">
                 <v-text-field
                   label="Tu respuesta"
@@ -143,10 +144,7 @@
                   required
                 ></v-autocomplete>
               </v-row>
-
-              
-
-
+              </v-form>
 
             </v-card>
           </v-col>
@@ -192,16 +190,18 @@ export default {
       software: ["PSIM2021a", "Solidworks 2020", "XIRIO", "Altium"],
       motivos: ["Extensión", "Investigación", "Academico", "Tesis"],
 
+      validForm: false,
+
       form:{
-        nombre: "Jaime Andrés Parra Fajardo",
-        codigo: "20152005057",
-        correo: "japarraf@correo.udistrital.edu.co",
-        documento: "1234567890",
-        proyecto: "Ingeniería Electrónica",
-        tipoUsuario: "Estudiante",
-        facultad: "Ingeniería",
-        software: "XIRIO",
-        motivo: "Academico",
+        nombre: "",
+        codigo: "",
+        correo: "",
+        documento: "",
+        proyecto: "",
+        tipoUsuario: "",
+        facultad: "",
+        software: "",
+        motivo: "",
       },
 
       rules:{
@@ -222,8 +222,9 @@ export default {
 
   methods:{
     send(){
-      console.log(this.form);
-      this.buscarAdicionales();
+      if(this.$refs.form.validate()){
+        this.buscarAdicionales();
+      }
     },
     buscarAdicionales(){
       let objeto = this;
@@ -238,6 +239,7 @@ export default {
         })
       .then(function(response) {
         console.log(response.data.mensaje);
+        alert("Solicitud de licencia enviada.")
       })
       .catch(function(error) {
         objeto.output = error;

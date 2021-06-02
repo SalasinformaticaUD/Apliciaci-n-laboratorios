@@ -37,8 +37,6 @@ import Monitores from "../views/vistaMonitores.vue";
 import agendaadicionalesL from "../views/agendaAdicionalesLaboratorista.vue";
 import agendaadicionalesM from "../views/agendaAdicionalesEstudiantes.vue";
 
-import agendaAdicionales from "../views/agendaAdicionales.vue";
-
 Vue.use(VueRouter);
 
 const routes = [
@@ -163,14 +161,6 @@ const routes = [
     path: "/reservaestudiante",
     name: "reservaestudiante",
     component: reservaEstudiante,
-    meta: {
-      requiresAuth: false
-    },
-  },
-  {
-    path: "/agendaAdicionales",
-    name: "agendaAdicionales",
-    component: agendaAdicionales,
     meta: {
       requiresAuth: false
     },

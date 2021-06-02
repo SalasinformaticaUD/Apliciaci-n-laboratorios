@@ -284,6 +284,7 @@ class Usuario(Resource):
                     mensaje = "El adicional se ha registrado correctamente. Pasará a estado PENDIENTE hasta la aprobación de un laboratorista."
             else:
                 mensaje = "El banco que intenta reservar ya esta ocupado."
+                self.status = 3
         else:
             mensaje = "Ocurrio un error de sincronización con la fecha y hora. Revise la hora y fecha de su sistema."
 

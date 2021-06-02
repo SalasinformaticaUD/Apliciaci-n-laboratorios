@@ -502,6 +502,8 @@ export default {
     },
     asistenciaAdicional(){      
       // Se hace un filtrado de los bancos que tienen el estado APROBADO y luego se obtiene el número del banco y se orden ascendentemente. Teniendo los bancos ordenados se vuelve a filtrar la información para obtener solo la información de interes para verificar la asistencia. 
+      console.log(this.registrosLaboratorio);
+
       let bancosOcupados = this.registrosLaboratorio.filter(item => item.estado=="APROBADO");
       bancosOcupados = bancosOcupados.map(item => item.banco).sort();
 
@@ -517,6 +519,8 @@ export default {
       }
       if (bancosOcupados.length > 0){
         this.dialogAsistencia = true;
+      }else{
+        alert("No hay adicionales con reserva aprobada.");
       }
     },
     cambioAsistencia(index,state){
@@ -604,8 +608,8 @@ export default {
       .then(function(response) {
         objeto.registrosLaboratorio = response.data.data;          
         if (response.data.status==1){          
-          // El valor del 6 debe ser variable y depender de acuerdo a la cantidad de bancos de la sala
-          objeto.infoBancos = new Array(6).fill([0]);
+          let infoLab = objeto.$store.getters.infoLabs.find(item => item.name == objeto.laboratorioAdicional);
+          objeto.infoBancos = new Array(infoLab.bancos).fill([0]);
           for(let i=0;i<6;i++){
             if (objeto.registrosLaboratorio[i]){
               if(objeto.registrosLaboratorio[i].estado !== "CANCELADO"){
