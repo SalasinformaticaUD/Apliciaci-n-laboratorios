@@ -84,6 +84,7 @@
                           label="Placa"
                         ></v-text-field>
                       </v-col>
+
                       <v-col>
                         <v-text-field
                           v-model="infoItem.tipoMantenimiento"
@@ -105,7 +106,7 @@
                         <v-text-field
                           v-model="infoItem.fechaMantenimiento"
                           :disabled="true"
-                          label="Fecha Mantenimiento Laboratorista"
+                          label="Fecha inicio o detección"
                         ></v-text-field>
                       </v-col>
                       <v-col>
@@ -157,7 +158,7 @@
                         <v-text-field
                           v-model="infoItem.fechaReal"
                           :disabled="true"
-                          label="Fecha Mantenimiento externo"
+                          label="Fecha de finalización del mantenimiento"
                         ></v-text-field>
                       </v-col>
                       <v-col>
@@ -233,19 +234,21 @@
                     </v-row>
                     <v-row>
                       <v-col>
-                        <v-text-field
-                          v-model="infoItem.espMantReal"
+                        <v-textarea
+                        v-model="infoItem.espMantReal"
                           :disabled="true"
                           label="Especificaciones del mantenimiento"
-                        ></v-text-field>                        
+                        >
+                        </v-textarea>
+                                              
                       </v-col>
               
                       <v-col>
-                        <v-text-field
+                        <v-textarea
                           v-model="infoItem.observaciones"
                           :disabled="true"
                           label="Observaciones"
-                        ></v-text-field>                        
+                        ></v-textarea>                        
                       </v-col>
                    
                     </v-row>
@@ -290,9 +293,11 @@
                         ></v-text-field>
                       </v-col>
 
+                      
+
                       <v-col>
                         <v-text-field
-                          v-model="numInterno"
+                          v-model="infoItem.numInterno"
                           :disabled="true"
                           :label="infoItem.numeroInterno"
                           hint="Número Interno"
@@ -313,33 +318,14 @@
                           persistent-hint
                         ></v-text-field> -->
 
-                        <v-menu
-                          ref="menu1"
-                          v-model="menu1"
-                          :close-on-content-click="false"
-                          transition="scale-transition"
-                          offset-y
-                          max-width="290px"
-                          min-width="auto"
-                        >
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-text-field
-                              v-model="dateFormatted"
-                              label="MM/DD/YYYY"
-                              hint="Fecha de Mantenimiento"
-                              persistent-hint
-                              prepend-icon="mdi-calendar"
-                              v-bind="attrs"
-                              @blur="date = parseDate(this.infoItem.fechaMantenimiento)"
-                              v-on="on"
-                            ></v-text-field>
-                          </template>
-                          <v-date-picker
-                            v-model="date"
-                            no-title
-                            @input="menu1 = false"
-                          ></v-date-picker>
-                        </v-menu>
+                        <v-text-field
+                          v-model="infoItem.fechaMantenimiento"
+                          :disabled="true"                         
+                          label="DD/MM/AA"
+                          hint="Fecha de inicio o detección"
+                          persistent-hint
+                          readonly
+                        ></v-text-field>
 
 
 
@@ -348,8 +334,8 @@
 
                       <v-col>
                         <v-text-field
-                          v-model="Horario"
-                          :disabled="false"
+                          v-model="infoItem.Horario"
+                          :disabled="true"
                           :label="infoItem.hora"
                           hint="Hora"
                           persistent-hint
@@ -358,8 +344,8 @@
 
                       <v-col>
                         <v-text-field
-                          v-model="sala"
-                          :disabled="false"
+                          v-model="infoItem.sala"
+                          :disabled="true"
                           :label="infoItem.sala"
                           hint="Sala"
                           persistent-hint
@@ -381,7 +367,7 @@
                       <v-col>
                         <v-select
                           v-model="infoItem.tipoMantenimiento"
-                          :disabled="false"
+                          :disabled="true"
                           label="Tipo de mantenimiento"
                           :item-value="infoItem.tipoMantenimiento"
                           :items="mantenimientos"
@@ -394,12 +380,12 @@
                       
                       
                       <v-col>
-                        <v-text-field
+                        <v-select
                           v-model="infoItem.estado"
-                          :disabled="false"
-                          label="Estado"
                           
-                        ></v-text-field>
+                          label="Estado"                          
+                          :items="estados">
+                        </v-select>
                       </v-col>
                     </v-row>
                     <v-row>
@@ -421,12 +407,94 @@
                     <v-row>
 
                       <v-col>
+
+                        <!-- <v-menu
+                          ref="menu3"
+                          v-model="menu3"
+                          :close-on-content-click="false"
+                          transition="scale-transition"
+                          offset-y
+                          max-width="290px"
+                          min-width="auto"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-text-field
+                              v-model="infoItem.fechaReal"
+                              label="MM/DD/YYYY"
+                              hint="Fecha inicio o detección"
+                              persistent-hint
+                              prepend-icon="mdi-calendar"
+                              v-bind="attrs"
+                              @blur="date = parseDate(this.infoItem.fechaReal)"
+                              v-on="on"
+                              :disabled="true"
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="date"
+                            no-title
+                            @input="menu3 = false"
+                          ></v-date-picker>
+                        </v-menu> -->
+
+
+
+
+                        <!-- <v-text-field
+                          v-model="infoItem.fechaReal"
+                          :disabled="false"                         
+                          :label="infoItem.fechaReal"
+                          hint="Fecha de realización del mantenimiento"
+                          persistent-hint
+                        ></v-text-field> -->
+
+                        <v-menu
+                          ref="menu3"
+                          v-model="menu3"
+                          :close-on-content-click="false"
+                          transition="scale-transition"
+                          offset-y
+                          max-width="290px"
+                          min-width="auto"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-text-field
+                              v-model="infoItem.fechaReal"
+                              label="DD/MM/YYYY"
+                              hint="Fecha de finalización del mantenimiento"
+                              persistent-hint
+                              prepend-icon="fa fa-calendar"
+                              v-bind="attrs"
+                              @blur="date = parseDate(this.infoItem.fechaReal)"
+                              v-on="on"
+                              :disabled="false"
+                              readonly
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="date"
+                            no-title
+                            @input="menu3 = false"
+                          ></v-date-picker>
+                        </v-menu>
+
+
+                      </v-col>
+
+
+
+
+                      <!-- <v-col>
                         <v-text-field
                           v-model="infoItem.fechaReal"
                           :disabled="true"
-                          label="Fecha Mantenimiento externo"
+                          label="Fecha de realización del mantenimiento"
                         ></v-text-field>
-                      </v-col>
+                      </v-col> -->
+
+                      
+
+
 
                       <v-col>
                         <v-text-field
@@ -444,11 +512,43 @@
                         ></v-text-field>
                       </v-col>
                       <v-col>
-                        <v-text-field
+                        <!-- <v-text-field
                           v-model="infoItem.tiempGar"
                           :disabled="false"
                           label="Tiempo garantía"
-                        ></v-text-field>
+                        ></v-text-field> -->
+<!-- TIEMPO GARANTÍA -->
+                        <v-menu
+                          ref="menuTiemGar"
+                          v-model="menuTiemGar"
+                          :close-on-content-click="false"
+                          transition="scale-transition"
+                          offset-y
+                          max-width="290px"
+                          min-width="auto"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-text-field
+                              v-model="infoItem.tiempGar"
+                              label="DD/MM/YYYY"
+                              hint="Tiempo garantía"
+                              persistent-hint
+                              prepend-icon="fa fa-calendar"
+                              v-bind="attrs"
+                              @blur="dateGarantia = parseDate(this.infoItem.tiempGar)"
+                              v-on="on"
+                              :disabled="false"
+                              readonly
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="dateGarantia"
+                            no-title
+                            @input="menuTiemGar = false"
+                          ></v-date-picker>
+                        </v-menu>
+
+
                       </v-col>                      
        
                     </v-row>
@@ -502,19 +602,19 @@
                     </v-row>
                     <v-row>
                       <v-col>
-                        <v-text-field
+                        <v-textarea
                           v-model="infoItem.espMantReal"
                           :disabled="false"
                           label="Especificaciones del mantenimiento"
-                        ></v-text-field>                        
+                        ></v-textarea>                        
                       </v-col>
               
                       <v-col>
-                        <v-text-field
+                        <v-textarea
                           v-model="infoItem.observaciones"
                           :disabled="false"
                           label="Observaciones"
-                        ></v-text-field>                        
+                        ></v-textarea>                        
                       </v-col>
                    
                     </v-row>
@@ -525,7 +625,9 @@
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     
-                    <v-btn outlined color="blue darken-1" text @click="close2">Cerrar</v-btn>
+                    <v-btn  rounded color="blue darken-1" dark @click="close2">Cerrar</v-btn>
+                    <!-- <v-btn outlined rounded dark color="primary" text @click="close2">Guardar Cambios</v-btn> -->
+                    <v-btn rounded color="primary" dark @click="actualizar">Guardar</v-btn>
                   </v-card-actions>
                 </v-row>
               </v-card-text>
@@ -555,6 +657,7 @@ export default {
   },
   data: vm => ({
       date: new Date().toISOString().substr(0, 10),
+      dateGarantia: new Date().toISOString().substr(0, 10),
       dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
       //dateFormatted: this.infoItem.fechaMantenimiento,
       menu1: false,
@@ -582,7 +685,7 @@ export default {
       proxMant:'',
       espMantReal:'',
       observaciones:'',
-
+      
 
       
     },
@@ -609,7 +712,7 @@ export default {
     infoIndex: -1,
     infoItem: {},
     mantenimientos:['Interno Correctivo','Externo Correctivo','Interno Predictivo','Externo Predictivo','Interno Preventivo','Externo Preventivo'],
-
+    estados:['EN PROCESO','PENDIENTE','TERMINADO'],
     defaultItem: {
       name: "",
       calories: 0,
@@ -638,8 +741,11 @@ export default {
     },
 
     date (val) {
-      this.dateFormatted = this.formatDate(this.date)
+      this.infoItem.fechaReal = this.formatDate(this.date)
     },  
+    dateGarantia(val){
+      this.infoItem.tiempGar = this.formatDate(this.dateGarantia)
+    },
   },
 
   created() {
@@ -651,7 +757,7 @@ export default {
         if (!date) return null
 
         const [year, month, day] = date.split('-')
-        return `${month}/${day}/${year}`
+        return `${day}/${month}/${year}`
       },
       
       FechaMant (){
@@ -731,6 +837,62 @@ export default {
         this.infoIndex = -1;
       });
     },
+
+    actualizar(){
+      
+      var confirmacion = confirm("¿Esta seguro de guardar estos cambios?");
+      if (confirmacion) {
+          
+        let objeto=this;
+        this.axios
+          .post(
+            "http://"+objeto.$serverURI+":"+objeto.$serverPort+"/Usuario/actualizarMant",
+            {
+              placa: objeto.infoItem.placa,
+              Tipo_De_Mantenimiento:this.infoItem.tipoMantenimiento,
+              nomUsu:this.infoItem.laboratorista,
+              fecha :this.infoItem.fechaMantenimiento,
+              Horario:this.infoItem.hora,
+              sala:this.infoItem.sala,
+              Estado:this.infoItem.estado,
+              descDano:this.infoItem.dano,
+              fechaReal:this.infoItem.fechaReal,
+              nomEmpresa:this.infoItem.nomEmpresa,
+              nit:this.infoItem.NIT,
+              tiempoGar:this.infoItem.tiempGar,
+              costMan:this.infoItem.costMant,   
+              Numero_Interno:this.infoItem.numeroInterno,
+              numOrdServ:this.infoItem.numOrdServ,
+              vigencia:this.infoItem.vigencia,
+              supervisor:this.infoItem.supervisor,
+              repuestos:this.infoItem.repuestos,                           
+              supervisor:this.infoItem.supervisor,              
+              proxMant:this.infoItem.proxMant ,
+              espMantReal:this.infoItem.espMantReal ,
+              observaciones:this.infoItem.observaciones,
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(function(response) {
+              var respuesta = response.data.mensaje;
+              var status = response.data.status;
+              if (status == "1") {
+                alert(respuesta);
+                objeto.buscar();
+                //   objeto.reservalab.splice(index, 1);
+              }
+          })
+          .catch(function(error) {
+            objeto.output = error;
+          });
+
+      }
+    },
+
 
     buscar() {
       let objeto = this;

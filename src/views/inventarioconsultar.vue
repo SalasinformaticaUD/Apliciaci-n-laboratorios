@@ -1,5 +1,5 @@
-<template >
-  <v-container fluid v-if="(tipoUsuario === 'Laboratorista') || (tipoUsuario === 'Administrador')">    
+<template>
+  <v-container fluid>
 
     <v-div v-if = "tipoUsuario === 'Laboratorista' ">
       <HeaderLaboratorista />
@@ -7,7 +7,6 @@
     <v-div v-if = "tipoUsuario === 'Administrador'">
       <HeaderAdmin />
     </v-div>
-
 
     <v-col align="center" class="mt-4">
     <v-data-table :headers="headers" :items="equipolab" :search="search" class="elevation-1" color="background" dark>
@@ -549,11 +548,22 @@ export default {
           }
         )
         .then(function(response) {          
-          objeto.tipoUsuario = response.data.data[0].tipo;          
+          objeto.tipoUsuario = response.data.data[0].tipo;
+          objeto.authVista(objeto.tipoUsuario);
         })
         .catch(function(error) {
           objeto.output = error;          
         });
+    },
+
+    authVista(userRole){
+      console.log(userRole);
+      if(userRole !== "Laboratorista" && userRole !== "Administrador"){
+        localStorage.autorizado = null;
+        localStorage.usuario= null;      
+        this.$cookies.remove(this.token);      
+        this.$router.push("/");
+      }      
     },
 
     reset () {

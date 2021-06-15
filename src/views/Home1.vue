@@ -230,14 +230,17 @@ export default {
           var respuesta = response.data.mensaje;
           //localStorage.identificacion= usuarioL; //TENER CUIDADO PARA PRUEBA
           
-          let encriptado = objeto.$Crypto.AES.encrypt(
-            //objeto.usuarioL,
-            usuarioL,
-            response.data.data.token
-          );
-          console.log("AQUI EL ENCRIPTADO COOKIE: ",encriptado);
-          console.log("AQUI EL OBJ USUARIO: ",usuarioL);
+
           if (respuesta == "1") {
+            let encriptado = objeto.$Crypto.AES.encrypt(
+              //objeto.usuarioL,
+              usuarioL,
+              response.data.data.token
+            );
+            console.log("AQUI EL ENCRIPTADO COOKIE: ",encriptado);
+            console.log("AQUI EL OBJ USUARIO: ",usuarioL);
+
+
             objeto.$cookies.set(
               "user_session",
               encriptado.toString(),
@@ -247,16 +250,16 @@ export default {
               null,
               true
             );
-            console.log("COOKIE HOME1: ",objeto.$cookies.get("user_session"));
+            // console.log("COOKIE HOME1: ",objeto.$cookies.get("user_session"));
 
             localStorage.cdcb0830cc2dd220 = response.data.data.token;
-            objeto.$router.replace({ name: response.data.data.addr });
-          } else {
-            alert("No existe");
+            objeto.$router.replace({ name: response.data.data.addr });         
+          }else {          
+            alert("El usuario no existe.");
           }
         })
         .catch(function(error) {
-          // alert(error);
+           alert("Error");
         });
     }
   }

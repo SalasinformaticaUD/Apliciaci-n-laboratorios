@@ -9,7 +9,7 @@ export default new Vuex.Store({
       {name: "Electrónica A",      color: "red darken-2",      bancos:8,    colorLight: "red lighten-2"},
       {name: "Electrónica B",      color: "indigo darken-2",   bancos:6,    colorLight: "indigo lighten-2"},
       {name: "Máquinas",           color: "green darken-3",    bancos:8,    colorLight: "green lighten-2"},
-      {name: "Circuitos",          color: "yellow accent-4",   bancos:12,   colorLight: "yellow lighten-1"},
+      {name: "Circuitos",          color: "yellow accent-4",   bancos:12,   colorLight: "yellow"},
       {name: "Comunicaciones",     color: "teal darken-2",     bancos:6,    colorLight: "teal lighten-2"},
       {name: "Electrónica básica", color: "orange darken-3",   bancos:8,    colorLight: "orange lighten-2"},
     ],

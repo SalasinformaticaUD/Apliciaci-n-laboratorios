@@ -7,11 +7,19 @@
       <v-spacer></v-spacer>
       <v-text-field
         v-model="search"
+        ref="form"
         append-icon="fas far-search"
         label="Search"
         single-line
         hide-details
+        @keyup.enter="initialize"
       ></v-text-field>
+
+      <v-btn color="primary" @click="initialize">Buscar</v-btn>          
+      <v-spacer></v-spacer>          
+      <v-btn color="primary" @click="reset">Reset</v-btn>
+
+      <v-spacer></v-spacer>
     </v-card-title>
     <v-data-table
       
@@ -152,6 +160,21 @@
                             {{item}}
                           </v-col>
 
+                            <v-col cols="12" sm="2" class="text-sm-center" v-if=true>
+                            
+                            <v-text-field
+                              
+                              dense
+                              hide-details
+                              label=""
+                              single-line
+                              v-model = "revisionElementos[index]"
+                              id="Revisar"
+                              autofocus: true
+                            ></v-text-field>
+                            
+                                                       
+                          </v-col>
 
                           <v-col cols="12" sm="2" class="text-sm-center" v-if=true>
                             <v-icon small class="mr-2" @click="aprobarReserva(index,true)">fas fa-check-circle</v-icon>
@@ -160,18 +183,6 @@
                                                        
                           </v-col>
                           
-                            <v-col cols="12" sm="2" class="text-sm-center" v-if=true>
-                            
-                            <v-text-field
-                              dense
-                              hide-details
-                              label="Pendiente"
-                              single-line
-                              v-model = "revisionElementos[index]"
-                            ></v-text-field>
-                            
-                                                       
-                          </v-col>
 
                         </v-row>
 
@@ -257,7 +268,6 @@ export default {
       { text: "Asistencia", value: "asistencia", sortable: false }
     ],
     reservalab: [],
-    reservasLabAll: [],
     infoIndex: -1,
     objItem: "",
     agregarUbicacionIndex: -1,
@@ -270,8 +280,9 @@ export default {
     banco:'',
     aprobar:''
   }),
-  mounted(){
-  },
+  // mounted(){
+  // this.$verificarLogin();
+  // },
 
   computed: {
     formTitle() {
@@ -286,9 +297,10 @@ export default {
   },
 
   created() {
-    console.log("Este es el created");
     this.initialize();
   },
+
+
 
   methods: {
     getColor(estado) {
@@ -299,20 +311,11 @@ export default {
     initialize() {
       (this.reservalab = []), this.buscar();
     },
+    reset () {
+      this.search="";
+      this.$refs.form.reset(), this.initialize();
+    },
 
-    aprobarReserva(item,opc){
-      console.log("ITEM: ", item);
-      console.log("Valor: ", opc);
-      this.revisionElementos[item]=opc;
-      console.log(this.revisionElementos);
-      
-      
-      //this.$refs.form.reset();
-      
-    },
-    ficha(){
-      alert("AQUI VA LA FICHA");
-    },
     mail(infoItem){
       let objeto = this;
       this.axios
@@ -323,7 +326,10 @@ export default {
               fecha_adicional: infoItem.fecha_adicional,
               laboratorio: infoItem.sala,
               hora: infoItem.hora,
-              opcion: this.aprobar
+              opcion: this.aprobar,
+              
+              revisionElementos: this.revisionElementos,
+              elementos: this.infoItem.elemento,
             },
             {
               headers: {
@@ -405,7 +411,9 @@ export default {
                 sala: this.sala,
                 hora: this.hora,
                 banco: this.banco,
-                aprobar: this.aprobar
+                aprobar: this.aprobar,
+                revisionElementos: this.revisionElementos,
+                elementos: this.infoItem.elemento,
               },
               {
                 headers: {
@@ -549,7 +557,7 @@ export default {
     },
 
     save() {
-      var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
+      var confirmacion = confirm("¿Esta seguro de guardar estos cambios?");
 
       this.placa = this.agregarUbicacionItem.placa;
       this.sala = this.agregarUbicacionItem.sala;
@@ -605,28 +613,42 @@ export default {
           }
         )
         .then(function(response) {
-          objeto.reservasLabAll = response.data.data;
-          objeto.verificarBusqueda();
+          objeto.reservalab = response.data.data;
+
+           console.log(objeto.reservalab);
         })
         .catch(function(error) {
           objeto.output = error;
         });
     },
-    verificarBusqueda(){
-      console.log("Funcion desde la vista Consultar");
-      let date = this.$store.state.date;
-      let hour = this.$store.state.hour;
-      let banco = this.$store.state.banco;
-      if (date !== null && hour !== null && banco !== null){
-        this.reservalab = this.reservasLabAll.filter(item => item.fecha_adicional == date && item.hora == hour && item.banco == banco);
-        this.$store.state.hour = null;
-        this.$store.state.date = null;
-        this.$store.state.banco = null;
+
+    aprobarReserva(item,opc){
+      console.log("ITEM: ", item);
+      console.log("Valor: ", opc);
+      if(opc){
+        this.revisionElementos[item]="APROBADO";
       }else{
-        this.reservalab = this.reservasLabAll;
+        this.revisionElementos[item]="NO APROBADO";
       }
-      console.log(this.$store.state.date);
-    }
+      // let prueba=this.revisionElementos[item];
+      // console.log(prueba);
+
+      // var revision=document.getElementById("Revisar");
+      // revision.value="Holaaas"
+      // console.log(revision);
+
+
+      this.dialog2=false;
+      this.dialog2=true;
+      
+      
+      
+      //this.$refs.form.reset();
+      
+    },
+    ficha(){
+      alert("AQUI VA LA FICHA");
+    },
   }
 };
 </script>

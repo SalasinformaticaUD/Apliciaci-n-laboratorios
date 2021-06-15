@@ -22,34 +22,39 @@
                 <v-card-title
                   class="justify-center"
                   style="color:white;font-weigth:bolder;"
-                >Mantenimiento</v-card-title>
+                >Inicio o detección del mantenimiento</v-card-title>
 
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <select style="display:none;"  id="selectPlaca" v-model="placa" solo>
-                         <option value="">Buscar por placa, nombre o ubicacion</option>
+                    <select style="display:none;"  id="selectUsuario" v-model="codUsu" >
+                          <option value="">Buscar por codigo o nombre de laboratorista</option>
+                    </select>
+                  </v-col>
+
+                  <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="nomUsu" label="Nombre Usuario *" readonly disabled='true'></v-text-field>
+                  </v-col>
+                </v-row>
+
+
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6">
+                    <select style="display:none;"  id="selectPlaca" v-model="placa" >
+                         <option value="">Buscar elemento por placa, nombre o ubicacion</option>
                     </select>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                  <select style="display:none;"  id="selectUsuario" v-model="codUsu" solo>
-                         <option value="">Buscar por codigo o nombre</option>
-                  </select>
+                    <v-text-field v-model="nomEqu" label="Nombre Equipo *"  readonly disabled='true'></v-text-field>
                   </v-col>
+
+                  
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="numInterno" label="Número Interno" solo readonly></v-text-field>
+                    <v-text-field v-model="numInterno" label="Número Interno"  readonly disabled='true'></v-text-field>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="nomUsu" label="Nombre Usuario" solo readonly></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="nomEqu" label="Nombre Equipo" solo readonly></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="sala" label="Sala" solo readonly></v-text-field>
+                    <v-text-field v-model="sala" label="Sala *" readonly disabled='true'></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -68,7 +73,7 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           v-model="fechaForm"
-                          label="Fecha"
+                          label="Fecha inicio o detección *"
                           readonly
                           v-bind="attrs"
                           prepend-icon = "far fa-calendar-alt"
@@ -83,26 +88,60 @@
                     </v-menu>
                   </v-col>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="Horario" label="Horario" solo></v-text-field>
+
+                    <!-- <v-text-field v-model="Horario" label="Horario" ></v-text-field> -->
+
+
+                    <v-menu
+                      ref="HorarioMantenimiento"
+                      v-model="SeleccionarHorario"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      :return-value.sync="Horario"
+                      transition="scale-transition"
+                      offset-y
+                      max-width="290px"
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="Horario"
+                          label="Hora *"
+                          prepend-icon="far fa-clock"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-time-picker
+                        v-if="SeleccionarHorario"
+                        v-model="Horario"
+                        color="#008B8B"
+                        full-width
+                        @click:minute="$refs.HorarioMantenimiento.save(Horario)"
+                      ></v-time-picker>
+                    </v-menu>
+
+
                   </v-col>
                   <v-col>
-                    <v-text-field v-model="Estado" label="Estado" solo></v-text-field>
+                    <v-select v-model="Estado" label="Estado *" :items="estados"></v-select>
                   </v-col>
-                </v-row>
-                <v-row>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-select
                       v-model="Tipo_De_Mantenimiento"
                       :items="mantenimientos"
-                      label="Tipo de Mantenimiento"
-                      solo
+                      label="Tipo de Mantenimiento *"
+                      
                     ></v-select>
                   </v-col>
+                </v-row>
+                <v-row>
                   <v-col class="col-sm-12 col-lg-6">
                     <v-text-field
                       v-model="descDano"
-                      label="Descripcion Daño"
-                      solo
+                      label="Descripcion Daño *"
+                      
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -111,7 +150,8 @@
               <v-btn text @click="volverpag()">Cancelar</v-btn>
             </v-stepper-content>
 
-            <v-stepper-content step="2">
+          
+            <v-stepper-content  step="2" >
               <v-card color="#424242" style="padding:30px" class="mb-12">
                 <v-card-title
                   class="justify-center"
@@ -119,6 +159,7 @@
                 >Mantenimiento</v-card-title>
 
                 <v-row>
+                  <!-- REALIZACIÓN DEL MANTENIMIENTO" -->
                   <v-col class="col-sm-12 col-lg-6">
                     <v-menu
                       ref="menu2"
@@ -133,12 +174,12 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           v-model="fechaRealForm"
-                          label="Fecha Realizacion"
+                          label="Fecha de finalización del mantenimiento"
                           readonly
                           prepend-icon = "far fa-calendar-alt"
                           v-bind="attrs"
                           v-on="on"
-                          solo
+                          
                         ></v-text-field>
                       </template>
                       <v-date-picker v-model="fechaReal" no-title scrollable>
@@ -148,56 +189,125 @@
                       </v-date-picker>
                     </v-menu>
                   </v-col>
+
+                  <v-col class="col-sm-12 col-lg-6" v-if="this.mantenimientoExterno">
+                    <v-text-field v-model="nomEmpresa" label="Nombre de la empresa contratada *" ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6" v-if="this.mantenimientoExterno">
+                    <v-text-field v-model="nit" label="NIT *" ></v-text-field>
+                  </v-col>
+<!-- AQUI FECHA                   -->
+                  <!-- <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="tiempGar" label="Tiempo de Garantía" ></v-text-field>
+                  </v-col> -->
+
+                  <v-col class="col-sm-12 col-lg-6" v-if="this.mantenimientoExterno">
+                    <v-menu
+                      ref="menuTiempGar"
+                      v-model="menuTiempGar"
+                      :close-on-content-click="false"
+                      :return-value.sync="tiempGar"
+                      transition="scale-transition"
+                      offset-y
+                      dark
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="fechaTiempGar"
+                          label="Tiempo de garantía *"
+                          readonly
+                          prepend-icon = "far fa-calendar-alt"
+                          v-bind="attrs"
+                          v-on="on"
+                          
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker v-model="tiempGar" no-title scrollable>
+                        <v-spacer></v-spacer>
+                        <v-btn text color="primary" @click="menuTiempGar = false">Cancel</v-btn>
+                        <v-btn text color="primary" @click="$refs.menuTiempGar.save(tiempGar)">OK</v-btn>
+                      </v-date-picker>
+                    </v-menu>
+                  </v-col>    
+
+
+                </v-row>
+                <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="nomEmpresa" label="Nombre de la empresa contratada" solo></v-text-field>
+                    <v-text-field v-if="this.mantenimientoExterno" v-model="costMant" label="Costo Mantenimiento (COP) *" ></v-text-field>
+                    <v-text-field v-else v-model="costMant" label="Costo Mantenimiento (COP)" ></v-text-field>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6" v-if="this.mantenimientoExterno">
+                    <v-text-field v-model="numOrdServ" label="No Orden de servicio *" ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="col-sm-12 col-lg-6" v-if="this.mantenimientoExterno">
+                    <v-text-field v-model="vigencia" label="Vigencia *" ></v-text-field>
+                  </v-col>
+                  <v-col class="col-sm-12 col-lg-6" v-if="this.mantenimientoExterno">
+                    <v-text-field v-model="supervisor" label="Supervisor *" ></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="nit" label="NIT" solo></v-text-field>
+                    <v-text-field v-if="this.mantenimientoExterno" v-model="repuestos" label="Repuestos *" ></v-text-field>
+                    <v-text-field v-else v-model="repuestos" label="Repuestos" ></v-text-field>
                   </v-col>
+                  <!-- <v-col class="col-sm-12 col-lg-6">
+                    <v-text-field v-model="proxMant" label="Proximo Mantenimiento *" ></v-text-field>
+                  </v-col> -->
                   <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="tiempGar" label="Tiempo de Garantía" solo></v-text-field>
+                    <v-menu
+                      ref="menuProxMant"
+                      v-model="menuProxMant"
+                      :close-on-content-click="false"
+                      :return-value.sync="proxMant"
+                      transition="scale-transition"
+                      offset-y
+                      dark
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="fechaproxMant"
+                          label="Fecha proximo mantenimiento"
+                          readonly
+                          prepend-icon = "far fa-calendar-alt"
+                          v-bind="attrs"
+                          v-on="on"
+                          
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker v-model="proxMant" no-title scrollable>
+                        <v-spacer></v-spacer>
+                        <v-btn text color="primary" @click="menuProxMant = false">Cancel</v-btn>
+                        <v-btn text color="primary" @click="$refs.menuProxMant.save(proxMant)">OK</v-btn>
+                      </v-date-picker>
+                    </v-menu>
                   </v-col>
+
+
+
                 </v-row>
                 <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="costMant" label="Costo Mantenimiento" solo></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="numOrdServ" label="No Orden de servicio" solo></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="vigencia" label="Vigencia" solo></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="supervisor" label="Supervisor" solo></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="repuestos" label="Repuestos" solo></v-text-field>
-                  </v-col>
-                  <v-col class="col-sm-12 col-lg-6">
-                    <v-text-field v-model="proxMant" label="Proximo Mantenimiento" solo></v-text-field>
+                  <v-col class="col-sm-12 col-lg-12">
+                    <v-textarea v-model="espMantReal" label="Especificaciones mantenimiento realizado" solo hint="Especificaciones mantenimiento realizado"></v-textarea>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="col-sm-12 col-lg-12">
-                    <v-textarea v-model="espMantReal" label="Especificaciones mantenimiento realizado" solo></v-textarea>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col class="col-sm-12 col-lg-12">
-                    <v-textarea v-model="observaciones" label="Observaciones" solo></v-textarea>
+                    <v-textarea v-model="observaciones" label="Observaciones" solo hint="Observaciones"></v-textarea>
                   </v-col>
                 </v-row>
               </v-card>
               <v-btn rounded color="primary" dark @click="formSubmit">Guardar</v-btn>
               <v-btn text @click="volverpag()">Cancelar</v-btn>
             </v-stepper-content>
+
 
           </v-stepper-items>
         </v-stepper>
@@ -216,14 +326,25 @@ export default {
   },
   data() {
     return {
+      SeleccionarHorario:false,
+      time:null,
+      minute:'',
+      
       e1: 1,
       menu:false,
       fecha : new Date().toISOString().substr(0, 10),
       fechaForm:this.formatDate(new Date().toISOString().substr(0, 10)),
       menu2:false,
+      menuTiempGar:false,
+      menuProxMant:false,
+      menuVigencia:false,
+      mantenimientoExterno:false,
       fechaReal : new Date().toISOString().substr(0, 10),
-      fechaRealForm:this.formatDate(new Date().toISOString().substr(0, 10)),
+      tiempGar: new Date().toISOString().substr(0, 10),
+      fechaRealForm:"",
+      fechaTiempGar:"",
       mantenimientos:['Interno Correctivo','Externo Correctivo','Interno Predictivo','Externo Predictivo','Interno Preventivo','Externo Preventivo'],
+      estados:['EN PROCESO','PENDIENTE','TERMINADO'],
       editable: true,
       placa:'',
       codUsu:'',
@@ -237,7 +358,7 @@ export default {
       descDano:'',
       nomEmpresa:'',
       nit:'',
-      tiempGar:'',
+      
       costMant:'',
       numOrdServ:'',
       vigencia:'',
@@ -314,7 +435,16 @@ export default {
     },
     fechaReal (val){
       this.fechaRealForm = this.formatDate(this.fechaReal)
-    }
+    },
+    tiempGar (val){
+      this.fechaTiempGar = this.formatDate(this.tiempGar)
+    },
+    proxMant (val){
+      this.fechaproxMant = this.formatDate(this.proxMant)
+    },
+    Tipo_De_Mantenimiento (val){
+      this.mantenimientoExterno=(this.Tipo_De_Mantenimiento == this.mantenimientos[1] || this.Tipo_De_Mantenimiento == this.mantenimientos[3] || this.Tipo_De_Mantenimiento == this.mantenimientos[5])
+    },    
   },
   methods: {
     volverpag(){
@@ -327,13 +457,12 @@ export default {
         return `${day}/${month}/${year}`
     },
     formSubmit() {
-      
+      console.log("Horario: " + this.Horario);
+      let validarDatos=false;
       if (
-        this.fechaForm &&
-        
+        this.fechaForm &&        
         this.placa &&
-        this.codUsu &&
-        
+        this.codUsu &&        
         this.nomUsu &&
         this.nomEqu &&
         this.sala &&
@@ -354,6 +483,36 @@ export default {
         this.espMantReal &&
         this.observaciones */
       ) {
+        if(this.mantenimientoExterno){
+          if (
+          
+          
+          this.nomEmpresa &&
+          this.nit &&
+          this.tiempGar &&
+          this.costMant &&
+          this.numOrdServ &&
+          this.vigencia &&
+          this.supervisor &&
+          this.repuestos &&
+          this.proxMant){      
+            validarDatos=true;      
+          }else{
+            validarDatos=false;
+          }
+        }else{
+          validarDatos=true;
+        }
+      }else{
+        validarDatos=false;
+      }
+
+
+
+
+
+
+      if (validarDatos) {
         let objeto = this;
         this.axios
           .post(
