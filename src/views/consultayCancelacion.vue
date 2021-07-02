@@ -7,14 +7,30 @@
         <v-data-table
           :headers="headers"
           :items="reservasUser"
+          :custom-sort="customSortTable"
+          :sort-by="['fecha_adicional']"
           class="elevation-1"
           color="background"
+          :search="filterDataTable"
         >
           <template v-slot:top>
-            <v-toolbar flat color="white">
-              <v-toolbar-title>Edición y eliminación</v-toolbar-title>
+            <v-toolbar class="pa-0" flat height="90px">
+              <v-toolbar-title> Consulta de horarios adicionales </v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
+              <v-spacer></v-spacer>
+              <v-spacer></v-spacer>
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="filterDataTable"
+                label="Buscar adicionales por..."
+                clearable
+                single-line
+                hide-details
+                clear-icon="fas fa-times"
+                prepend-icon="fas fa-search"
+              ></v-text-field>
             </v-toolbar>
+            <v-divider></v-divider>
           </template>
 
           <template v-slot:[`item.actions`]="{ item }">
@@ -154,10 +170,10 @@
               </v-col>
             </v-row>
             
-            <v-row class="pb-2 ma-2 mt-n2" align="center" align-content="center" v-if="estadoFicha">
+            <v-row class="pb-2 ma-2 mt-n2" align="center" align-content="center" v-if="selectedAdicional.flagAddElementos">
               <v-col cols="12" sm="10">
                 <v-text-field
-                  label="Ingrese un elemento adicional"
+                  label="Ingrese un elemento adicional (máx. 10)"
                   hide-details="auto"
                   dense
                   @keyup.enter="addElementoAdicional()"
@@ -170,63 +186,66 @@
                 >Agregar</v-btn>
               </v-col>
             </v-row>      
-
-            <v-divider v-if="selectedAdicional.elemento && selectedAdicional.elemento.length>0"></v-divider>
             
-            <v-row no-gutters class="pa-1" align="center" v-if="selectedAdicional.elemento && selectedAdicional.elemento.length>0">
-              <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
-                No.
-              </v-col>
-              <v-col cols="12" sm="5" class="font-weight-black pl-5">
-                Elementos
-              </v-col>
-              <v-col cols="12" sm="4" v-if="estadoFicha"></v-col>              
-              <v-col cols="12" sm="4" class="font-weight-black pl-5" v-else>
-                Observaciones
-              </v-col>
-              <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if="estadoFicha">
-                Eliminar
-              </v-col>
-              <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-else>
-                No. Placa
-              </v-col>
-            </v-row>
+            <div v-if="selectedAdicional.elementos && selectedAdicional.elementos.length>0">
+              <v-divider></v-divider>
 
-            <v-divider v-if="selectedAdicional.elemento && selectedAdicional.elemento.length>0"></v-divider>
-            <v-row no-gutters align="center">
-              <v-col v-for= "(elemento,index) in selectedAdicional.elemento" :key="index" cols="12" sm="12">  
-                <v-row no-gutters class="pa-1" align="center">
-                  <v-col cols="12" sm="1" class="text-sm-center">
-                    {{index+1}}.
-                  </v-col>
-                  <v-col></v-col>
-                  <v-col cols="12" sm="5" class="pl-5">
-                    {{elemento}}
-                  </v-col>
-                  <v-col cols="12" sm="4" v-if="estadoFicha">
-                  </v-col>
-                  <v-col cols="12" sm="4" v-else>
-                    {{selectedAdicional.estadoElemento[index]}}
-                  </v-col>
-                  <v-col cols="12" sm="2" class="text-sm-center pl-5 pr-5" v-if="estadoFicha">
-                    <v-btn @click="deleteElementoAdicional(index)" icon x-small>
-                      <v-icon> fas fa-trash-alt </v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="12" sm="2" class="text-sm-center pl-5 pr-5" v-else>
-                    <v-text-field
-                      dense
-                      class="centered-input"
-                      hide-details
-                      label="# Placa"
-                      single-line
-                      v-model="placasElementos[index]"  
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-divider></v-divider>
-              </v-col>                  
-            </v-row>
+              <v-row no-gutters class="pa-1" align="center">
+                <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
+                  No.
+                </v-col>
+                <v-col cols="12" sm="5" class="font-weight-black pl-5">
+                  Elementos
+                </v-col>
+                <v-col cols="12" sm="4" v-if="selectedAdicional.flagAddElementos"></v-col>
+                <v-col cols="12" sm="4" class="font-weight-black pl-5" v-else>
+                  Observaciones
+                </v-col>
+                <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-if="selectedAdicional.flagAddElementos">
+                  Eliminar
+                </v-col>
+                <v-col cols="12" sm="2" class="text-sm-center font-weight-black" v-else>
+                  No. Placa
+                </v-col>
+              </v-row>
+
+              <v-divider></v-divider>
+
+              <v-row no-gutters align="center">
+                <v-col v-for= "(elemento, index) in selectedAdicional.elementos" :key="index" cols="12" sm="12">  
+                  <v-row no-gutters class="pa-1" align="center">
+                    <v-col cols="12" sm="1" class="text-sm-center">
+                      {{index+1}}.
+                    </v-col>
+                    <v-col></v-col>
+                    <v-col cols="12" sm="5" class="pl-5">
+                      {{elemento.nombre}}
+                    </v-col>
+                    <v-col cols="12" sm="4" v-if="selectedAdicional.flagAddElementos">
+                    </v-col>
+                    <v-col cols="12" sm="4" v-else class="pl-5">
+                      {{elemento.estado}}
+                    </v-col>
+                    <v-col cols="12" sm="2" class="text-sm-center pl-5 pr-5" v-if="selectedAdicional.flagAddElementos">
+                      <v-btn @click="deleteElementoAdicional(index)" icon x-small>
+                        <v-icon> fas fa-trash-alt </v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col cols="12" sm="2" class="text-sm-center pl-5 pr-5" v-else>
+                      <v-text-field
+                        dense
+                        class="centered-input"
+                        hide-details
+                        label="# Placa"
+                        single-line
+                        v-model="elemento.placa"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-divider></v-divider>
+                </v-col>                  
+              </v-row>
+            </div>    
             <v-row no-gutters align="center" v-if="selectedAdicional.observacionesGenerales && selectedAdicional.observacionesGenerales.length > 0">
               <v-col cols="12" sm="12">
                 <v-text-field
@@ -235,22 +254,18 @@
                   label="Observaciones Generales"
                 ></v-text-field>
               </v-col>
-            </v-row>
+              </v-row>        
           </v-container>
-
-          <v-card-actions>
-            <v-row class="justify-center mb-n4 mt-0">
-              <v-col cols="12" sm="6">
-                <v-btn color="primary" dark @click="saveFichaAdicional()" large block v-if="estadoFicha">
-                  Guardar     
-                </v-btn>
-                <v-btn color="primary" dark @click="setPlacasFichaAdicional()" large block v-else>
-                  Guardar     
-                </v-btn>
-              </v-col>              
-            </v-row>
-          </v-card-actions>
         </v-card-text>
+        <v-card-actions>
+          <v-row class="justify-center mb-1 mt-n4">
+            <v-col cols="12" sm="6">
+              <v-btn color="primary" dark @click="saveFichaAdicional()" large block>
+                Guardar     
+              </v-btn>
+            </v-col>              
+          </v-row>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>
@@ -280,21 +295,19 @@ export default {
       { text: "Asistencia del adicional", value: "asistencia",      align: "center",  sortable: true},
       { text: "Acciones",                 value: "actions",         align: "center",  sortable: false}
     ],
+
     reservasUser: [],
     msgResponseServer: "",
-    modelDataTable: false,
-    estadoFicha: false,
-
-    codigoLab:"", //
+    modelDataTable: false,    
 
     modelCardFicha: false,  
     selectedAdicional: {},         
     indexSelectedAdicional: null,
-    inputElemento:"",     
+    inputElemento: "",
 
-    fichaEdit: false,
-    fichaPlacas: false,
-    placasElementos: []
+    weekdaysString: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
+
+    filterDataTable: "",
   }),
 
   computed: {    
@@ -311,28 +324,79 @@ export default {
   },
 
   methods: {
+
+    customSortTable(adicionales, key, isDescending){
+      adicionales.sort((a,b) => {
+        if(key[0]==='dia'){
+          return this.sortByDay(a[key], b[key], isDescending[0]);
+        }
+        if(key[0]==='fecha_adicional'){
+          return this.sortByDate(a[key], b[key], isDescending[0]);
+        }
+        if(key[0]==='sala' || key[0]==='estado' || key[0]==='asistencia'){
+          return this.sortByText(a[key], b[key], isDescending[0]);
+        }
+      })
+      return adicionales   
+    },
+
+    sortByDay(a, b, isDescending){
+      let aIndex = this.weekdaysString.indexOf(a);
+      let bIndex = this.weekdaysString.indexOf(b);
+      if (!isDescending){
+        return aIndex - bIndex;
+      }
+      return bIndex - aIndex;
+    },
+
+    sortByDate(a, b, isDescending){
+      let [a_day, a_month, a_year] = a.split("/");
+      let aDate = new Date(a_year, a_month-1, a_day);
+      let [b_day, b_month, b_year] = b.split("/");
+      let bDate = new Date(b_year, b_month-1, b_day);
+      if (!isDescending){
+        return bDate - aDate;
+      }
+      return aDate - bDate;
+    },
+
+    sortByText(a, b, isDescending){
+      if (!isDescending) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+      }
+      else {
+        return b.toLowerCase().localeCompare(a.toLowerCase());
+      }
+    },
+
     clickInFichaAdicional(adicional){
       // Es posible cancelar los adicionales hasta 1 hora antes del adicional
       // Es posible agregar elementos del adicional hasta 30 minutos antes
-      // estadoFicha: true -> puede agregar elementos; false -> agregar placas elementos
+      // flagAddElementos: true -> puede agregar elementos; false -> agregar placas elementos
       this.indexSelectedAdicional = this.reservasUser.indexOf(adicional);
-      this.selectedAdicional = JSON.parse(JSON.stringify(adicional));
-      this.placasElementos = this.selectedAdicional.placaElemento;
-      this.estadoFicha = this.selectedAdicional.flagAddElementos;
+      this.selectedAdicional = JSON.parse(JSON.stringify(adicional));      
       this.modelCardFicha = true;
     },
     addElementoAdicional(){
+      // Valida que el elemento agregado en el input del adicional no sea un espacio en blanco o vacío
       if (this.inputElemento.length>0){
         if(this.inputElemento.replace(/ /g, "").length>0){
-          this.selectedAdicional.elemento.push(this.inputElemento);
-          this.selectedAdicional.placaElemento.push("");
+          if(this.selectedAdicional.elementos.length<10){
+            this.selectedAdicional.elementos.push({
+              nombre: this.inputElemento,
+              estado: "PENDIENTE",
+              placa: ""
+            });
+          }else{
+            alert("Solo se permite un máximo 10 elementos.");
+          }
         }
-      }      
+      }            
       this.inputElemento = "";
     },
+
     deleteElementoAdicional(index){
-      this.selectedAdicional.elemento.splice(index,1);
-      this.selectedAdicional.placaElemento.splice(index,1);
+      this.selectedAdicional.elementos.splice(index,1);
     },
 
     getColorChips(estado) {
@@ -344,32 +408,28 @@ export default {
     cancelarAdicional(item) {
       var confirmacion = confirm("¿Esta seguro que desea cancelar este laboratorio?");
 
-      if (confirmacion) {
+      if (confirmacion){
+        let {sala, banco, fecha_adicional, hora, codigo} = item;
         let index = this.reservasUser.indexOf(item);
-        let {sala, banco, fecha_adicional, hora} = this.reservasUser[index];
-        let objeto = this;
-        this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/aprobarreserva",
+        this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/cancelarAdicionalEstudiante",
           {
-            fecha_adicional: fecha_adicional,
-            sala: sala,
-            hora: hora,
-            banco: banco,
-            aprobar: "CANCELADO"
+            datos: {sala, banco, fecha_adicional, hora, codigo},
           },
           {
             headers: {
               "Content-Type": "application/json"
             }
           })
-          .then(function(response){
-            if(response.data.status === 1){
-              objeto.updateEstadoReservaUser(index);
+          .then(response => {
+            let {status, mensaje} = response.data;
+            if(status === 1){
+              this.updateEstadoReservaUser(index);
             }
-            alert(response.data.mensaje);
+            alert(mensaje);
           })
-          .catch(function(error) {
+          .catch(error => {
           alert(error);
-        });      
+        });
       }
     },
 
@@ -379,16 +439,10 @@ export default {
       this.reservasUser[index].flagCancelar = false;
     },
 
-    setPlacasFichaAdicional(){
-      this.selectedAdicional.placaElemento = this.placasElementos;
-      this.saveFichaAdicional();
-    },
-
     saveFichaAdicional() {
       var confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
-      if (confirmacion) {        
-        let objeto = this;
-        this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editarElementosAdicional",
+      if (confirmacion) {
+        this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/editarElementosAdicional",
           {
             datos: this.selectedAdicional,
           },
@@ -397,32 +451,30 @@ export default {
               "Content-Type": "application/json"
             }
           })
-        .then(function(response) {
+        .then(response => {
           let {mensaje, status} = response.data;
-          if (status == 1){
-            objeto.updateFichaAdicional();
-            objeto.modelCardFicha = false;
+          if (status === 1){
+            this.updateFichaAdicional();
+            this.modelCardFicha = false;
           }
           alert(mensaje);
         })
-        .catch(function(error) {
+        .catch(error => {
           alert(error);
         });
       }
     },
 
     updateFichaAdicional(){
-      this.$set(this.reservasUser, this.indexSelectedAdicional, this.selectedAdicional);       
+      this.$set(this.reservasUser, this.indexSelectedAdicional, this.selectedAdicional);
       this.selectedAdicional = {};
-      this.placasElementos = [];
     },
 
-    getReservasUser() {    
+    getReservasUser() {
       let token = localStorage.cdcb0830cc2dd220;
       let codigoLab = this.$Crypto.AES.decrypt(this.$cookies.get("user_session"), token);
       codigoLab = codigoLab.toString(this.$Crypto.enc.Utf8);
-      let objeto = this;
-      this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getReservasUser",
+      this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getReservasUser",
         {
           codigo: codigoLab
         },
@@ -432,17 +484,18 @@ export default {
           }
         }
       )
-      .then(function(response){
-        if(response.data.status===1){
-          objeto.reservasUser = objeto.filterReservasByAdicional(response.data.data);
+      .then(response => {
+        let {data, status, mensaje} = response.data;
+        if(status === 1){
+          this.reservasUser = this.filterReservasByAdicional(data);
         }else{
-          objeto.reservasUser = [];
-          objeto.msgResponseServer = response.data.mensaje;
+          this.reservasUser = [];
+          this.msgResponseServer = mensaje;
         }
-        objeto.modelDataTable = true;
+        this.modelDataTable = true;
       })
-      .catch(function(error) {
-        objeto.output = error;
+      .catch(error => {
+        alert(error);
       });
     },
     filterReservasByAdicional(reservas){
@@ -450,7 +503,7 @@ export default {
       let date = this.$store.state.date;
       let hour = this.$store.state.hour;     
       if (date === null && hour === null){
-        return reservas      
+        return reservas
       }
       this.$store.state.hour = null;
       this.$store.state.date = null;

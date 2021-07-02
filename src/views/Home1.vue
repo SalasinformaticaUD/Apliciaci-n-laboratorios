@@ -181,6 +181,7 @@
 
 <script>
 import Headerhome from "@/components/Headerhome.vue";
+import jwt_decode from "jwt-decode";
 export default {
   components: {
     Headerhome
@@ -228,6 +229,22 @@ export default {
         )
         .then(function(response) {
           var respuesta = response.data.mensaje;
+          console.log("Este es el token: ");
+          let token = response.data.data.jwt;
+          let decoded = jwt_decode(token);
+          console.log(decoded);
+
+          objeto.$cookies.set(
+              "jwt",
+              token,
+              60 * 100,
+              null,
+              null,
+              null,
+              true
+            );
+
+
           //localStorage.identificacion= usuarioL; //TENER CUIDADO PARA PRUEBA
           
 
@@ -253,7 +270,7 @@ export default {
             // console.log("COOKIE HOME1: ",objeto.$cookies.get("user_session"));
 
             localStorage.cdcb0830cc2dd220 = response.data.data.token;
-            objeto.$router.replace({ name: response.data.data.addr });         
+            objeto.$router.replace({ name: response.data.data.addr });
           }else {          
             alert("El usuario no existe.");
           }

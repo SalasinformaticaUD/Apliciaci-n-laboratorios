@@ -58,9 +58,9 @@
             :show-interval-label="showIntervalLabel"
             :interval-format="intervalFormat" 
             :short-weekdays="false"
-            :events = "calendarEventsAdicionales"
+            :events = "calendarHorariosAdicionales"
             class="botton"
-            @click:event="clickInEventAdicional"
+            @click:event="clickInHorarioAdicional"
           >
             <template v-slot:day-body="{ date }">
               <div
@@ -275,11 +275,11 @@
             <v-row class="pb-2 ma-2 mt-n2" align="center" align-content="center">
               <v-col cols="12" sm="10">
                 <v-text-field
-                  label="Ingrese un elemento adicional"
+                  label="Ingrese un elemento adicional (máx. 10)"
                   hide-details="auto"
                   dense
                   @keyup.enter="addElementoAdicional()"
-                  v-model = "inputElementoAdicional"
+                  v-model = "inputElemento"
                   :disabled="!estadoUserLab"
                 ></v-text-field>
               </v-col>
@@ -289,50 +289,55 @@
                 </v-btn>
               </v-col>
             </v-row>      
-            <v-divider v-if="selectedUserLab.elemento && selectedUserLab.elemento.length>0"></v-divider>
-            <v-row no-gutters class="pa-1" align="center" v-if="selectedUserLab.elemento && selectedUserLab.elemento.length>0">
-              <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
-                No.
-              </v-col>
-              <v-col cols="12" sm="5" class="font-weight-black pl-5">
-                Elementos
-              </v-col>              
-              <v-col cols="12" sm="4" class="font-weight-black pl-5">
-                Observaciones
-              </v-col>                          
-              <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
-                No. Placa
-              </v-col>
-            </v-row>
-            <v-divider v-if="selectedUserLab.elemento && selectedUserLab.elemento.length>0"></v-divider>
-            <v-row no-gutters align="center">
-              <v-col v-for= "(item,index) in selectedUserLab.elemento" :key="index" cols="12" sm="12">
-                <v-row no-gutters class="pa-1" align="center">
-                  <v-col cols="12" sm="1" class="text-sm-center">
-                    {{index+1}}.
-                  </v-col>
-                  <v-col></v-col>
-                  <v-col cols="12" sm="5" class="pl-5">
-                    {{item}}
-                  </v-col>
-                  <v-col cols="12" sm="4">
-                    {{selectedUserLab.estadoElemento[index]}}
-                  </v-col>
-                  <v-col cols="12" sm="2" class="text-sm-center pl-5 pr-5">
-                    <v-text-field
-                      dense
-                      class="centered-input"
-                      hide-details
-                      label="# Placa"
-                      single-line
-                      :disabled="!estadoUserLab"
-                      v-model = "selectedUserLab.placaElemento[index]"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-                <v-divider></v-divider>  
-              </v-col>                  
-            </v-row>
+            <div v-if="selectedUserLab.elementos && selectedUserLab.elementos.length>0">
+              <v-divider></v-divider>
+              
+              <v-row no-gutters class="pa-1" align="center">
+                <v-col cols="12" sm="1" class="text-sm-center font-weight-black">
+                  No.
+                </v-col>
+                <v-col cols="12" sm="5" class="font-weight-black pl-5">
+                  Elementos
+                </v-col>              
+                <v-col cols="12" sm="4" class="font-weight-black pl-5">
+                  Observaciones
+                </v-col>                          
+                <v-col cols="12" sm="2" class="text-sm-center font-weight-black">
+                  No. Placa
+                </v-col>
+              </v-row>
+
+              <v-divider></v-divider>
+
+              <v-row no-gutters align="center">
+                <v-col v-for= "(elemento,index) in selectedUserLab.elementos" :key="index" cols="12" sm="12">
+                  <v-row no-gutters class="pa-1" align="center">
+                    <v-col cols="12" sm="1" class="text-sm-center">
+                      {{index+1}}.
+                    </v-col>
+                    <v-col></v-col>
+                    <v-col cols="12" sm="5" class="pl-5">
+                      {{elemento.nombre}}
+                    </v-col>
+                    <v-col cols="12" sm="4" class="pl-5">
+                      {{elemento.estado}}
+                    </v-col>
+                    <v-col cols="12" sm="2" class="text-sm-center pl-5 pr-5">
+                      <v-text-field
+                        dense
+                        class="centered-input"
+                        hide-details
+                        label="# Placa"
+                        single-line
+                        :disabled="!estadoUserLab"
+                        v-model="elemento.placa"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-divider></v-divider>  
+                </v-col>                  
+              </v-row>
+            </div>            
             <v-row no-gutters align="center" class="mt-5" v-if="selectedUserLab.observacionesGenerales && selectedUserLab.observacionesGenerales.length>0">   
               <v-col cols="12" sm="12">
                 <v-text-field
@@ -343,16 +348,16 @@
               </v-col>
             </v-row>
           </v-container>
-          <v-card-actions>
-            <v-row class="mt-2 justify-center">
-              <v-col cols="12" sm="6">
-                <v-btn :disabled="!estadoUserLab" color="primary" :dark="estadoUserLab" @click="saveFichaAdicional()" large block>
-                  Guardar los cambios
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-actions>
         </v-card-text>
+        <v-card-actions>
+          <v-row class="justify-center mb-1 mt-n4">
+            <v-col cols="12" sm="6">
+              <v-btn :disabled="!estadoUserLab" color="primary" :dark="estadoUserLab" @click="saveFichaAdicional()" large block>
+                Guardar los cambios
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -444,7 +449,7 @@ export default {
       modelCalendar: "",
       readyCalendar: false,
       weekNumberCalendar: 22,
-      calendarEventsAdicionales: [],
+      calendarHorariosAdicionales: [],
 
       infoLabsStore:[],           //  (se trae desde vuex ./store/index.js)      
 
@@ -481,11 +486,12 @@ export default {
       selectedUserLab: {},
       estadoUserLab: false,
       msgInfoFichaAdicional: "",
-      inputElementoAdicional:"",
+      inputElemento:"",
 
       nameUserMonitor : "",
     }
   },
+
   created(){
     this.dateNow = this.conversionDate();
     this.infoLabsStore = this.$store.getters.infoLabs;
@@ -493,7 +499,7 @@ export default {
   },
 
   mounted(){   
-    this.getEventsAdicionales();
+    this.getHorariosAdicionales();
     this.readyCalendar = true;
   },
 
@@ -545,16 +551,17 @@ export default {
         this.$refs.calendarMonitores.next();
       }
     },
-    clickInEventAdicional({event}){
+    clickInHorarioAdicional({event}){
       // Para el evento seleccionado, revisa la información de los bancos
-      this.queryFechaAdicional = this.formatDate(event.start.split(" ")[0]);
-      this.queryLaboratorioAdicional = event.name;
-      this.queryHoraAdicional = event.hour;
+      let {start, name, hour, bancos} = event;
+      this.queryFechaAdicional = this.formatDate(start.split(" ")[0]);
+      this.queryLaboratorioAdicional = name;
+      this.queryHoraAdicional = hour;
 
       this.infoBancosLab = {
-        habilitados: event.bancos.length - event.bancos.filter(banco => banco === "No Disponible").length,
-        reservados: event.bancos.filter(banco => banco === "Reservado").length,
-        pendientes: event.bancos.filter(banco => banco === "Pendiente").length,
+        habilitados: bancos.length - bancos.filter(banco => banco === "No Disponible").length,
+        reservados:  bancos.filter(banco => banco === "Reservado").length,
+        pendientes:  bancos.filter(banco => banco === "Pendiente").length,
       }
       
       if(this.infoBancosLab.reservados>0 || this.infoBancosLab.pendientes>0){
@@ -565,19 +572,29 @@ export default {
       }
     },
     addElementoAdicional(){
-      // Esta función toma el text-input que ingresa más elementos en la ficha de laboratorio, 
-      if (this.inputElementoAdicional.length>0){                          // Verifica que no sea una cadena vacía 
-        if(this.inputElementoAdicional.replace(/ /g, "").length>0){       // Verifica que no sean espacios vacíos 
-          this.selectedUserLab.elemento.push(this.inputElementoAdicional);       // Hace push al vector elementos del selectedUserLab
+      // Valida que el elemento agregado en el input del adicional no sea un espacio en blanco o vacío
+      if (this.inputElemento.length>0){
+        if(this.inputElemento.replace(/ /g, "").length>0){
+          if(this.selectedUserLab.elementos.length<10){
+            this.selectedUserLab.elementos.push({
+              nombre: this.inputElemento,
+              estado: "PENDIENTE",              
+              placa: ""
+            });
+          }else{
+            alert("Solo se permite un máximo 10 elementos.");
+          }
         }
-      }      
-      this.inputElementoAdicional = "";                                   // Limpia el v-input
+      }            
+      this.inputElemento = "";
     },
+
     getColorChips(estado) {
       if (estado == "APROBADO") return "green";                  // Identifica el color para los v-chip del  
       else if (estado == "PENDIENTE") return "orange";           // estado de la asistencia en el v-data-table
       else if (estado == "CANCELADO") return "red";
     },
+
     showDialogFichaAdicional(adicional){
       // Esta función copia el objeto del adicional seleccionado para hacer la ficha del laboratorio. 
       let filterUserLab = this.selectedLabAdicional.find(item => item.banco == adicional.banco);
@@ -596,6 +613,7 @@ export default {
       this.estadoUserLab = (estado=="APROBADO");
       this.modelUserFichaAdicional = true;
     },
+
     showAsistenciaAdicional(){
       // Se recorre cada uno de los bancos y se toma en un vector auxiliar (infoUsersAsistencia) la informacion a mostrar y a editar en el v-dialog de asistencia
       this.infoUsersAsistencia = this.selectedLabAdicional.map(function(userLab){
@@ -606,6 +624,7 @@ export default {
     
       this.dialogUsersAsistencia = true;
     },  
+
     editAsistenciaBanco(index,state){
       // Se modifica la asistencia con el state enviado (SI o NO). Se adjunta la firma del monitor. 
       // Se utiliza $set ya que es la forma de actualizar un array conservando la reactividad de vue
@@ -616,6 +635,7 @@ export default {
 
       this.$set(this.infoUsersAsistencia, index, temp); 
     },
+
     saveAsistenciaLab(){
       // Se recorre registrosLaboratorio y se modifican con la información de asistencia y el nombre del monitor
       let confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
@@ -629,6 +649,7 @@ export default {
         this.saveFichaAdicionalServer();
       }
     },
+
     saveFichaAdicional(){
       let confirmacion = confirm("¿Esta seguro de guardar estos cambio?");
       if (confirmacion) {
@@ -639,34 +660,35 @@ export default {
         this.saveFichaAdicionalServer();
       }
     },
+
     saveFichaAdicionalServer(){
       // En el backend se manda de nuevo la información de todos los bancos y se guarda (esto se hace para utilizar la misma función tanto para la asistencia como para la edicion de elementos de un solo banco)
-      let objeto = this;
-      this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/editarAdicional",
+      this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/editarAdicionalesMonitor",
         {
-          datos: objeto.selectedLabAdicional,
+          datos: this.selectedLabAdicional,
         },
         {
           headers: {
             "Content-Type": "application/json"
           }
         })
-      .then(function(response){
-        if (response.data.status == 1) {
-          alert(response.data.mensaje);
-          objeto.selectedUserLab = {};                            
-          objeto.modelUserFichaAdicional = false;
-          objeto.infoUsersAsistencia = [];
-          objeto.dialogUsersAsistencia = false;
+      .then(response => {
+        let {status, mensaje} = response.data;
+        if (status === 1) {
+          alert(mensaje);
+          this.selectedUserLab = {};
+          this.modelUserFichaAdicional = false;
+          this.infoUsersAsistencia = [];
+          this.dialogUsersAsistencia = false;
         }
       })
-      .catch(function(error) {
+      .catch(error => {
         alert(error);
       });
     },
+
     getReservasLaboratorio(){
-      let objeto = this;
-      this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getReservasLaboratorio",
+      this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getReservasLaboratorio",
         {
           fecha_laboratorio: this.queryFechaAdicional,
           sala_laboratorio: this.queryLaboratorioAdicional,
@@ -677,60 +699,54 @@ export default {
             "Content-Type": "application/json"
           }
         })
-      .then(function(response) {        
-        objeto.selectedLabAdicional = [];
-        if (response.data.status===1){
-          let sortBancos = response.data.data.map(item => item.banco).sort((a,b)=>(a-b));
+      .then(response => {
+        let {status, data} = response.data;
+        this.selectedLabAdicional = [];
+        if (status === 1){
+          let sortBancos = data.map(item => item.banco).sort((a,b)=>(a-b));
           let lengthBancos = sortBancos.length;
           for(let i=0; i<lengthBancos; i++){
-            objeto.selectedLabAdicional[i] = response.data.data.find(item => item.banco === sortBancos[i]);
+            this.selectedLabAdicional[i] = data.find(item => item.banco === sortBancos[i]);
           }
-          objeto.displayTableLab = true;
+          this.displayTableLab = true;
         }else{
-          objeto.displayTableLab = false;
+          this.displayTableLab = false;
         }
-        objeto.cardInfoLaboratorio = true;
+        this.cardInfoLaboratorio = true;
       })
-      .catch(function(error) {
-        objeto.output = error;
+      .catch(error => {
+        alert(error);
       });
     },
-    getEventsAdicionales(){
-      let objeto = this;
-      this.axios.get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getHorariosAdicionales",
+    getHorariosAdicionales(){
+      this.axios.get("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getHorariosAdicionales",
         {
           headers: {
             "Content-Type": "application/json"
           }
         })
-      .then(function(response) {       
-        objeto.calendarEventsAdicionales = [];
-        if (response.data.data.length > 0){
-          objeto.setColorEvents(response.data.data);
+      .then(response => {
+        let {data} = response.data;
+        this.calendarHorariosAdicionales = [];
+        if (data.length > 0){
+          this.setColorAdicionales(data);
         } 
       })
       .catch(function(error) {
         alert("Ha ocurrido un error en el servidor. Por favor intentar de nuevo en un momento.")
       });
     },
-    setColorEvents(dataEvents){  
-      let dateNow = this.conversionDate(new Date());
-      let hourNow = new Date().getHours();
-
-      for (let i=0; i < dataEvents.length; i++){
-        let dateAdicional = dataEvents[i].start.split(" ")[0];
-        let condition1 = (dateNow < dateAdicional);
-        let condition2 = (dateNow == dateAdicional &&  hourNow < dataEvents[i].hour);
-
-        let infoSala = this.infoLabsStore.find(item => item.name == dataEvents[i].name);
-
-        if(condition1 || condition2){
-          dataEvents[i].color = infoSala.color;
+    setColorAdicionales(adicionales){        
+      let lengthAdicionales = adicionales.length;
+      for (let i=0; i<lengthAdicionales; i++){        
+        let {color, colorLight} = this.infoLabsStore.find(item => item.name == adicionales[i].name);
+        if(adicionales[i].state){
+          adicionales[i].color = color;
         }else{
-          dataEvents[i].color = infoSala.colorLight;          
+          adicionales[i].color = colorLight;
         }
       }
-      this.calendarEventsAdicionales = dataEvents;
+      this.calendarHorariosAdicionales = adicionales;
     },
   },
 };

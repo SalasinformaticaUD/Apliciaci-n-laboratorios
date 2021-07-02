@@ -1,14 +1,18 @@
+from typing import List
 from flask import Flask, Response, send_file
 from flask import jsonify
 from flask import request
 from flask import session
+from flask.helpers import flash
 from flask_restful import Resource, Api
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import datetime
+import jwt
 import json
 from bson import json_util, ObjectId
 from flask_mail import Mail,  Message
+
 
 
 from openpyxl.utils import get_column_letter
@@ -50,24 +54,39 @@ class Usuario(Resource):
         user = mongo.db.Usuarios
         usuario = request.json['usuario']
         contrasena = request.json['contrasena']
-        tipo= ""
-        pregunta = user.find_one(
-            {"Código_usuario": usuario, "Contraseña": contrasena})  
+        tipo = ""
+     
+        pregunta = user.find_one({"Código_usuario": usuario, "Contraseña": contrasena})
+
+        key = "secret"
+        # encoded = jwt.encode({"some": "payload", "Codigo": usuario, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)}, key, algorithm="HS256")
+        # print("Codificacion: ")
+        # print(encoded)
+        # decoded= jwt.decode(encoded, key, algorithms="HS256")
+        # print("Decodificacion: ")
+        # print(decoded)
+
         if pregunta:
             tipo = pregunta['Tipo']
             print(tipo)
             mensaje = "1"
             self.status = 1
+
+            encoded = jwt.encode({"tipo": tipo, "Codigo": usuario, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, key, algorithm="HS256")
+            encoded = encoded.decode('UTF-8')
+
             if tipo == "Laboratorista":
-               self.datos = {'token': self.token, 'addr':"HomeLaboratorista", 'kind':"1"}       
+               self.datos = {'token': self.token, 'addr':"HomeLaboratorista", 'kind':"1", 'jwt': encoded}       
             elif tipo == "Administrador":
-                self.datos = {'token': self.token, 'addr':"HomeAdmin", 'kind':"2"}
+                self.datos = {'token': self.token, 'addr':"HomeAdmin", 'kind':"2", 'jwt': encoded}
             elif tipo == "Estudiante":
-                self.datos = {'token': self.token, 'addr':"agendaadicionalesM", 'kind':"3"}
+                self.datos = {'token': self.token, 'addr':"agendaadicionalesM", 'kind':"3", 'jwt': encoded}
         else:  
             mensaje = "0"
             print(mensaje)
-            self.status = 1    
+            
+            self.status = 1
+
         return mensaje
 
     def isLoggedIn(self):
@@ -193,132 +212,36 @@ class Usuario(Resource):
             mensaje
         return mensaje
 
-    def reserva(self):
-        mensaje = ""
-        self.status = 2
-
-        # Se toma la fecha de la maquina del usuario (date_user) en formato año-mes-dia y se divide en un vector
-        date_user = request.json['date_user'].split('-')
-        hour_user = request.json['hour_user']
-        minutes_user = request.json['minutes_user']
-        
-        # Con todos los datos de la fecha del usuario se crea un formato de fecha datetime de python
-        date_user = datetime.datetime(int(date_user[0]),int(date_user[1]),int(date_user[2]),hour_user,minutes_user,0)
-        date_now = datetime.datetime.now()  # Fecha del servidor año-mes-dia hora:min:sec
-
-        # Se toma la diferencia en segundos de las fechas (mayor menos menor o se desborda la resta)
-        if(date_user>date_now):
-            difference = (date_user - date_now).seconds
-        else:
-            difference = (date_now - date_user).seconds
-
-        # Si la diferencia no es mayor o menor a 300 segundos entonces continua, sino, rechaza la peticion
-        if(-300<=difference and difference<=300):
-            reservas = mongo.db.Prestamo        # Trae todas las reservas de la base de datos
-
-            sala = request.json['sala']                              # Sala del adicional
-            fecha_adicional = request.json['fecha_adicional']        # Fecha del adicional
-            hora = request.json['hora']                              # Hora del adicional
-            banco = request.json['banco']                            # Banco del adicional
-
-            # Verifica si el banco esta ocupado (Pendiente o Aprobado) o disponible
-            search = reservas.find({"$or":[
-                                        {"$and": [{'Sala': sala}, {'Hora': hora}, {'Fecha_Adicional': fecha_adicional}, {'Banco': banco},{'Estado': "PENDIENTE"}]},
-                                        {"$and": [{'Sala': sala}, {'Hora': hora}, {'Fecha_Adicional': fecha_adicional}, {'Banco': banco},{'Estado': "APROBADO"}]},
-                                    ]}).count()
-            
-            if search == 0:
-                codigo = request.json['codigo']
-
-                # Trae unicamente las reservas del usuaario para no operar sobre toda la base de datos
-                reservasUsuario = reservas.find({'Codigo': codigo})
-
-                # Numero de semana ISO de acuerdo a la fecha del adicional
-                date = fecha_adicional.split('/')
-                dateAdicional = datetime.datetime(int(date[2]), int(date[1]), int(date[0]))
-                adicional_week = dateAdicional.isocalendar()[1]
-
-                actual_week = date_now.isocalendar()[1]     # Numero de semana actual ISO
-                next_week = actual_week + 1                 # Numero de semana siguiente ISO
-                count_actual = 0                            # Contador semana actual
-                count_next = 0                              # Contador semana siguiente
-                count_cruce = 0                             # Contador de cruce adicionales 
-
-                for item in reservasUsuario:
-                    # Identifica si ese usuario ya tiene algun laboratorio en esa franja horaria
-                    if item['Fecha_Adicional'] == fecha_adicional and item['Hora'] == hora:
-                        count_cruce = count_cruce + 1
-
-                    # Identifica cuantos adicionales coinciden con la semana actual o la semana siguiente
-                    if item['Estado'] == "PENDIENTE" or item['Estado'] == "APROBADO":            
-                        date_item = item['Fecha_Adicional'].split('/')
-                        date_item = datetime.datetime(int(date_item[2]),int(date_item[1]),int(date_item[0]))
-                        week_date_item = date_item.isocalendar()[1]                    
-                        count_actual = count_actual+1 if week_date_item==actual_week else count_actual+0
-                        count_next = count_next+1 if week_date_item==next_week else count_next+0
-
-                if count_cruce > 0:
-                    mensaje = "Ya tiene un adicional pendiente en esta franja horaria."
-                elif (count_actual==3 and adicional_week == actual_week):
-                    mensaje = "Ya tiene tres laboratorios registrados para esta semana."
-                elif (count_next==3 and adicional_week == next_week):
-                    mensaje = "Ya tiene tres laboratorios registrados para esta semana."
-                else:
-                    usuario = request.json['usuario']
-                    dia = request.json['diaSemana']
-                    practica = request.json['practica']
-                    elemento = request.json['elemento']
-                    estado = "PENDIENTE"
-                    asistencia = "PENDIENTE"                       
-                    fecha_reserva = date_now.strftime("%d/%m/%Y")
-                    estadoElemento = [""]*len(elemento)
-                    placaElemento = [""]*len(elemento)
-                    monitor = ""
-                    observacionesGenerales = ""
-                    
-                    self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Pendiente")
-
-                    reservas.insert({'Hora': hora, 'Dia': dia, 'Fecha_Adicional': fecha_adicional, 'Fecha_reserva': fecha_reserva,'Codigo': codigo, 'Usuario': usuario, 'Sala': sala, 'practica': practica, 'Banco': banco, 'Elemento': elemento, 'Estado': estado, 'Asistencia': asistencia,'Estado_Elemento': estadoElemento,'Placa_Elemento':placaElemento,'Observaciones_Generales': observacionesGenerales, 'Monitor': monitor})
-
-                    self.status = 1
-                    mensaje = "El adicional se ha registrado correctamente. Pasará a estado PENDIENTE hasta la aprobación de un laboratorista."
-            else:
-                mensaje = "El banco que intenta reservar ya esta ocupado."
-                self.status = 3
-        else:
-            mensaje = "Ocurrio un error de sincronización con la fecha y hora. Revise la hora y fecha de su sistema."
-
-        return mensaje
-
-    def consultabanco(self):
-        mensaje = "0"
-        user = mongo.db.Prestamo
-        hora = request.json['hora']
-        fecha_adicional = request.json['fecha_adicional']
-        sala = request.json['sala']
-        banco = request.json['banco']
-        estado = "PENDIENTE"
-        estado2 = "APROBADO"
-        pregunta = user.find_one({"$and": [{'Sala': sala}, {'Hora': hora}, {
-                                 'Fecha_Adicional': fecha_adicional}, {'Banco': banco},{'Estado':estado}]})
-        pregunta2 = user.find_one({"$and": [{'Sala': sala}, {'Hora': hora}, {
-                                 'Fecha_Adicional': fecha_adicional}, {'Banco': banco},{'Estado':estado2}]})                                 
-                                
-        if pregunta2 != None or pregunta != None:
-            self.status = 1
-            mensaje = "banco ocupado"
-        return mensaje
-
-    def buscarreserva(self):
-        user = mongo.db.Prestamo
+    def getReservasUser(self):
+        reservas = mongo.db.Prestamo
         codigo = request.json['codigo']
+        dateNow = datetime.datetime.now()
         output = []
-        self.status = 1
-        mensaje = "Encontrado"
-        for u in user.find({"Codigo": codigo}):
-        	#'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],
-            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'practica': u['practica'],'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],
-                           'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'],'usuario': u['Usuario'], 'estado': u['Estado']})
+        for u in reservas.find({"Codigo": codigo}):
+            # Solo se puede cancelar un adicional hasta una hora antes y si el estado es aprobado o pendiente
+            # Solo se pueden agregar elementos al adicional hasta 30 minutos antes y si el estado es pendiente
+            day, month, year = u['Fecha_Adicional'].split('/')
+            dateAdicional = datetime.datetime(int(year), int(month), int(day), u['Hora']-1, 0, 0)
+            flagCancelar = dateNow<dateAdicional and (u['Estado']=="PENDIENTE" or u['Estado']=="APROBADO")
+
+            dateAdicional = datetime.datetime(int(year), int(month), int(day), u['Hora']-1, 30, 0)
+            flagAddElementos = dateNow<dateAdicional and u['Estado']=="PENDIENTE"
+
+            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],
+                           'practica': u['Practica'], 'asistencia': u['Asistencia'], 'banco': u['Banco'],
+                           'sala': u['Sala'], 'fecha_reserva': u['Fecha_reserva'], 'usuario': u['Usuario'], 
+                           'codigo': u['Codigo'], 'estado': u['Estado'], 'elementos': u['Elementos'], 
+                           'flagCancelar': flagCancelar, 'flagAddElementos': flagAddElementos, 
+                           'observacionesGenerales': u['Observaciones_Generales'],})
+
+        if len(output)>0:
+            self.status = 1
+            output = output[::-1]
+            mensaje = "Adicionales encontrados."
+        else:
+            self.status = 0
+            mensaje = "No se han encontrado registros de adicionales para el usuario con código %s." %codigo
+            
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
     
     def getReservasLaboratorio(self):
@@ -337,27 +260,50 @@ class Usuario(Resource):
         fecha = request.json['fecha_laboratorio']
         sala = request.json['sala_laboratorio']
         hora = request.json['hora_laboratorio']
-        output = []        
-        registros = user.find({'Fecha_Adicional': fecha, 'Hora': hora, 'Sala': sala})
+        output = []
+
+        registros = user.find({"$or":[
+                                {"$and": [{'Fecha_Adicional': fecha, 'Hora': hora, 
+                                           'Sala': sala, 'Estado': "PENDIENTE"}]},
+                                {"$and": [{'Fecha_Adicional': fecha, 'Hora': hora, 
+                                           'Sala': sala, 'Estado': "APROBADO"}]},
+                            ]})
+
         if registros.count()>0:
             self.status = 1
             mensaje = "Encontrado"
             for u in registros:
-                output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'],'codigo': u['Codigo'],'practica': u['practica'],'asistencia': u['Asistencia'], 'estadoElemento': u['Estado_Elemento'],'placaElemento': u['Placa_Elemento'], 'observacionesGenerales': u['Observaciones_Generales'],'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'],'usuario': u['Usuario'], 'estado': u['Estado'], "monitor": u['Monitor']})
+                output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_adicional': u['Fecha_Adicional'], 
+                               'codigo': u['Codigo'], 'practica': u['Practica'], 'asistencia': u['Asistencia'], 
+                               'observacionesGenerales': u['Observaciones_Generales'], 'monitor': u['Monitor'], 
+                               'fecha_reserva': u['Fecha_reserva'], 'sala': u['Sala'], 'banco': u['Banco'], 
+                               'usuario': u['Usuario'], 'estado': u['Estado'], 'elementos': u['Elementos']
+                              })
         else:
             self.status = 2
-            mensaje = "No hay adicionales registrados para el día " + str(fecha) + " en el laboratorio de " + str(sala) + " durante la franja de " + str(hora) + " - " + str(hora+2)
+            mensaje = "No hay adicionales registrados."
             
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def buscarreservalabo(self):
         user = mongo.db.Prestamo
         output = []
-        self.status = 1
-        mensaje = "Encontrado"
         for u in user.find():
-            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_reserva': u['Fecha_reserva'], 'practica': u['practica'], 'fecha_adicional': u['Fecha_Adicional'],
-                           'sala': u['Sala'], 'banco': u['Banco'], 'elemento': u['Elemento'], 'codigo': u['Codigo'], 'usuario': u['Usuario'], 'estado': u['Estado']})
+            output.append({'hora': u['Hora'], 'dia': u['Dia'], 'fecha_reserva': u['Fecha_reserva'], 
+                           'practica': u['Practica'], 'fecha_adicional': u['Fecha_Adicional'],
+                           'sala': u['Sala'], 'banco': u['Banco'], 'elementos': u['Elementos'], 
+                           'codigo': u['Codigo'], 'usuario': u['Usuario'], 'estado': u['Estado'],
+                           'asistencia': u['Asistencia'], 'monitor': u['Monitor'], 
+                           'observacionesGenerales': u['Observaciones_Generales']})
+
+        if len(output)>0:
+            self.status = 1
+            output = output[::-1]
+            mensaje = "Adicionales encontrados."
+        else:
+            self.status = 0
+            mensaje = "No se encontraron reservas de adicionales."
+
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def borrarreserva(self):
@@ -367,20 +313,17 @@ class Usuario(Resource):
         banco = request.json['banco']
         fecha_adicional = request.json['fecha_adicional']
         hora = request.json['hora']
-        mensaje = "Operación fallida"
-        print(codigo)
-        print(sala)
-        print(banco)
-        print(fecha_adicional)
-        print(hora)
-        borrar = user.delete_one({"$and": [{'Codigo': codigo}, {'Sala': sala}, {'Banco': banco}, {'Fecha_Adicional':fecha_adicional}, {'Hora':hora}]})
-        if borrar:
-            print("Entro al if")
-            self.status = 1
-            print("Pasó el Status:",self.status)
-            mensaje = "usuarios eliminados"
-        print("el mensaje: ",mensaje)
-        return mensaje
+        
+        response = user.delete_one({"$and": [{'Codigo': codigo, 'Sala': sala, 'Banco': banco, 
+                                             'Fecha_Adicional':fecha_adicional, 'Hora':hora}]
+                                   })
+        
+        if response.deleted_count == 0:
+            return "Ha ocurrido un error."
+        
+        self.status = 1
+        self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Disponible")
+        return "Reserva eliminada"
 
     def editarreserva(self):
         user = mongo.db.Prestamo
@@ -405,44 +348,101 @@ class Usuario(Resource):
             mensaje
         return mensaje
     
-    def editarAdicional(self):
-        user = mongo.db.Prestamo
-        datos = request.json['datos']
+    def editarAdicionalesMonitor(self):
+        user = mongo.db.Prestamo                # Trae la base de datos de adicionales estudiantes
+        datos = request.json['datos']           # Toma el array de JSON con la info de los bancos
+
+        # Recorre el arreglo datos para tomar cada uno de los JSON con la info de los adicionales. 
+        # Siempre modifica los campos variables como elementos, estado, placa, monitor y observaciones. 
         for item in datos:
             user.update({"$and": [{'Codigo': item['codigo']}, {'Hora': item['hora']}, {'Dia': item['dia']}, 
                                   {'Fecha_Adicional': item['fecha_adicional']}, {'Fecha_reserva': item['fecha_reserva']}, 
                                   {'Banco': item['banco']}, {'Codigo': item['codigo']}]}, 
-                        {"$set": {'Elemento': item['elemento'], 'Estado_Elemento':item['estadoElemento'], 
-                                  'Placa_Elemento': item['placaElemento'], 'Asistencia': item['asistencia'],
+                        {"$set": {'Elementos': item['elementos'], 'Asistencia': item['asistencia'],
                                   'Monitor': item['monitor'], 'Observaciones_Generales': item['observacionesGenerales']}})
 
         self.status = 1
         mensaje = "Reserva modificada"
         return mensaje
+    
+    def editarElementosAdicional(self):
+        adicionales = mongo.db.Prestamo
+        datos = request.json['datos']
 
-    def aprobarreserva(self):
-        user = mongo.db.Prestamo
-        hora = request.json['hora']
-        sala = request.json['sala']
-        fecha_adicional = request.json['fecha_adicional']
-        banco = request.json['banco']        
-        mensaje = "Operación realizada"
-        aprobar = request.json['aprobar']
-        aprobado = "APROBADO"
-        cancelado = "CANCELADO"
+        response = adicionales.update({"$and": [{'Codigo': datos['codigo']}, {'Hora': datos['hora']}, 
+                                                {'Dia': datos['dia']}, {'Banco': datos['banco']}, 
+                                                {'Fecha_Adicional': datos['fecha_adicional']}, 
+                                                {'Fecha_reserva': datos['fecha_reserva']}]}, 
+                                      {"$set": {'Elementos': datos['elementos']}})
 
-        actualizardatos = user.update({"$and": [{'Sala': sala}, {'Hora': hora}, {'Fecha_Adicional': fecha_adicional}, {'Banco': banco}]}, {"$set": {"Estado": aprobar}})
-        
-        if actualizardatos:
+        if response['updatedExisting']:
+            mensaje = "Reserva modificada."
             self.status = 1
-            if (aprobar==aprobado):
-                self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Reservado")
-                mensaje = "PRÁCTICA APROBADA"
-            if (aprobar==cancelado):
-                self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Disponible")
-                mensaje = "PRÁCTICA CANCELADA"
+        else:
+            mensaje = "Ha ocurrido un error."
+            self.status = 0
 
         return mensaje
+
+    def editarReserva(self):
+        reservas = mongo.db.Prestamo
+        datos = request.json['datos']
+        newEstado = request.json['newEstado']
+
+        sala = datos['sala']
+        banco = datos['banco']
+        fecha_adicional = datos['fecha_adicional']
+        hora = datos['hora']
+        elementos = datos['elementos']
+        observacionesGenerales = datos['observacionesGenerales']
+
+        if newEstado == "CANCELADO":
+            setValues = {"Estado": newEstado, "Asistencia": newEstado, "Elementos": [],
+                         "Observaciones_Generales": observacionesGenerales}
+        else:
+            setValues = {"Estado": newEstado, "Elementos": elementos, 
+                         "Observaciones_Generales": observacionesGenerales}
+
+        response = reservas.update({"$and": [{'Sala': sala, 'Banco': banco,
+                                            'Fecha_Adicional': fecha_adicional, 'Hora': hora}]}, 
+                                   {"$set": setValues})
+
+        if not response['updatedExisting']:
+            self.status = 0
+            return "Ha ocurrido un error."
+
+        self.status = 1
+        
+        if newEstado == "APROBADO":
+            self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Reservado")
+            return "PRÁCTICA APROBADA"
+
+        if newEstado == "CANCELADO":
+            self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Disponible")
+            return "PRÁCTICA CANCELADA"
+
+        return "PRACTICA PENDIENTE"
+
+    def cancelarAdicionalEstudiante(self):
+        user = mongo.db.Prestamo
+        datos = request.json['datos']
+
+        sala = datos['sala']
+        fecha_adicional = datos['fecha_adicional']
+        hora = datos['hora']
+        banco = datos['banco']
+        codigo = datos['codigo']        
+
+        response = user.update({"$and": [{'Sala': sala, 'Fecha_Adicional': fecha_adicional,
+                                         'Hora': hora, 'Banco': banco, 'Codigo': codigo}]}, 
+                                {"$set": {"Estado": "CANCELADO", "Asistencia": "CANCELADO", "Elementos": []}})
+
+        if response['updatedExisting']:
+            self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Disponible")
+            self.status = 1
+            return "PRÁCTICA CANCELADA"
+
+        return "Ha ocurrido un error."
 
     def asistenciareserva(self):
         user = mongo.db.Prestamo
@@ -688,6 +688,44 @@ class Usuario(Resource):
             self.status = 1
         return mensaje
 
+    def actualizarMant(self):
+        print("ENTRO A MANTENIMIENTO 1")
+        mensaje="Operación fallida"
+        mantenimiento = mongo.db.Mantenimiento
+        placa = request.json['placa']
+        Tipo_De_Mantenimiento = request.json['Tipo_De_Mantenimiento']
+        Numero_Interno = request.json['Numero_Interno']
+        fecha = request.json['fecha']
+        
+        nomUsu = request.json['nomUsu']
+        sala = request.json['sala']
+        Horario = request.json['Horario']
+        descDano = request.json['descDano']
+        fechaReal = request.json['fechaReal']
+        nomEmpresa = request.json['nomEmpresa']
+        nit = request.json['nit']		
+        tiempoGar = request.json['tiempoGar']		
+        espMantReal = request.json['espMantReal']        
+        costMant = request.json['costMan']
+        numOrdServ = request.json['numOrdServ']                                 
+        vigencia = request.json['vigencia']
+        supervisor = request.json['supervisor']
+        repuestos = request.json['repuestos']
+        proxMant = request.json['proxMant'] 
+        observaciones = request.json['observaciones']
+      
+        Estado = request.json['Estado']
+
+        print("ENTRO A MANTENIMIENTO 2")
+
+        actualizardatos = mantenimiento.update({"$and": [{'Placa':placa, 'Fecha':fecha, 'Horario':Horario}]}, {"$set": {'Descripcion_Dano':descDano,'Tipo_De_Mantenimiento':Tipo_De_Mantenimiento,'Fecha_De_Realizacion':fechaReal,'Nombre_Empresa_Contratada':nomEmpresa,'Nit':nit,'Tiempo_De_Garantia':tiempoGar,'Especificaciones_Del_Mantenimiento_Realizado':espMantReal,'Costo_Mantenimiento':costMant,'Numero_Orden_De_Servicio_Del_Mantenimiento':numOrdServ,'Vigencia':vigencia,'Supervisor':supervisor,'Repuestos':repuestos,'Proximo_Mantenimiento':proxMant,'Observaciones':observaciones,'Estado':Estado}})
+
+        if actualizardatos:
+            self.status = 1
+            mensaje="Mantenimiento Actualizado"
+
+        return mensaje
+
     def registrarMant(self):
         mensaje = "0"
         elemento = mongo.db.Mantenimiento
@@ -847,18 +885,52 @@ class Usuario(Resource):
         return mensaje
 
     #############################################################################################
-    ######                Funciones para los calendarios de adicionales                   #######
+    ######                        Funciones para los adicionales                          #######
     #############################################################################################
 
+    def authorization(self, header, tipo):
+        if (header.startswith('Bearer')):
+            # Indica que se esta logueado
+            token = header.split(' ')[1]            
+            try:
+                decode = jwt.decode(token, "secret", algorithms="HS256")
+                if decode['tipo'] in tipo:
+                    return True
+                else:
+                    return False
+            except Exception as e:
+                mensaje = ("Hubo una exception: " + str(e))
+                return False
+
     def getHorariosAdicionales(self):
+        try:
+            response = self.authorization(request.headers['Authorization'], ["Laboratorista"])
+        except Exception as e:
+            response = False
+            print(e)
+
+        if not response:
+            return {'status': 0, 'mensaje': "error", 'data': []}
+
+        
+
         # Retorna todos los horarios adicionales para la vista de la agenda en el portal laboratoristas
         horarios = mongo.db.horariosAdicionales
 
+        dateNow = datetime.datetime.now()
+
         output = []
         for horario in horarios.find():
+
+            year, month, day = horario['Fecha'].split("-") 
+            dateEnable = datetime.datetime(int(year), int(month), int(day), horario['Hora'], 5, 0)
+            state = dateNow<dateEnable
+
             start = horario['Fecha'] + " " + str(horario['Hora']) + ":00"
             end = horario['Fecha'] + " " + str(horario['Hora']+2) + ":00"
-            output.append({'name': horario['Laboratorio'], 'start': start, 'end': end, 'bancos': horario['Bancos'], 'weekday': horario['Dia'], 'hour': horario['Hora']})
+            output.append({'name': horario['Laboratorio'], 'bancos': horario['Bancos'], 
+                           'weekday': horario['Dia'], 'hour': horario['Hora'], 'state': state, 
+                           'start': start, 'end': end})
 
         if len(output)>0:
             mensaje = "Adicionales encontrados"
@@ -867,37 +939,145 @@ class Usuario(Resource):
             self.status = 0
             mensaje = "No se han encontrado registros de adicionales"
         
-        return {'status': self.status, 'mensaje': mensaje, 'data': output}    
+        return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
     def getHorariosAdicionalesEstudiantes(self):
-        horarios = mongo.db.horariosAdicionales     # Trae la base de datos de horarios
+        horarios = mongo.db.horariosAdicionales     # Trae la base de datos de horarios adicionales
+        reservas = mongo.db.Prestamo                # Trae la base de datos de reservas estudiantes
+        codigoUser = request.json['codigoUser']
 
-        dateNow = datetime.datetime.now()           # Fecha del servidor año-mes-dia hora:min:sec
-        weekNow = dateNow.isocalendar()[1]          # Numero de semana ISO del año
-        weekdayNow = dateNow.weekday()              # Numero de la semana (0 lunes - 6 domingo)
+        dateNow = datetime.datetime.now()
+        weekNow = dateNow.isocalendar()[1]
+        weekdayNow = dateNow.weekday()
 
-        output = []                                 # Lista de diccionarios con los adicionales a retornar
+        output = []
 
         for horario in horarios.find():
-            # Se obtiene el numero de semana ISO del adicional y solo se retornan aquellos que sean de la semana actual o hasta ocho días despues del dia actual.
-            weekHorario = self.weekFromDate(horario['Fecha'], "-")
+            # Se obtiene el numero de semana ISO de la fecha del adicional y solo se retornan 
+            # las que coincidan con la semana actual o hasta ocho días despues del dia actual
+            weekHorario = self.weekNumberFromDate(horario['Fecha'], "-", 1)
 
             condicion1 = weekHorario == weekNow
             condicion2 = weekHorario == weekNow+1 and horario['Dia']-1 <= weekdayNow
             
-            if condicion1 or condicion2:      
+            if condicion1 or condicion2:
+                # Se verifica con el codigo del estudiante si el horario del adicional presenta
+                # cruce con alguna reserva que tenga en la misma franja horaria
+
+                listFechaAdicional = horario['Fecha'].split('-')
+                fechaAdicional = "/".join(listFechaAdicional[::-1])
+
+                search = reservas.find_one({"$and": 
+                                                   [{'Codigo': codigoUser, 'Fecha_Adicional': fechaAdicional, 
+                                                   'Hora': horario['Hora'], 'Sala': horario['Laboratorio']}]
+                                            })
+
+                if search is not None:
+                    state = search['Estado']        # Horario no disponible debido a cruce con otro adicional
+                else:
+                    # dateEnable es la fecha para la cual el adicional puede ser o no reservado
+                    year, month, day = listFechaAdicional
+                    dateEnable = datetime.datetime(int(year), int(month), int(day), horario['Hora'], 5, 0)
+
+                    # state: true -> permite reservar el adicional; false -> no permite reservar
+                    state = dateNow<dateEnable
+
+                # strings para el manejo de eventos del v-calendar (año-mes-dia hora:min)
                 start = horario['Fecha'] + " " + str(horario['Hora']) + ":00"
                 end = horario['Fecha'] + " " + str(horario['Hora']+2) + ":00"
-                output.append({'name': horario['Laboratorio'], 'start': start, 'end': end, 'bancos': horario['Bancos'], 'weekday': horario['Dia'], 'hour': horario['Hora']})
+
+                output.append({'name': horario['Laboratorio'], 'start': start, 'end': end, 'state': state,
+                               'bancos': horario['Bancos'], 'weekday': horario['Dia'], 'hour': horario['Hora']
+                              })
             
         if len(output)>0:
             mensaje = "Adicionales encontrados"
-            self.status = weekNow
+            self.status = 1
         else:
             self.status = 0
             mensaje = "No se han encontrado registros de adicionales"
+        
+        return {'status': self.status, 'mensaje': mensaje, 'data': output}
 
-        return {'status': self.status, 'mensaje': mensaje, 'data': output}    
+    def addReservaEstudiante(self):
+        # Se compara la hora del equipo del usuario con la del servidor y 
+        # solo se admiten adicionales con diferencia de +- 5 minutos
+        yearUser, monthUser, dayUser = request.json['dateUser'].split('-')
+
+        hourUser = request.json['hourUser']
+        minutesUser = request.json['minutesUser']
+        dateUser = datetime.datetime(int(yearUser), int(monthUser), int(dayUser), hourUser, minutesUser, 0)
+        dateServer = datetime.datetime.now()
+
+        if(dateUser>dateServer):
+            difference = (dateUser - dateServer).seconds
+        else:
+            difference = (dateServer - dateUser).seconds
+
+        if(difference<=-300 or 300<=difference):
+            return "Ocurrio un error de sincronización con la fecha y hora. Por favor revise la hora y fecha de su sistema."
+
+        reservas = mongo.db.Prestamo
+        datos = request.json['datos']
+
+        fecha_adicional = datos['fecha_adicional']
+        sala = datos['sala']
+        hora = datos['hora']
+        banco = datos['banco']
+
+        search = reservas.find({"$or":[
+                                    {"$and": [{'Sala': sala}, {'Fecha_Adicional': fecha_adicional}, 
+                                              {'Hora': hora}, {'Banco': banco}, {'Estado': "PENDIENTE"}]},
+                                    {"$and": [{'Sala': sala}, {'Fecha_Adicional': fecha_adicional}, 
+                                              {'Hora': hora}, {'Banco': banco}, {'Estado': "APROBADO"}]},
+                                ]})
+        
+        if search.count() != 0:
+            self.status = 2
+            return "El banco que intenta reservar ya esta ocupado."
+
+        codigoUser = request.json['codigoUser']
+
+        weekAdicional = self.weekNumberFromDate(fecha_adicional, '/', 2)
+
+        weekNow = dateServer.isocalendar()[1]
+        weekNext = weekNow + 1
+        countActualWeek = 0
+        countNextWeek = 0
+
+        # Identifica cuantos adicionales del usuario coinciden con la semana actual o la semana siguiente
+        for reserva in reservas.find({'Codigo': codigoUser}):
+            if reserva['Estado'] == "PENDIENTE" or reserva['Estado'] == "APROBADO":
+                weekReserva = self.weekNumberFromDate(reserva['Fecha_Adicional'], '/', 2)
+                countActualWeek = countActualWeek + 1 if weekReserva == weekNow else countActualWeek + 0
+                countNextWeek = countNextWeek + 1 if weekReserva == weekNext else countNextWeek + 0
+
+        if (countActualWeek == 3 and weekAdicional == weekNow):
+            self.status = 3
+            return "Ya tiene tres laboratorios registrados para esta semana."
+
+        if (countNextWeek == 3 and weekAdicional == weekNext):
+            self.status = 3
+            return "Ya tiene tres laboratorios registrados para esta semana."
+        
+        user = request.json['usuario']
+        fecha_reserva = dateServer.strftime("%d/%m/%Y")
+        estado = "PENDIENTE"
+        asistencia = "PENDIENTE"
+        monitor = ""
+        observacionesGenerales = ""
+        
+        self.status = 1
+        reservas.insert({'Hora': hora, 'Dia': datos['diaSemana'], 'Fecha_Adicional': fecha_adicional, 
+                         'Fecha_reserva': fecha_reserva, 'Codigo': codigoUser, 'Usuario': user, 
+                         'Sala': sala, 'Practica': datos['practica'], 'Banco': banco, 'Estado': estado, 
+                         'Asistencia': asistencia, 'Observaciones_Generales': observacionesGenerales, 
+                         'Monitor': monitor, 'Elementos': datos['elementos']
+                        })
+        
+        self.setBancoAdicional(fecha_adicional, sala, hora, banco, "Pendiente")
+
+        return "El adicional se ha registrado correctamente. Pasará a estado PENDIENTE hasta la aprobación de un laboratorista."
     
     def addHorarioAdicional(self):
         self.status = 0     # Status 0 -> no logro agregar ningun campo de adicional
@@ -913,7 +1093,7 @@ class Usuario(Resource):
 
         if repeat:        
             # Identifica la semana en la cual se dio click para agregar el evento
-            weekClick = self.weekFromDate(request.json['dateClick'], "-")
+            weekClick = self.weekNumberFromDate(request.json['dateClick'], "-", 1)
 
             # Identifica el No. de semana para la cual se debe repetir el adicional
             dateRepeat = request.json['dateRepeat'].split('/')
@@ -961,23 +1141,21 @@ class Usuario(Resource):
             self.status = 1         # Status 1 -> Al menos un adicional fue agregado con exito
 
     def setBancoAdicional(self, fecha_adicional, sala, hora, banco, estado):
-        # Trae la base de datos
         horario = mongo.db.horariosAdicionales
-        # Convierte el formato de la fecha adicional al formato del v-calendar
-        fecha_adicional = fecha_adicional.split('/')
-        fecha_adicional = fecha_adicional[2] + "-" + fecha_adicional[1] + "-" + fecha_adicional[0]
-        # Hace una busqueda en la base de datos del laboratorio adicional
+        day, month, year = fecha_adicional.split('/')
+        fecha_adicional = year + "-" + month + "-" + day
         search = horario.find_one({'Laboratorio': sala, 'Hora': hora, 'Fecha': fecha_adicional})
-        # Actualiza el vector de bancos con el estado enviado
         Bancos = search['Bancos']
         Bancos[banco-1] = estado
-        # Actualiza el documento
         horario.update({"$and": [{'Laboratorio': sala, 'Hora': hora, 'Fecha': fecha_adicional}]}, {"$set": {"Bancos": Bancos}})
 
-    def weekFromDate(self, date, separator):
+    def weekNumberFromDate(self, date, separator, format):
         # Funcion que a partir de el string de una fecha, obtiene el numero de la semana ISO 
         date = date.split(separator)
-        dateFormat = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+        if format==1:
+            dateFormat = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+        else:
+            dateFormat = datetime.datetime(int(date[2]), int(date[1]), int(date[0]))    
         return dateFormat.isocalendar()[1]
 
     def deleteHorarioAdicional(self):
@@ -1704,10 +1882,10 @@ class Usuario(Resource):
             mensaje = self.login()   
         elif accion == "borrar":
             mensaje = self.borrarPrueba()
-        elif accion == "reserva":
-            mensaje = self.reserva()
-        elif accion == "buscarreserva":
-            respuesta = self.buscarreserva()
+        elif accion == "addReservaEstudiante":
+            mensaje = self.addReservaEstudiante()
+        elif accion == "getReservasUser":
+            respuesta = self.getReservasUser()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
         elif accion == "getReservasLaboratorio":
@@ -1718,10 +1896,14 @@ class Usuario(Resource):
             mensaje = self.borrarreserva()
         elif accion == "editarreserva":
             mensaje = self.editarreserva()
-        elif accion == "editarAdicional":
-            mensaje = self.editarAdicional()
-        elif accion == "aprobarreserva":
-            mensaje = self.aprobarreserva()
+        elif accion == "editarAdicionalesMonitor":
+            mensaje = self.editarAdicionalesMonitor()
+        elif accion == "editarElementosAdicional":
+            mensaje = self.editarElementosAdicional()
+        elif accion == "editarReserva":
+            mensaje = self.editarReserva()
+        elif accion == "cancelarAdicionalEstudiante":
+            mensaje = self.cancelarAdicionalEstudiante()
         elif accion == "asistenciareserva":
             mensaje = self.asistenciareserva()            
         elif accion == "consultaeditlabo":
@@ -1740,10 +1922,10 @@ class Usuario(Resource):
             respuesta = self.consultaTraslados()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "consultabanco":
-            mensaje = self.consultabanco()
         elif accion == "registrarMant":
             mensaje = self.registrarMant()
+        elif accion == "actualizarMant":
+            mensaje = self.actualizarMant()
         elif accion == "excelTemporalElementos":
             mensaje = self.excelTemporalElementos()
         elif accion == "excelTemporalFilterDate":
@@ -1758,6 +1940,10 @@ class Usuario(Resource):
             mensaje = self.addHorarioAdicional()
         elif accion == "deleteHorarioAdicional":
             mensaje = self.deleteHorarioAdicional()
+        elif accion == "getHorariosAdicionalesEstudiantes":
+            respuesta = self.getHorariosAdicionalesEstudiantes()
+            mensaje = respuesta['mensaje']
+            self.datos = respuesta['data']
 
         else:
             self.status = 2
@@ -1811,10 +1997,6 @@ class Usuario(Resource):
             return self.xirioLogo()
         elif accion == "getHorariosAdicionales":
             respuesta =  self.getHorariosAdicionales()
-            mensaje = respuesta ['mensaje']
-            self.datos = respuesta['data']
-        elif accion == "getHorariosAdicionalesEstudiantes":
-            respuesta =  self.getHorariosAdicionalesEstudiantes()
             mensaje = respuesta ['mensaje']
             self.datos = respuesta['data']
 

@@ -14,7 +14,7 @@ import CryptoJS from 'crypto-js';
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
 import Chart from 'chart.js';
-import VueCharts from 'vue-chartjs'
+import VueCharts from 'vue-chartjs';
 
 Vue.use(VueCookies);
 

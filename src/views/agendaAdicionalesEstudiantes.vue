@@ -96,7 +96,7 @@
         type="week"
         :weekdays="weekdaysCalendar"
         :short-weekdays="false"
-        :events="calendarEventsAdicionales"
+        :events="calendarAdicionales"
         color="primary"
         interval-minutes="120"
         first-time="06:00"
@@ -104,7 +104,7 @@
         :interval-height="70"
         :show-interval-label="showIntervalLabel"
         :interval-format="intervalFormat"
-        @click:event ="clickInEventAdicional"
+        @click:event ="clickInHorarioAdicional"
         class="botton"
       >
         <template v-slot:day-body="{ date }">
@@ -121,16 +121,17 @@
         </template>
       </v-calendar>
       <v-menu
-        v-model="menuEventAdicional"
+        v-model="menuInfoAdicional"
         :close-on-content-click="false"
-        :activator="divEventAdicional"
+        :open-on-click="false"
+        :activator="divElementAdicional"
         offset-x
       >
         <v-card color="grey lighten-4" width="320px" flat>
-          <v-toolbar :color="selectedEventAdicional.color" dark>
-            <v-toolbar-title v-html="selectedEventAdicional.name"></v-toolbar-title>
+          <v-toolbar :color="selectedAdicional.color" dark>
+            <v-toolbar-title v-html="selectedAdicional.name"></v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn icon large @click.prevent="menuEventAdicional = false">
+            <v-btn icon large @click.prevent="menuInfoAdicional = false">
               <v-icon>fas fa-times</v-icon>
             </v-btn>
           </v-toolbar>
@@ -144,13 +145,13 @@
               elevation="4" 
               class="text-subtitle-2 mb-5" 
               prominent
-              v-if="selectedEventAdicional.state !== true && selectedEventAdicional.state !== false"
+              v-if="selectedAdicional.state !== true && selectedAdicional.state !== false"
             >
               Tiene registrado un
               <router-link :to="{
                 name: 'consulta'}">
-                <span @click="sendReservaToConsulta">
-                  adicional {{selectedEventAdicional.state}}
+                <span @click="sendReservaToVistaConsulta">
+                  adicional {{selectedAdicional.state}}
                 </span>
               </router-link>
               en este horario.
@@ -158,10 +159,10 @@
             <v-divider></v-divider>
             <v-row no-gutters class="mb-2 ml-2 mt-2">
               <v-col cols="12" sm="4" class="text-subtitle-2">
-                Día: {{weekdaysString[selectedEventAdicional.weekday-1]}}
+                Día: {{weekdaysString[selectedAdicional.weekday-1]}}
               </v-col>
               <v-col cols="12" sm="6" offset="2" class="text-subtitle-2">
-                Horario: {{selectedEventAdicional.hour}}:00 - {{selectedEventAdicional.hour+2}}:00
+                Horario: {{selectedAdicional.hour}}:00 - {{selectedAdicional.hour+2}}:00
               </v-col>
             </v-row>
             <v-row no-gutters class="mb-1 ml-2 mt-3 text-subtitle-2" v-if="auxEstadoBancos.habilitados.length>0">
@@ -181,7 +182,7 @@
           </v-card-text>            
           <v-card-actions>
             <v-row no-gutters v-if="enableBtnSolicitarReserva()" justify="center" class="px-4 mb-3 mt-n2">
-              <v-btn block :color="selectedEventAdicional.color" dark @click="setFormReserva">
+              <v-btn block :color="selectedAdicional.color" dark @click="setFormReserva">
                 Solicitud de reserva
               </v-btn>
             </v-row>
@@ -194,7 +195,7 @@
       
     <v-dialog v-model="menuFormReserva" max-width="530px">
       <v-card color="grey lighten-4">
-        <v-toolbar :color="selectedEventAdicional.color" dark>
+        <v-toolbar :color="selectedAdicional.color" dark>
           <v-toolbar-title class="text-h6">Reserva de laboratorio adicional</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon large @click.prevent="menuFormReserva = false">
@@ -204,13 +205,13 @@
 
         <v-stepper  tile non-linear v-model="modelStepperReserva">
           <v-stepper-header class="mt-n3" flat>
-            <v-stepper-step :complete="modelStepperReserva > 1" step="1" :color="selectedEventAdicional.color" editable>
+            <v-stepper-step :complete="modelStepperReserva > 1" step="1" :color="selectedAdicional.color" editable>
               Información  
               <hr>
               del adicional
             </v-stepper-step>
             <v-divider></v-divider>
-            <v-stepper-step step="2" :color="selectedEventAdicional.color" editable>
+            <v-stepper-step step="2" :color="selectedAdicional.color" editable>
               Elementos 
               <hr>
               Adicionales
@@ -247,7 +248,7 @@
                     <v-col cols="12" sm="6" class="text-subtitle-1 pr-3">
                       3. Dia del adicional
                       <v-text-field
-                        :value="weekdaysString[formReserva.diaSemana-1]"
+                        :value="formReserva.diaSemana"
                         outlined
                         dense
                         disabled
@@ -300,7 +301,7 @@
                 </v-card-text>            
                 <v-card-actions class="mx-6 mb-n2 mt-n3">
                   <v-row no-gutters>
-                    <v-btn large block :color="selectedEventAdicional.color" @click="modelStepperReserva=2" dark>
+                    <v-btn large block :color="selectedAdicional.color" @click="modelStepperReserva=2" dark>
                       Siguiente
                     </v-btn>
                   </v-row>
@@ -318,7 +319,7 @@
                   <v-row no-gutters class="px-3">
                     <v-col cols="12" sm="9">
                       <v-text-field
-                        label="Ingrese un elemento adicional"
+                        label="Ingrese un elemento adicional (máx. 10)"
                         hide-details="auto"
                         v-model = "inputElementoAdicional"
                         dense
@@ -326,25 +327,25 @@
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="2" align-self="center" class="pl-4">
-                      <v-btn :color="selectedEventAdicional.color" outlined elevation="1" tile medium class="px-2 py-1" @click="addElementoAdicional()">
+                      <v-btn :color="selectedAdicional.color" outlined elevation="1" tile medium class="px-2 py-1" @click="addElementoAdicional()">
                         Agregar
                       </v-btn>
                     </v-col>
                   </v-row>      
-                  <v-card elevation="4" class="mt-4 pa-2 mx-3 scroll"  v-if="formReserva.elemento.length !== 0" max-height="160">
+                  <v-card elevation="4" class="mt-4 pa-2 mx-3 scroll"  v-if="formReserva.elementos.length !== 0" max-height="160">
                     <v-card-text>
-                      <v-row no-gutters v-for= "(item,index) in formReserva.elemento" :key="index">
+                      <v-row no-gutters v-for= "(elemento,index) in formReserva.elementos" :key="index">
                         <v-col cols="12" sm="10">
                           <v-divider></v-divider>
                           <ol>
                             <dt align="left">
-                              {{index+1}}. {{item}}
+                              {{index+1}}. {{elemento.nombre}}
                             </dt>
                           </ol>
                         </v-col>
                         <v-col cols="12" sm="2" align="center">
                           <v-divider></v-divider>
-                          <v-icon small @click="formReserva.elemento.splice(index,1)"> 
+                          <v-icon small @click="formReserva.elementos.splice(index,1)"> 
                             fas fa-trash-alt
                           </v-icon>
                         </v-col>
@@ -355,7 +356,7 @@
                 </v-card-text>                
                 <v-card-actions class="mx-5 mb-n2">
                   <v-row no-gutters>
-                    <v-btn large block :color="selectedEventAdicional.color" :dark="modelFormReserva" :disabled="!modelFormReserva"
+                    <v-btn large block :color="selectedAdicional.color" :dark="modelFormReserva" :disabled="!modelFormReserva"
                     @click="checkFormReserva">
                       Enviar
                     </v-btn>
@@ -372,6 +373,7 @@
 
 <script>
 import Headerestudiantes from "@/components/Headerestudiantes.vue";
+import jwt_decode from "jwt-decode";
 
 export default {
   components: {
@@ -383,8 +385,8 @@ export default {
       readyCalendar: false,
       weekNumberCalendar: null,
 
-      allEventsAdicionales:[],
-      calendarEventsAdicionales: [],
+      allAdicionales:[],
+      calendarAdicionales: [],
 
       dateNow: "",                          // formato año-mes-dia
       weekNumberNow: null,                  // Numero de semana ISO (1 to 52 or 53)
@@ -402,11 +404,21 @@ export default {
         libres: [],                 // Bancos habilitados que pueden ser ocupados
       },      
 
-      selectedEventAdicional: {},
-      menuEventAdicional: false,
-      divEventAdicional: null,
+      selectedAdicional: {
+        bancos: [],
+        color: "",
+        date: "",
+        hour: null,
+        name: "",
+        start: "",
+        state: null,
+        weekday: null,
+      },
+      
+      menuInfoAdicional: false,
+      divElementAdicional: null,
 
-      menuFormReserva: false,      
+      menuFormReserva: false,
 
       formReserva:{
         fecha_adicional: "",              // Fecha del adicional en formato dia/mes/año 
@@ -415,7 +427,7 @@ export default {
         diaSemana: "",                    // Día de la semana
         banco: "",                        // Numero de banco
         practica: "",                     // Nombre de la practica
-        elemento: [],                     // Elementos solicitados
+        elementos: [],                    // Elementos solicitados
       },
       inputElementoAdicional: "",
       rulesFormReserva:{
@@ -425,6 +437,7 @@ export default {
       modelStepperReserva: 1,
     }
   },
+
   created(){
     this.dateNow = this.conversionDate();
     let [year, month, day] = this.dateNow.split("-");
@@ -434,8 +447,9 @@ export default {
     this.nameLabSelectArray = this.infoLabsStore.map(lab => lab.name);
     this.nameLabSelectArray.push("Ver todos");
   },
-  mounted(){   
-    this.getEventsAdicionales();
+
+  mounted(){
+    this.getHorariosAdicionales();
     this.readyCalendar = true;
   },
   watch:{
@@ -444,7 +458,7 @@ export default {
       val === false ? this.$refs.formReserva.reset() : null;
     },
     nameLabSelected: function(){
-      this.filterEventsAdicionalesByName();
+      this.filterHorariosAdicionalesByName();
     },
   },
   computed: {
@@ -458,6 +472,7 @@ export default {
     },
   },
   methods:{
+
     conversionDate(){
       // Esta función toma la fecha dada la función Date() de JS y retorna una fecha en el formato año-mes-dia. Esto se realiza para evitar utilizar la función Date().toISOString ya que esta última no tiene en cuenta la zona horaria y en horas de la noche toma la fecha como la del dia siguiente. 
       let date = new Date();
@@ -466,34 +481,40 @@ export default {
       let day = date.getDate().toString();
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
     },
+
     showIntervalLabel(interval) {
       // Esta función permite visualizar el primer dato de tiempo (06:00) en el v-calendar
       return interval.minute === 0
     },
+
     intervalFormat(interval) {
       // Esta función modifica el formato de visualización de las horas en el v-calendar a hh:mm
       return interval.time
     },
+
     formatTitle(title){
       // Funcion que pone la primera letra en mayuscula para un string
       return title.charAt(0).toUpperCase() + title.slice(1);
     },
+
     changeWeek(val){
       // Funcion para los botones de cambiar la semana en el header del v-calendar
       if(val===0){
         this.$refs.calendarEstudiantes.prev();
       }else{
         this.$refs.calendarEstudiantes.next();
-      }      
+      }
       let [year, month, day] = this.modelCalendar.split('-');
       this.weekNumberCalendar = this.findWeekNumberFromDate(year, month-1, day);
     },
+
     gotoWeekNowCalendar(){
-      // Lleva la vista del calendario a la semana actual. 
+      // Lleva la vista del calendario a la semana actual
       this.modelCalendar = "";       // Se debe limpiar el model del v-calendar 
       this.weekNumberCalendar = this.weekNumberNow;
     },
-    findWeekNumberFromDate(year,month,day){
+
+    findWeekNumberFromDate(year, month, day){
       // Funcion que a partir de una fecha, identifica el número de la semana del año según formato ISO.
       var date = new Date(year,month,day);
       var nDay = (date.getDay() + 6) % 7;
@@ -505,88 +526,104 @@ export default {
       }
       return 1 + Math.ceil((n1stThursday - date) / 604800000);
     },
-    filterEventsAdicionalesByName(){
+
+    filterHorariosAdicionalesByName(){
       // Se hace el filtro de los eventos de acuerdo al valor de labSelect
       if(this.nameLabSelected === "Ver todos"){
-        this.calendarEventsAdicionales = this.allEventsAdicionales;
+        this.calendarAdicionales = this.allAdicionales;
       }else{
-        this.calendarEventsAdicionales = this.allEventsAdicionales.filter(lab => lab.name === this.nameLabSelected);
+        this.calendarAdicionales = this.allAdicionales.filter(lab => lab.name === this.nameLabSelected);
       }
     },    
-    clickInEventAdicional ({ nativeEvent, event }){        
-      // Se toma en selectedEventAdicional la información de interes del adicional seleccionado
-      const open = () => {        
+
+    clickInHorarioAdicional ({ nativeEvent, event }){
+      // Se toma en selectedAdicional la información de interes del adicional seleccionado
+      const open = () => {
         let [year, month, day] = event.start.split(" ")[0].split("-");
-        let {end, ...restOfEvent} = event;        
-        this.selectedEventAdicional = {...restOfEvent, fecha: `${day}/${month}/${year}`};
-        this.divEventAdicional = nativeEvent.target;
-        this.getEstadoBancos(this.selectedEventAdicional);
-        requestAnimationFrame(() => requestAnimationFrame(() => this.menuEventAdicional = true));
-      }
-      if (this.menuEventAdicional) {
-        this.menuEventAdicional = false;
+        let {end, ...restOfAdicional} = event;
+        this.selectedAdicional = {...restOfAdicional, date: `${day}/${month}/${year}`};
+        this.divElementAdicional = nativeEvent.target;
+        this.getEstadoBancos(this.selectedAdicional);
+        requestAnimationFrame(() => requestAnimationFrame(() => this.menuInfoAdicional = true));
+      }      
+      if (this.menuInfoAdicional) {
+        this.menuInfoAdicional = false;
         requestAnimationFrame(() => requestAnimationFrame(() => open()));
       } else {
         open();
       }
-
       nativeEvent.stopPropagation();
     },
-    getEstadoBancos(event){    
-      // Recibe un objeto de evento y toma la información de los bancos según corresponda
-      // Posibles valores de de event.bancos: No Disponible, Disponible, Pendiente, Reservado
+
+    getEstadoBancos(adicional){    
+      // Recibe un objeto del adicional y toma la información de los bancos según corresponda
+      // Posibles valores de de adicional.bancos: No Disponible, Disponible, Pendiente, Reservado
       this.auxEstadoBancos = {
         habilitados: [],
         ocupados: [],
         libres: [],
       };
-      let lengthBancosEvent = event.bancos.length;
+      let lengthBancosEvent = adicional.bancos.length;
       for(let i=0; i<lengthBancosEvent; i++){
-        if(event.bancos[i]!=="No Disponible"){
+        let estado = adicional.bancos[i];
+        if(estado !== "No Disponible"){
           this.auxEstadoBancos.habilitados.push(i+1);       // Bancos habilitados para reserva
-          if(event.bancos[i]==="Pendiente" || event.bancos[i]==="Reservado"){
+          if(estado === "Pendiente" || estado === "Reservado"){
             this.auxEstadoBancos.ocupados.push(true);       // Bancos para reserva ocupados
           }else{
             this.auxEstadoBancos.ocupados.push(false);      // Bancos para reserva libres
-            this.auxEstadoBancos.libres.push(i+1);          // Bancos libres para reserva        
+            this.auxEstadoBancos.libres.push(i+1);          // Bancos libres para reserva   
           }
         }
-      }
+      }      
     },
+
     enableBtnSolicitarReserva(){
       // Habilita el btn de solicitar reserva solo si el adicional tiene bancos libres y si el state es true
-      return this.auxEstadoBancos.libres.length>0 && this.selectedEventAdicional.state === true
+      return this.auxEstadoBancos.libres.length>0 && this.selectedAdicional.state === true
     },
-    sendReservaToConsulta(){
+
+    sendReservaToVistaConsulta(){
       // Guarda en el store de Vuex la fecha y hora del adicional para hacer el filtrado en /consulta
-      this.$store.state.date = this.selectedEventAdicional.fecha;
-      this.$store.state.hour = this.selectedEventAdicional.hour;
+      this.$store.state.date = this.selectedAdicional.date;
+      this.$store.state.hour = this.selectedAdicional.hour;
     },
+
     setFormReserva(){
       // Toma la información para llenar el formulario e información de interés para enviar al servidor
-      let {fecha, name, hour, weekday} = this.selectedEventAdicional;
+      let {date, name, hour, weekday} = this.selectedAdicional;
       this.formReserva = {
-        fecha_adicional: fecha,
+        fecha_adicional: date,
         sala: name,
         hora: hour,
-        diaSemana: weekday,
+        diaSemana: this.weekdaysString[weekday - 1],
         banco: null,
         practica: null,
-        elemento: [],
+        elementos: [],
       }
       this.modelStepperReserva = 1;
-      this.menuEventAdicional = false;
+      this.menuInfoAdicional = false;
       this.menuFormReserva = true;
     },
+
     addElementoAdicional(){
       // Valida que el elemento agregado en el input del adicional no sea un espacio en blanco o vacío
-      if (this.inputElementoAdicional.length>0){
+      if(this.inputElementoAdicional.length>0){
         if(this.inputElementoAdicional.replace(/ /g, "").length>0){
-          this.formReserva.elemento.push(this.inputElementoAdicional);
+          if(this.formReserva.elementos.length<10){
+            this.formReserva.elementos.push({
+              nombre: this.inputElementoAdicional,
+              estado: "PENDIENTE",
+              placa: ""
+            });
+          }else{
+            alert("Solo se permite un máximo 10 elementos.")
+          }
         }
       }            
       this.inputElementoAdicional = "";
     },
+
     checkFormReserva(){
       // Se valida si los campos de banco y practica han sido llenados
       if(this.$refs.formReserva.validate()){
@@ -595,24 +632,20 @@ export default {
         this.modelStepperReserva = 1;
       }
     },
+
     sendFormReservaToServer(){
-      let cod_encrypted = this.$cookies.get("user_session");      
-      let codigoLab = this.$Crypto.AES.decrypt(cod_encrypted, localStorage.cdcb0830cc2dd220);      
-      let objeto = this;      
-      this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/reservaEstudiante",
-        {
-          codigo: codigoLab.toString(this.$Crypto.enc.Utf8),
+      let cod_encrypted = this.$cookies.get("user_session");
+      let codigoLab = this.$Crypto.AES.decrypt(cod_encrypted, localStorage.cdcb0830cc2dd220);
+      codigoLab = codigoLab.toString(this.$Crypto.enc.Utf8);
+      this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/addReservaEstudiante",
+        { 
+          codigoUser: codigoLab,
           usuario: localStorage.usuario,
-          hora: this.formReserva.hora,
-          fecha_adicional: this.formReserva.fecha_adicional,
-          sala: this.formReserva.sala,
-          banco: this.formReserva.banco,
-          elemento: this.formReserva.elemento,
-          practica: this.formReserva.practica,
-          diaSemana: this.weekdaysString[this.formReserva.diaSemana-1],
-          date_user: this.dateNow,
-          hour_user: new Date().getHours(),
-          minutes_user: new Date().getMinutes()
+          datos: this.formReserva,
+
+          dateUser: this.dateNow,
+          hourUser: new Date().getHours(),
+          minutesUser: new Date().getMinutes()
         },
         {
           headers: {
@@ -620,54 +653,48 @@ export default {
           }
         }
       )
-      .then(function(response){        
-        if(response.data.status === 1){             // status = 1 -> Reserva registrada correctamente
-          objeto.updateEventsAdicionales();
-          objeto.menuFormReserva = false;          
-          alert(response.data.mensaje);
-
-        }else if(response.data.status == 3){        // status = 3 -> Si el banco solicitado ya esta ocupado     
-          objeto.getEventsAdicionales();
-          objeto.formReserva.banco = null;
-          objeto.modelStepperReserva = 1;
-          alert(response.data.mensaje);
-
-        }else{
-          alert(response.data.mensaje);
-          objeto.menuFormReserva = false;
+      .then((response) => {
+        let {status, mensaje} = response.data;
+        if(status === 1){                          // status = 1 -> Reserva registrada correctamente
+          this.getHorariosAdicionales();
+          this.menuFormReserva = false;
+          alert(mensaje);
+        }else if(status === 2){                    // status = 2 -> Si el banco solicitado ya esta ocupado
+          this.getHorariosAdicionalesAwait(mensaje);
+        }else{                                     // status = 3 -> Si ya tiene 3 adicionales en la semana
+          this.menuFormReserva = false;
+          alert(mensaje);
         }
       })
-      .catch(function(error) {
-        objeto.output = error;
+      .catch((error) => {
+        this.output = error;
       });
     },
-    updateEventsAdicionales(){
-      // En caso de haber agregado el adicional, para no hacer otra petición a la base de datos y traer la información actualizada, se actualizan las variables de los bancos para ese adicional seleccionado.
-      this.selectedEventAdicional.bancos[this.formReserva.banco - 1] = "Pendiente";      
-      this.selectedEventAdicional.state = "PENDIENTE";      
-      this.selectedEventAdicional.color = "grey lighten-1";            
 
-      this.allEventsAdicionales.filter(adicional => {
-        // Verifica los adicionales de la franja horaria y les cambia el color y estado. Si coincide con el mismo laboratorio, actualiza el vector de bancos
-        if(adicional.start === this.selectedEventAdicional.start){
-          adicional.state = this.selectedEventAdicional.state;
-          adicional.color = this.selectedEventAdicional.color;
-          if(adicional.name === this.selectedEventAdicional.name){
-            adicional.bancos = this.selectedEventAdicional.bancos;
-          }
-        }
-      })
-
-      this.getEstadoBancos(this.selectedEventAdicional);
+    getHorariosAdicionalesAwait: async function(mensaje){
+      // Se hace una funcion async para esperar y actualizar correctamente el laboratorio seleccionado
+      await this.getHorariosAdicionales();
+      this.updateEventsAdicionales();
+      this.formReserva.banco = null;
+      this.modelStepperReserva = 1;
+      alert(mensaje);
     },
-    getEventsAdicionales(){
-      // Trae del servidor, los adicionales para la semana actual y hasta ocho días después de la fecha actual
-      let cod_encrypted = this.$cookies.get("user_session");      
-      let codigoUser = this.$Crypto.AES.decrypt(cod_encrypted, localStorage.cdcb0830cc2dd220);      
-      codigoUser = codigoUser.toString(this.$Crypto.enc.Utf8)
 
-      let objeto = this;
-      this.axios.post("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/getHorariosAdicionalesEstudiantes",
+    updateEventsAdicionales(){
+      // En caso de haber agregado el adicional, se actualizan las variables de los bancos para ese adicional seleccionado
+      let {start, name} = this.selectedAdicional;
+      let filterAdicional = this.allAdicionales.find(adicional => adicional.start === start && adicional.name === name);
+      this.selectedAdicional = JSON.parse(JSON.stringify(filterAdicional));
+      this.getEstadoBancos(this.selectedAdicional);
+    },
+
+    getHorariosAdicionales: async function(){
+      // Trae del servidor, los adicionales para la semana actual y hasta ocho días después de la fecha actual
+      let cod_encrypted = this.$cookies.get("user_session");
+      let codigoUser = this.$Crypto.AES.decrypt(cod_encrypted, localStorage.cdcb0830cc2dd220);
+      codigoUser = codigoUser.toString(this.$Crypto.enc.Utf8);
+
+      await this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getHorariosAdicionalesEstudiantes",
         {
           codigoUser: codigoUser,
         },
@@ -676,42 +703,42 @@ export default {
             "Content-Type": "application/json"
           }
         })
-      .then(function(response) {  
-        objeto.allEventsAdicionales = [];
-        if (response.data.data.length > 0){
-          objeto.setColorEventsAdicionales(response.data.data);
-          objeto.filterEventsAdicionalesByName(); 
-        }
+      .then(response => {
+        this.allAdicionales = this.setColorEventsAdicionales(response.data.data);
+        this.filterHorariosAdicionalesByName();
       })
-      .catch(function(error) {
+      .catch(error => {
         alert(error)
       });
     },
-    setColorEventsAdicionales(events){
-      // Función que identifica el color del adicional según el estado retornado del servidor
-      let lengthEvents = events.length;
-      for (let i=0; i<lengthEvents; i++){ 
-        let infoLab = this.infoLabsStore.find(lab => lab.name == events[i].name); 
 
-        if(events[i].state === true){                       // state = true  -> laboratorio disponible
-          events[i].color = infoLab.color;
-        }else if(events[i].state === false){                // state = false -> laboratorio no disponible
-          events[i].color = infoLab.colorLight;
+    setColorEventsAdicionales(adicionales){
+      // Función que identifica el color del adicional según el estado retornado del servidor
+      let lengthAdicionales = adicionales.length;
+      for (let i=0; i<lengthAdicionales; i++){
+        let {color, colorLight} = this.infoLabsStore.find(lab => lab.name === adicionales[i].name);
+
+        if(adicionales[i].state === true){                  // state = true  -> laboratorio disponible
+          adicionales[i].color = color;
+        }else if(adicionales[i].state === false){           // state = false -> laboratorio no disponible
+          adicionales[i].color = colorLight;
         }else{                                              // state -> franja con reserva registrada
-          events[i].color = "grey lighten-1";
-          // Si el estado del adicional para un adicional es PENDIENTE o APROBADO, también se debe restringir cualquier otro evento que se encuentre en la misma franja horaria.
-          if (events[i].state === "PENDIENTE" || events[i].state === "APROBADO"){
-            events.filter(eventAdicional => {
-              if(eventAdicional.start === events[i].start){
-                eventAdicional.state = events[i].state;
-                eventAdicional.color = events[i].color;
+          adicionales[i].color = "grey lighten-1";
+          // Si el estado para un adicional es PENDIENTE o APROBADO, también se debe restringir cualquier otro evento que se encuentre en la misma franja horaria.
+          if (adicionales[i].state === "PENDIENTE" || adicionales[i].state === "APROBADO"){
+            let {start, state, color} = adicionales[i];
+            adicionales.filter(eventAdicional => {
+              if(eventAdicional.start === start){
+                eventAdicional.state = state;
+                eventAdicional.color = color;
               }
             })
           }
         }
       }
-      this.allEventsAdicionales = events;
+      return adicionales
     },
+
   },
 };
 </script>

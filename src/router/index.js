@@ -1,18 +1,16 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import jwt_decode from "jwt-decode";
 import HomeAdmin from "../views/HomeAdmin.vue";
 import HomeLaboratorista from "../views/HomeLaboratorista.vue";
 import consultayCancelacion from "../views/consultayCancelacion.vue";
-import consultasycancelacionlabo from "../views/consultasycancelacionlabo.vue";
 import registroUser from "../views/registroUser.vue";
 import editUser from "../views/editUser.vue";
-import editProfile from "../views/editProfile.vue";
-import Home1 from "../views/Home1.vue";
+import home from "../views/Home1.vue";
 import reservaEstudiante from "../views/reservaEstudiante.vue";
 import Addnewsala from "../views/Addnewsala.vue";
 import studentpass from "../views/studentpass.vue";
 import editprofilelab from "../views/editprofilelab.vue";
-import consultareslabo from "../views/consultareslabo.vue";
 import editadmin from "../views/editadmin.vue";
 import editpassadmin from "../views/editpassadmin.vue";
 import horarios from "../views/horarios.vue";
@@ -42,55 +40,91 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    name: "Home1",
-    component: Home1
+    name: "home",
+    component: home,
+    meta: {
+      requiresAuth: false,
+    },
   },
   {
     path: "/homel",
     name: "HomeLaboratorista",
-    component: HomeLaboratorista
+    component: HomeLaboratorista,
+    meta: {
+      requiresAuth: true,
+      role: ["Laboratorista"],
+    },
   },
   {
     path: "/horarios",
     name: "horarios",
-    component: horarios
+    component: horarios,
+    meta: {
+      requiresAuth: true,
+      role: ["Laboratorista", "Estudiante", "Administrador"],
+    },
   },
   {
     path: "/studentpass",
     name: "studentpass",
-    component: studentpass
+    component: studentpass,
+    meta: {
+      requiresAuth: true,
+      role: ["Estudiante"],
+    },
   },
   {
     path: "/editpassadmin",
     name: "editpassadmin",
-    component: editpassadmin
+    component: editpassadmin,
+    meta: {
+      requiresAuth: true,
+      role: ["Administrador"],
+    },
   },
   {
     path: "/labpass",
     name: "labpass",
-    component: labpass
+    component: labpass,
+    meta: {
+      requiresAuth: true,
+      role: ["Laboratorista"],
+    },
   },
   {
     path: "/LicenciasSoftware",
     name: "LicenciasSoftware",
     component: LicenciasSoftware,
+    meta: {
+      requiresAuth: true,
+      role: ["Laboratorista"],
+    },
   },  
   {
     path: "/licenciasEstudiantes",
     name: "licenciasEstudiantes",
     component: licenciasEstudiantes,
+    meta: {
+      requiresAuth: true,
+      role: ["Estudiante"],
+    },
   },
   {
     path: "/Monitores",
     name: "Monitores",
     component: Monitores,
+    meta: {
+      requiresAuth: true,
+      role: ["Estudiante", "Laboratorista"],
+    },
   },
   {
     path: "/editadmin",
     name: "editadmin",
     component: editadmin,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Administrador"]
     }
   },
   {
@@ -98,7 +132,8 @@ const routes = [
     name: "HomeAdmin",
     component: HomeAdmin,
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
+      role: ["Administrador"]
     }
   },
   {
@@ -106,15 +141,8 @@ const routes = [
     name: "consulta",
     component: consultayCancelacion,
     meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    path: "/consultalabo",
-    name: "consultalabo",
-    component: consultasycancelacionlabo,
-    meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Estudiante"]
     }
   },
   {
@@ -122,7 +150,8 @@ const routes = [
     name: "registrouser",
     component: registroUser,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Administrador"]
     }
   },
   {
@@ -130,31 +159,8 @@ const routes = [
     name: "edituser",
     component: editUser,
     meta: {
-      requiresAuth: false
-    },
-  },
-  {
-    path: "/editprofile",
-    name: "editprofile",
-    component: editProfile,
-    meta: {
-      requiresAuth: false
-    },
-  },
-  {
-    path: "/home",
-    name: "home",
-    component: Home1,
-    meta: {
-      requiresAuth: false
-    },
-  },
-  {
-    path: "/consulta2",
-    name: "consulta2",
-    component: consultasycancelacionlabo,
-    meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Administrador"]
     },
   },
   {
@@ -162,7 +168,8 @@ const routes = [
     name: "reservaestudiante",
     component: reservaEstudiante,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     },
   },
   {
@@ -170,7 +177,8 @@ const routes = [
     name: "agendaadicionalesL",
     component: agendaadicionalesL,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     },
   },
   {
@@ -178,72 +186,77 @@ const routes = [
     name: "agendaadicionalesM",
     component: agendaadicionalesM,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Estudiante"]
     },
   },
   {
+    // Vista rara que puede servir para nocturnos
     path: "/reservatemp",
     name: "reservatemp",
     component: reservatemp,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     },
   },
   {
+    // Vista rara que para profesores
     path: "/clasesadd",
     name: "clasesadd",
     component: clasesadd,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     },
   },
   {
+    // Solicitud de prestamo equipos externos (estudiantes)
     path: "/prestamoequext",
     name: "prestamoequext",
     component: prestamoequExt,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     },
   },
   {
+    // Solicitud de prestamo equipos internos (estudiantes)
     path: "/prestamoequint",
     name: "prestamoequint",
     component: prestamoequInt,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     },
   },
-  {
-    path: "/consultareslabo",
-    name: "consultareslabo",
-    component: consultareslabo,
-    meta: {
-      requiresAuth: false
-    }
-  },
-
   {
     path: "/editprofilelab",
     name: "editprofilelab",
     component: editprofilelab,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     }
   },
-    {
-      path: "/ticketsman",
-      name: "ticketsman",
-      component: ticketsman,
-      meta: {
-        requiresAuth: false
-      },
-    },
   {
+    // Vista para manejar personas
+    path: "/ticketsman",
+    name: "ticketsman",
+    component: ticketsman,
+    meta: {
+      requiresAuth: true,
+      role: ["Laboratorista"]
+    },
+  },
+  {
+    // Vista para agregar nueva sala (No esta vinculada con el toolbar)
     path: "/addnewsala",
     name: "addnewsala",
     component: Addnewsala,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"],
     },
   },
   {
@@ -251,7 +264,8 @@ const routes = [
     name: "Inventarioagregarequipo",
     component: Inventarioagregarequipo,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"],
     },
   },
   {
@@ -259,7 +273,8 @@ const routes = [
     name: "inventarioconsultar",
     component: inventarioconsultar,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"],
     },
   },
   {
@@ -267,7 +282,8 @@ const routes = [
     name: "mantenimiento",
     component: mantenimiento,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"]
     },
   },
   {
@@ -275,33 +291,36 @@ const routes = [
     name: "consultamantenimiento",
     component: consultamantenimiento,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"]
     },
   },
-    {
-      path: "/pruebaBuscar",
-      name: "select2",
-      component: pruebaSelect2,
-      meta: {
-        requiresAuth: false
-      },      
+  {
+    // Buscar usuario con correo interactivo
+    path: "/pruebaBuscar",
+    name: "select2",
+    component: pruebaSelect2,
+    meta: {
+      requiresAuth: true,
+      role: ["Laboratorista"]
+    },      
   },
-
   {
     path: "/consultareservalabstemp",
     name: "consultareservalabstemp",
     component: consultareservalabstemp,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista"]
     },    
   },
-
   {
     path: "/informesElementos",
     name: "informesElementos",
     component: informesElementos,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"]
     }
   },
   {
@@ -309,7 +328,8 @@ const routes = [
     name: "informesHorarios",
     component: informesHorarios,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"]
     }
   },
   {
@@ -317,25 +337,45 @@ const routes = [
     name: "informesPrestamos",
     component: informesPrestamos,
     meta: {
-      requiresAuth: false
+      requiresAuth: true,
+      role: ["Laboratorista", "Administrador"]
     }
   },
-
 ];
 
 const router = new VueRouter({
   routes
 });
 
-
 let objeto = Vue;
 router.beforeEach((to, from, next) => {
-  let estaAuth = objeto.$cookies.get("user_session");
-  let needAuth = to.matched.some(record => record.meta.requiresAuth);
-  
-  if(needAuth && !estaAuth){
-    next('home')
+
+  console.log("%c Desde el router", "font-size: 1rem;");
+
+  if(to.matched.some(record => record.meta.requiresAuth)){
+    if(objeto.$cookies.get("jwt") == null){
+      console.log("No hay token -> Se va al home");
+      next({name: 'home'})
+    }else{
+      if(to.matched.some(record => record.meta.role)){
+        // const role = jwt_decode(objeto.$cookies.get('jwt')).tipo;
+        // console.log("JWT: " + role);
+        // console.log("META: ");
+        // console.log(to.meta.role);
+        if (to.meta.role.includes(jwt_decode(objeto.$cookies.get('jwt')).tipo)){
+          console.log("Puede continuar, los roles concuerdan");
+          next()
+        }else{
+          console.log("No concuerdan los roles -> aborta la ruta");
+          next(false)
+        }
+      }else{
+        console.log("No hay variable role -> Sigue la ruta");
+        next()
+      }
+    } 
   }else{
+    console.log("No tiene la variable requiresAuth o es false -> Sigue la ruta");
     next()
   }
 });

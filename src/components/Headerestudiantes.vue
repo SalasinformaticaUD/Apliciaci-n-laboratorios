@@ -107,7 +107,7 @@ export default {
       this.$router.replace({ name: "home" });
       localStorage.usuario= null;
       let objeto = this;
-      objeto.$cookies.remove(objeto.token);      
+      objeto.$cookies.remove(objeto.token);
       objeto.$cookies.keys().forEach(cookie => objeto.$cookies.remove(cookie));
     },
     buscar() {
