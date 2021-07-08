@@ -649,7 +649,8 @@ export default {
         },
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         }
       )
@@ -661,7 +662,11 @@ export default {
           alert(mensaje);
         }else if(status === 2){                    // status = 2 -> Si el banco solicitado ya esta ocupado
           this.getHorariosAdicionalesAwait(mensaje);
-        }else{                                     // status = 3 -> Si ya tiene 3 adicionales en la semana
+        }else if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
+        }
+        else{                                     // status = 3 -> Si ya tiene 3 adicionales en la semana
           this.menuFormReserva = false;
           alert(mensaje);
         }
@@ -700,12 +705,18 @@ export default {
         },
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         })
       .then(response => {
+        if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
+        }
         this.allAdicionales = this.setColorEventsAdicionales(response.data.data);
         this.filterHorariosAdicionalesByName();
+
       })
       .catch(error => {
         alert(error)

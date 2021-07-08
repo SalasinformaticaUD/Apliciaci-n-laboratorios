@@ -117,7 +117,8 @@ export default {
             },
             {
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
               }
             }
           )
@@ -130,6 +131,9 @@ export default {
             } else if (status == "2") {
               alert(respuesta);
               objeto.clear();
+            }else if (response.data.status == 401) {                                
+              objeto.$router.push('/');
+              alert("Error de sesion");                
             }
           })
           .catch(function(error) {

@@ -59,12 +59,6 @@ class Usuario(Resource):
         pregunta = user.find_one({"Código_usuario": usuario, "Contraseña": contrasena})
 
         key = "secret"
-        # encoded = jwt.encode({"some": "payload", "Codigo": usuario, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)}, key, algorithm="HS256")
-        # print("Codificacion: ")
-        # print(encoded)
-        # decoded= jwt.decode(encoded, key, algorithms="HS256")
-        # print("Decodificacion: ")
-        # print(decoded)
 
         if pregunta:
             tipo = pregunta['Tipo']
@@ -72,7 +66,7 @@ class Usuario(Resource):
             mensaje = "1"
             self.status = 1
 
-            encoded = jwt.encode({"tipo": tipo, "Codigo": usuario, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, key, algorithm="HS256")
+            encoded = jwt.encode({"tipo": tipo, "Codigo": usuario, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}, key, algorithm="HS256")
             encoded = encoded.decode('UTF-8')
 
             if tipo == "Laboratorista":
@@ -887,33 +881,8 @@ class Usuario(Resource):
     #############################################################################################
     ######                        Funciones para los adicionales                          #######
     #############################################################################################
-
-    def authorization(self, header, tipo):
-        if (header.startswith('Bearer')):
-            # Indica que se esta logueado
-            token = header.split(' ')[1]            
-            try:
-                decode = jwt.decode(token, "secret", algorithms="HS256")
-                if decode['tipo'] in tipo:
-                    return True
-                else:
-                    return False
-            except Exception as e:
-                mensaje = ("Hubo una exception: " + str(e))
-                return False
-
+    
     def getHorariosAdicionales(self):
-        try:
-            response = self.authorization(request.headers['Authorization'], ["Laboratorista"])
-        except Exception as e:
-            response = False
-            print(e)
-
-        if not response:
-            return {'status': 0, 'mensaje': "error", 'data': []}
-
-        
-
         # Retorna todos los horarios adicionales para la vista de la agenda en el portal laboratoristas
         horarios = mongo.db.horariosAdicionales
 
@@ -940,6 +909,7 @@ class Usuario(Resource):
             mensaje = "No se han encontrado registros de adicionales"
         
         return {'status': self.status, 'mensaje': mensaje, 'data': output}
+
 
     def getHorariosAdicionalesEstudiantes(self):
         horarios = mongo.db.horariosAdicionales     # Trae la base de datos de horarios adicionales
@@ -1080,49 +1050,45 @@ class Usuario(Resource):
         return "El adicional se ha registrado correctamente. Pasará a estado PENDIENTE hasta la aprobación de un laboratorista."
     
     def addHorarioAdicional(self):
-        self.status = 0     # Status 0 -> no logro agregar ningun campo de adicional
-
         # Datos del adicional enviados en la peticion
-        laboratorio = request.json['name']
-        bancos = request.json['bancos']
-        dia = request.json['dia']
-        hora = request.json['hora']
+        datos = request.json['datos']
+        nameLab = datos['name']
+        bancos = datos['bancos']
+        weekday = datos['weekday']
+        hour = datos['hour']
 
         # boolean que reconoce si el adicional se debe, o no, repetir semanalmente
-        repeat = request.json['repeat']
+        repeat = datos['repeat']
 
-        if repeat:        
+        if repeat:
             # Identifica la semana en la cual se dio click para agregar el evento
-            weekClick = self.weekNumberFromDate(request.json['dateClick'], "-", 1)
+            weekStart = self.weekNumberFromDate(datos['dateStart'], "-", 1)
 
             # Identifica el No. de semana para la cual se debe repetir el adicional
-            dateRepeat = request.json['dateRepeat'].split('/')
-            dateRepeat = datetime.datetime(int(dateRepeat[2]), int(dateRepeat[1]), int(dateRepeat[0]))
+            day, month, year = datos['dateRepeat'].split('/')
+            dateRepeat = datetime.datetime(int(year), int(month), int(day))
             weekRepeat = dateRepeat.isocalendar()[1]
 
-            # Año actual
-            yearActual = datetime.datetime.now().year
-
             # Hace un for entre las semanas que se debe repetir el adicional
-            for week in range(weekClick, weekRepeat):
+            for week in range(weekStart, weekRepeat):
                 # Se identifica la fecha del adicional segun el dia de la semana, el año y el numero de semana
-                date_string = str(yearActual) + "-W" + str(week)
-                dateAdicional = datetime.datetime.strptime(date_string + '-' + str(dia), '%Y-W%W-%w')
+                date_string = str(year) + "-W" + str(week)
+                dateAdicional = datetime.datetime.strptime(date_string + '-' + str(weekday), '%Y-W%W-%w')
                 start = dateAdicional.strftime('%Y-%m-%d')    # Toma la fecha en formato año-mes-dia
-                self.addDocumentoAdicional(laboratorio, start, hora, dia, bancos)
+                self.addDocumentoAdicional(nameLab, start, hour, weekday, bancos)
             
             # Evalua si en la ultima semana  indicada se debe incluir el adicional 
-            date_string = str(yearActual) + "-W" + str(weekRepeat)
-            dateAdicional = datetime.datetime.strptime(date_string + '-' + str(dia), '%Y-W%W-%w')
+            date_string = str(year) + "-W" + str(weekRepeat)
+            dateAdicional = datetime.datetime.strptime(date_string + '-' + str(weekday), '%Y-W%W-%w')
 
             if(dateAdicional<=dateRepeat):
                 start = dateAdicional.strftime('%Y-%m-%d') # Toma la fecha en formato año-mes-dia
-                self.addDocumentoAdicional(laboratorio, start, hora, dia, bancos)
+                self.addDocumentoAdicional(nameLab, start, hour, weekday, bancos)
         
         else:
             # Si solo es un adicional se agrega un unico campo
-            start = request.json['dateClick']
-            self.addDocumentoAdicional(laboratorio, start, hora, dia, bancos)
+            start = datos['dateStart']
+            self.addDocumentoAdicional(nameLab, start, hour, weekday, bancos)
 
         if self.status == 1:
             mensaje = "Adicional agregado con exito."
@@ -1131,13 +1097,12 @@ class Usuario(Resource):
 
         return mensaje
     
-    def addDocumentoAdicional(self, lab, start, hora, dia, bancos):
-        # Trae la base de datos
+    def addDocumentoAdicional(self, nameLab, start, hour, weekday, bancos):
         horario = mongo.db.horariosAdicionales
         # Identifica que no existe otro adicional en el mismo laboratorio para esa franja horaria
-        search = horario.find_one({'Laboratorio': lab, 'Fecha': start, 'Hora': hora, 'Dia': dia})
+        search = horario.find_one({'Laboratorio': nameLab, 'Fecha': start, 'Hora': hour, 'Dia': weekday})
         if not search:
-            horario.insert({'Laboratorio': lab, 'Bancos': bancos, 'Fecha': start, 'Hora': hora, 'Dia': dia})
+            horario.insert({'Laboratorio': nameLab, 'Bancos': bancos, 'Fecha': start, 'Hora': hour, 'Dia': weekday})
             self.status = 1         # Status 1 -> Al menos un adicional fue agregado con exito
 
     def setBancoAdicional(self, fecha_adicional, sala, hora, banco, estado):
@@ -1850,140 +1815,167 @@ class Usuario(Resource):
             }
         )
 
+    def authorization(self, header, tipo):
+        if 'Authorization' in header.keys():
+            if (header['Authorization'].startswith('Bearer')):
+                # Indica que se esta logueado
+                token = header['Authorization'].split(' ')[1]
+                try:
+                    decode = jwt.decode(token, "secret", algorithms="HS256")
+                    if decode['tipo'] in tipo:
+                        return True
+                    else:
+                        self.status = 404
+                        self.mensaje = "Error en la sesión"
+                        return False
+                except Exception as e:
+                    self.mensaje = ("Hubo una exception: " + str(e))
+                    self.status = 401
+                    return False
+            else:
+                self.mensaje = "Error en la sesión"
+                self.status = 401
+                return False
+        else:
+            self.mensaje = "Error en la sesión"
+            self.status = 401
+            return False
+
     def post(self, accion):
         mensaje = "error"
-        if accion == "registrar":
+        if accion == "registrar" and self.authorization(request.headers, ["Administrador"]):
             mensaje = self.registrar()
-        elif accion == "desactivar":
+        elif accion == "desactivar" and self.authorization(request.headers, ["Administrador"]):
             mensaje = self.desactivar()
-        elif accion == "desactivarEquipo":
+        elif accion == "desactivarEquipo" and self.authorization(request.headers, ["Administrador","Laboratorista"]):
             mensaje = self.desactivarEquipo()
-        elif accion == "activarEquipo":
+        elif accion == "activarEquipo" and self.authorization(request.headers, ["Administrador","Laboratorista"]):
             mensaje = self.activarEquipo()
-        elif accion == "editaruser":
+        elif accion == "editaruser" and self.authorization(request.headers, ["Administrador"]):
             mensaje = self.editaruser()
-        elif accion == "editarequipo":
+        elif accion == "editarequipo" and self.authorization(request.headers, ["Administrador","Laboratorista"]):
             mensaje = self.editarequipo()
-        elif accion == "registrarEquipo":
+        elif accion == "registrarEquipo" and self.authorization(request.headers, ["Administrador","Laboratorista"]):
             mensaje = self.registrarEquipo()    
-        elif accion == "editaruserlab":
+        elif accion == "editaruserlab" and self.authorization(request.headers, ["Administrador","Laboratorista"]):
             mensaje = self.editaruserlab()
-        elif accion == "editpass":
+        elif accion == "editpass" and self.authorization(request.headers, ["Estudiante","Laboratorista"]):
             mensaje = self.editpass()
-        elif accion == "editpassadmin":
+        elif accion == "editpassadmin" and self.authorization(request.headers, ["Administrador"]):
             mensaje = self.editpassadmin()
-        elif accion == "resetpass":
+        elif accion == "resetpass" and self.authorization(request.headers, ["Administrador"]):
             mensaje = self.resetpass()
-        elif accion == "activar":
+        elif accion == "activar" and self.authorization(request.headers, ["Administrador"]):
             mensaje = self.activar()
-        elif accion == "buscarUno":
+        elif accion == "buscarUno": #NO SE ESTÁ USANDO
             mensaje = self.buscarUno()
         elif accion == "login":
             mensaje = self.login()   
-        elif accion == "borrar":
+        elif accion == "borrar": #NO SE ESTÁ USANDO
             mensaje = self.borrarPrueba()
-        elif accion == "addReservaEstudiante":
+        elif accion == "addReservaEstudiante" and self.authorization(request.headers, ["Estudiante"]):
             mensaje = self.addReservaEstudiante()
-        elif accion == "getReservasUser":
+        elif accion == "getReservasUser" and self.authorization(request.headers, ["Estudiante"]):
             respuesta = self.getReservasUser()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "getReservasLaboratorio":
+        elif accion == "getReservasLaboratorio" and self.authorization(request.headers, ["Estudiante"]):
             respuesta = self.getReservasLaboratorio()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "borrarreserva":
+        elif accion == "borrarreserva" and self.authorization(request.headers, ["Laboratorista"]):
             mensaje = self.borrarreserva()
-        elif accion == "editarreserva":
+        elif accion == "editarreserva" and self.authorization(request.headers, ["Laboratorista"]):
             mensaje = self.editarreserva()
-        elif accion == "editarAdicionalesMonitor":
+        elif accion == "editarAdicionalesMonitor" and self.authorization(request.headers, ["Estudiante","Laboratorista"]): #Cambiar estudiante por Monitor
             mensaje = self.editarAdicionalesMonitor()
-        elif accion == "editarElementosAdicional":
+        elif accion == "editarElementosAdicional" and self.authorization(request.headers, ["Estudiante","Laboratorista"]): #Reusar esta función en portal laboratorista
             mensaje = self.editarElementosAdicional()
-        elif accion == "editarReserva":
+        elif accion == "editarReserva" and self.authorization(request.headers, ["Laboratorista"]):
             mensaje = self.editarReserva()
-        elif accion == "cancelarAdicionalEstudiante":
+        elif accion == "cancelarAdicionalEstudiante" and self.authorization(request.headers, ["Estudiante","Laboratorista"]): #Reusar esta función en portal laboratorista
             mensaje = self.cancelarAdicionalEstudiante()
-        elif accion == "asistenciareserva":
+        elif accion == "asistenciareserva" and self.authorization(request.headers, ["Laboratorista"]): #Sirve pero no se está usando, hay que cruzar portal monitores a laboratorista, para que el último tenga más privilegios
             mensaje = self.asistenciareserva()            
-        elif accion == "consultaeditlabo":
+        elif accion == "consultaeditlabo" and self.authorization(request.headers, ["Estudiante","Laboratorista","Administrador"]):
             respuesta = self.consultaeditlabo()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "consultartipo":
+        elif accion == "consultartipo" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             respuesta = self.consultartipo()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "consultaeditadmin":
+        elif accion == "consultaeditadmin" and self.authorization(request.headers, ["Administrador"]):#Revisar función
             respuesta = self.consultaeditadmin()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "consultaTraslados":
+        elif accion == "consultaTraslados": # No existe esta función probablemente se aplicaba en alguna de las vistas borradas
             respuesta = self.consultaTraslados()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "registrarMant":
+        elif accion == "registrarMant" and self.authorization(request.headers, ["Laboratorista","Administrador"]):#Implementar en portal administrador
             mensaje = self.registrarMant()
-        elif accion == "actualizarMant":
+        elif accion == "actualizarMant" and self.authorization(request.headers, ["Laboratorista","Administrador"]):#Implementar en portal administrador
             mensaje = self.actualizarMant()
-        elif accion == "excelTemporalElementos":
+        elif accion == "excelTemporalElementos":# No se está usando
             mensaje = self.excelTemporalElementos()
-        elif accion == "excelTemporalFilterDate":
+        elif accion == "excelTemporalFilterDate" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             mensaje = self.excelTemporalFilterDate()
-        elif accion == "excelTemporalFilterDateBancosSala":
+        elif accion == "excelTemporalFilterDateBancosSala" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             mensaje = self.excelTemporalFilterDateBancosSala()
-        elif accion == "send_mail":
+        elif accion == "send_mail" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             mensaje = self.send_mail()
-        elif accion == "licenciasEstudiantes":
+        elif accion == "licenciasEstudiantes" and self.authorization(request.headers, ["Estudiante"]):
             mensaje = self.licenciasEstudiantes()
-        elif accion == "addHorarioAdicional":
+        elif accion == "addHorarioAdicional" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             mensaje = self.addHorarioAdicional()
-        elif accion == "deleteHorarioAdicional":
+        elif accion == "deleteHorarioAdicional": # No se está usando, se encuentra comentareada
             mensaje = self.deleteHorarioAdicional()
-        elif accion == "getHorariosAdicionalesEstudiantes":
+        elif accion == "getHorariosAdicionalesEstudiantes" and self.authorization(request.headers, ["Estudiante"]):
             respuesta = self.getHorariosAdicionalesEstudiantes()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
 
         else:
-            self.status = 2
+            # Aquí era 'self.status = 2' pero por defecto deberia ser 404
+            self.status = self.status
             mensaje = "Error en la peticion"
-            print(mensaje)     
+            print(mensaje)
         return {'status': self.status, 'mensaje': mensaje, 'data': self.datos}
 
     def get(self, accion):
         mensaje = "error"
-        if accion == "consultarTodos":
+        if accion == "consultarTodos": #No se esta usando
             respuesta = self.consultarTodos()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "buscarreservalabo":
+        elif accion == "buscarreservalabo" and self.authorization(request.headers, ["Laboratorista"]):
             respuesta = self.buscarreservalabo()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "buscarhorarios":
+        elif accion == "buscarhorarios" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             respuesta = self.buscarhorarios()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "logueado":
+        elif accion == "logueado": # No se está usando
             mensaje = self.isLoggedIn()
-        elif accion == "cerrarSesion":
+        elif accion == "cerrarSesion": # No se está usando
             mensaje = self.cerrarSesion()
-        elif accion == "consultarLabo":
+        elif accion == "consultarLabo" and self.authorization(request.headers, ["Administrador"]):
             respuesta = self.consultarLabo()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "consultarEquipo":
+        elif accion == "consultarEquipo" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             respuesta = self.consultarEquipo()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']
-        elif accion == "consultaMantenimiento":
+        elif accion == "consultaMantenimiento" and self.authorization(request.headers, ["Laboratorista","Administrador"]):
             respuesta = self.consultaMantenimiento()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']           
-        elif accion == "getToken":
+        elif accion == "getToken": # No se usa
             mensaje = self.token
-        elif accion == "obtenerElementosExcel":
+        elif accion == "obtenerElementosExcel" and self.authorization(request.headers, ["Laboratorista","Administrador"]): #Agregar función a admin
             respuesta = self.obtenerElementosExcel()
             mensaje = respuesta['mensaje']
             self.datos = respuesta['data']     
@@ -1995,7 +1987,7 @@ class Usuario(Resource):
             return self.solidWorksLogo()
         elif accion == "xirioLogo":
             return self.xirioLogo()
-        elif accion == "getHorariosAdicionales":
+        elif accion == "getHorariosAdicionales" and self.authorization(request.headers, ["Laboratorista"]):
             respuesta =  self.getHorariosAdicionales()
             mensaje = respuesta ['mensaje']
             self.datos = respuesta['data']
@@ -2010,8 +2002,7 @@ class Usuario(Resource):
         elif accion == "excelPrestamosBancosSala":
             return self.excelPrestamosBancosSala()
         else:
-            self.status = 2
-            mensaje = "Error en la peticion"
+            mensaje = self.mensaje
         return {'status': self.status, 'mensaje': mensaje, 'data': self.datos}
 
 

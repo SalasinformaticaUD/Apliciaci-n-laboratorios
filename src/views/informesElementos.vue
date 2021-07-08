@@ -275,10 +275,16 @@ export default {
       objeto.axios
         .get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/obtenerElementosExcel", {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         })
         .then(function(response) {
+          
+          if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
+          }
           objeto.elementos = response.data.data;
         })
         .catch(function(error) {

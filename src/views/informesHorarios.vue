@@ -141,10 +141,15 @@ export default {
     let objeto = this;
     objeto.axios.get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/buscarhorarios", {
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
       })
       .then(function(response) {
+        if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
+        }
         objeto.chartDiasVsHoras(response.data.data)
       })
       .catch(function(error) {
@@ -250,7 +255,8 @@ export default {
           },
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           }
         )
@@ -262,6 +268,9 @@ export default {
             objeto.excelDiasSemanaVsHoras();
           }else if (status==3){
             alert(mensaje)
+          }else if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
           }
         })
         .catch(function(error) {

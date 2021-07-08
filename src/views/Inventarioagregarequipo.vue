@@ -1204,7 +1204,8 @@ export default {
             },
             {
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
               }
             }
           )
@@ -1220,7 +1221,11 @@ export default {
             } else if (response.data.status == 2) {
               objeto.vista = true;
               objeto.output = response.data.status;
-            } else {
+            } else if (response.data.status == 401) {                                
+                objeto.$router.push('/');
+                alert("Error de sesion");                
+              }
+              else {
               objeto.vista = true;
               objeto.output = "Ha ocurrido un error";
             }

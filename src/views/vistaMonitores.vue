@@ -669,7 +669,8 @@ export default {
         },
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         })
       .then(response => {
@@ -680,6 +681,9 @@ export default {
           this.modelUserFichaAdicional = false;
           this.infoUsersAsistencia = [];
           this.dialogUsersAsistencia = false;
+        }else if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
         }
       })
       .catch(error => {
@@ -696,7 +700,8 @@ export default {
         },
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         })
       .then(response => {
@@ -709,6 +714,9 @@ export default {
             this.selectedLabAdicional[i] = data.find(item => item.banco === sortBancos[i]);
           }
           this.displayTableLab = true;
+        }else if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
         }else{
           this.displayTableLab = false;
         }
@@ -722,10 +730,15 @@ export default {
       this.axios.get("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getHorariosAdicionales",
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         })
       .then(response => {
+        if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
+        }
         let {data} = response.data;
         this.calendarHorariosAdicionales = [];
         if (data.length > 0){

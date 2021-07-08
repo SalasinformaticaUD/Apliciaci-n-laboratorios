@@ -377,10 +377,15 @@ export default {
         },
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
       })
       .then(response => {
+        if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
+        }
         let {mensaje} = response.data;
         console.log(mensaje);
       })
@@ -429,7 +434,8 @@ export default {
               },
               {
                 headers: {
-                  "Content-Type": "application/json"
+                  "Content-Type": "application/json",
+                  "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
                 }
               }
             )
@@ -439,6 +445,9 @@ export default {
               if (status == "1") {
                 alert(respuesta);
                 objeto.reservasLab.splice(index, 1);
+              }else if (response.data.status == 401) {                                
+                objeto.$router.push('/');
+                alert("Error de sesion");                
               }
             })
             .catch(function(error) {
@@ -464,7 +473,8 @@ export default {
           },
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           })
         .then(response => {
@@ -472,6 +482,9 @@ export default {
           if (status == 1){
             this.reservasLab.splice(index, 1);
             alert(mensaje);
+          }else if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
           }
         })
         .catch(error => {
@@ -484,13 +497,17 @@ export default {
       this.axios.get("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/buscarreservalabo",
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         })
       .then(response => {
         let {status, data, mensaje} = response.data;
         if (status == 1){
           this.reservasLab = data;
+        }else if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
         }else{
           alert(mensaje);
         }
@@ -513,7 +530,8 @@ export default {
           },
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           })
         .then(response => {
@@ -524,6 +542,9 @@ export default {
             this.modelCardFicha = false;
             if(newEstado == "APROBADO" || newEstado == "CANCELADO"){
               // this.mail(this.infoReserva);
+            }else if (response.data.status == 401) {                                
+              objeto.$router.push('/');
+              alert("Error de sesion");                
             }
           }else{
             alert(mensaje);

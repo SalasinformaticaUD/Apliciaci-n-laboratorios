@@ -149,12 +149,17 @@ export default {
           },
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
+
             }
           }
         )
         .then(function(response) {
-          
+          if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
+          }
           localStorage.usuario = response.data.data[0].usuario;  
           objeto.usuario = response.data.data[0].usuario;
           // console.log("AUYUDAAA VUE");

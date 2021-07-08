@@ -543,11 +543,16 @@ export default {
           },
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           }
         )
         .then(function(response) {          
+          if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
+          }
           objeto.tipoUsuario = response.data.data[0].tipo;
           objeto.authVista(objeto.tipoUsuario);
         })
@@ -598,12 +603,14 @@ export default {
               ":" +
               objeto.$serverPort +
               "/Usuario/desactivarEquipo",
+              
             {
               placa: objeto.placa
             },
             {
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
               }
             }
           )
@@ -614,6 +621,9 @@ export default {
               alert(respuesta);
               //   objeto.equipolab.splice(index, 1);
               objeto.buscar();
+            }else if (response.data.status == 401) {                                
+                objeto.$router.push('/');
+                alert("Error de sesion");                
             }
           })
 
@@ -643,7 +653,8 @@ export default {
             },
             {
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
               }
             }
           )
@@ -654,7 +665,11 @@ export default {
               alert(respuesta);
               //   objeto.equipolab.splice(index, 1);
               objeto.buscar();
-            }
+            }else if (response.data.status == 401) {                                
+                objeto.$router.push('/');
+                alert("Error de sesion");
+                
+              }
           })
           .catch(function(error) {
             alert(error);
@@ -710,7 +725,8 @@ export default {
             //toUpperCase convierte la cadena de String a mayusculas
             {
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
               }
             }
           )
@@ -721,7 +737,10 @@ export default {
               alert(respuesta);
               objeto.buscar();
               //   objeto.equipolab.splice(index, 1);
-            }
+            }else if (response.data.status == 401) {                                
+                objeto.$router.push('/');
+                alert("Error de sesion");                
+              }
           })
           .catch(function(error) {
             alert(error);
@@ -741,11 +760,16 @@ export default {
             "/Usuario/consultarEquipo",
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           }
         )
         .then(function(response) {
+          if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
+          }
           objeto.equipolab = response.data.data;
           
           // console.log(objeto.equipolab);

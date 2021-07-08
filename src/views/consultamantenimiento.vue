@@ -873,7 +873,8 @@ export default {
             },
             {
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
               }
             }
           )
@@ -884,6 +885,9 @@ export default {
                 alert(respuesta);
                 objeto.buscar();
                 //   objeto.reservalab.splice(index, 1);
+              }else if (response.data.status == 401) {                                
+                objeto.$router.push('/');
+                alert("Error de sesion");                
               }
           })
           .catch(function(error) {
@@ -905,11 +909,16 @@ export default {
             "/Usuario/consultaMantenimiento",
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           }
         )
         .then(function(response) {
+          if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
+          }
           objeto.equipolab = response.data.data;
            console.log("AJI");
            console.log(objeto.equipolab);

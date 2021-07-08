@@ -549,7 +549,8 @@ export default {
             },
             {
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
               }
             }
           )
@@ -559,6 +560,9 @@ export default {
               alert(respuesta);
             } else if (response.data.status == 2) {
               alert(response.data.status);
+            } else if (response.data.status == 401) {                                
+              objeto.$router.push('/');
+              alert("Error de sesion");                
             } else {
               alert(response.data.status);
             }

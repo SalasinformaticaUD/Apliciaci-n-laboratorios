@@ -701,10 +701,15 @@ export default {
         },
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         })
-      .then(function(response) {                
+      .then(function(response) {       
+        if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
+        }         
         objeto.menuCreatedAdicional = false;
         objeto.menuShowEvent = false;
         alert(response.data.mensaje);
@@ -745,11 +750,12 @@ export default {
     },
 
     getHorariosAdicionales(){
-      const authHeader = this.$cookies.get('jwt') ? { 'Authorization': 'Bearer ' + this.$cookies.get('jwt') } : {}
+      // const authHeader = this.$cookies.get('jwt') ? { 'Authorization': 'Bearer ' + this.$cookies.get('jwt') } : {}
       this.axios.get("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getHorariosAdicionales",
         {
           headers: {
-            ...authHeader,
+            // ...authHeader,
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             "Content-Type": "application/json"
           }
         })
@@ -759,6 +765,9 @@ export default {
         this.filterHorariosAdicionalesByName();
         if (status == 0){
           alert(mensaje);
+        }else if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
         }
       })
       .catch(error => {

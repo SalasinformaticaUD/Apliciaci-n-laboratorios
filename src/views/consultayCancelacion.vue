@@ -417,13 +417,17 @@ export default {
           },
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           })
           .then(response => {
             let {status, mensaje} = response.data;
             if(status === 1){
               this.updateEstadoReservaUser(index);
+            }else if (response.data.status == 401) {                                
+              objeto.$router.push('/');
+              alert("Error de sesion");                
             }
             alert(mensaje);
           })
@@ -448,7 +452,8 @@ export default {
           },
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           })
         .then(response => {
@@ -456,6 +461,9 @@ export default {
           if (status === 1){
             this.updateFichaAdicional();
             this.modelCardFicha = false;
+          }else if (response.data.status == 401) {                                
+            objeto.$router.push('/');
+            alert("Error de sesion");                
           }
           alert(mensaje);
         })
@@ -480,7 +488,8 @@ export default {
         },
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
           }
         }
       )
@@ -488,6 +497,9 @@ export default {
         let {data, status, mensaje} = response.data;
         if(status === 1){
           this.reservasUser = this.filterReservasByAdicional(data);
+        }else if (response.data.status == 401) {                                
+          objeto.$router.push('/');
+          alert("Error de sesion");                
         }else{
           this.reservasUser = [];
           this.msgResponseServer = mensaje;

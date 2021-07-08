@@ -143,19 +143,29 @@ export default {
               },
               {
                 headers: {
-                  "Content-Type": "application/json"
+                  "Content-Type": "application/json",
+                  "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
                 }
               }
             )
             .then(function(response) {
+              console.log("Status:" + response.data.status);
+              console.log("Mns:" + response.data.mensaje);
               if (response.data.status == 1) {
                 objeto.vista = true;
+                console.log("regista 1");
                 objeto.output = response.data.mensaje;
               } else if (response.data.status == 2) {
                 objeto.vista = true;
-                objeto.output = response.data.status;
+                console.log("regista 2");
+                objeto.output = response.data.mensaje;
+              } else if (response.data.status == 401) {                                
+                objeto.$router.push('/');
+                alert("Error de sesion");
+                
               } else {
                 objeto.vista = true;
+                console.log("regista 3");
                 objeto.output = "Ha ocurrido un error";
               }
             })
@@ -169,10 +179,6 @@ export default {
         if (!this.identificacion) this.errors.push("Identificación requerida.")
         if (!this.correo) this.errors.push("Dirección de correo requerida.")
         if (!this.rules.email.value) this.errors.push("Dirección de correo invalida.")
-   
-
-
-
 
         }
     }
