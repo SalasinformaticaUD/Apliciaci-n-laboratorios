@@ -228,8 +228,10 @@ export default {
           }
         )
         .then(function(response) {
-          var respuesta = response.data.mensaje;
+          var respuesta = response.data.status;
+          if(respuesta=='1'){
           console.log("Este es el token: ");
+
           let token = response.data.data.jwt;
           let decoded = jwt_decode(token);
           console.log(decoded);
@@ -237,7 +239,7 @@ export default {
           objeto.$cookies.set(
               "jwt",
               token,
-              60 * 100,
+              60 * response.data.data.tiempo,
               null,
               null,
               null,
@@ -246,16 +248,18 @@ export default {
 
 
           //localStorage.identificacion= usuarioL; //TENER CUIDADO PARA PRUEBA
-          
 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////                      TODO ESTO DEBE IRSE POR SEGURIDAD                                       //////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
           if (respuesta == "1") {
             let encriptado = objeto.$Crypto.AES.encrypt(
               //objeto.usuarioL,
               usuarioL,
               response.data.data.token
             );
-            console.log("AQUI EL ENCRIPTADO COOKIE: ",encriptado);
-            console.log("AQUI EL OBJ USUARIO: ",usuarioL);
 
 
             objeto.$cookies.set(
@@ -270,7 +274,11 @@ export default {
             // console.log("COOKIE HOME1: ",objeto.$cookies.get("user_session"));
 
             localStorage.cdcb0830cc2dd220 = response.data.data.token;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             objeto.$router.replace({ name: response.data.data.addr });
+          }
           }else {          
             alert("El usuario no existe.");
           }

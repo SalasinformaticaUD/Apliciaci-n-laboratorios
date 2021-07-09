@@ -132,16 +132,12 @@ export default {
     },
     buscar() {
       let objeto = this;
-      objeto.token = localStorage.cdcb0830cc2dd220;
-      let encrypted = objeto.$cookies.get("user_session");
-      let desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
-      let codlab = desen.toString(objeto.$Crypto.enc.Utf8)
-      objeto.codigoLab = codlab;
+  
       this.axios
         .post(
          "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/consultaeditlabo",
           {
-            codigo: objeto.codigoLab
+            
           },
           {
             headers: {

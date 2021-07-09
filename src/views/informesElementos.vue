@@ -190,7 +190,8 @@ export default {
           "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/excelTemporalElementos",JSON.stringify(this.selectedElements),
           {
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Authorization": this.$cookies.get("jwt") ? "Bearer " + this.$cookies.get("jwt") : "",
             }
           }
         )
@@ -201,6 +202,10 @@ export default {
             objeto.axios
             .get("http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/createExcel", {responseType: 'blob'})
             .then(function(response) {
+            if (response.data.status == 401) {                                
+              objeto.$router.push('/');
+              alert("Error de sesion");                
+            }else{
               // Para guardar el documento se crea una etiqueta <a> para asociar un href con un URL y agregarle el atributo de descargar
               const url = window.URL.createObjectURL(new Blob([response.data]));
               const link = document.createElement('a');
@@ -208,6 +213,7 @@ export default {
               link.setAttribute('download', 'Informe.xlsx');
               link.click();
               objeto.dialogSelect = false; //Cierra el v-dialog luego de descargar
+            }
             })
             .catch(function(error) {
               objeto.output = error;

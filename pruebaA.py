@@ -51,30 +51,39 @@ class Usuario(Resource):
     token = '79548af95a6f0d909441d77c3814a3f36030dc317d05a9204dfd8172b7f51b6'
 
     def login(self):
+        # Crear un canal cifrado punto a punto, con el Certificado de Seguridad de la universidad
         user = mongo.db.Usuarios
         usuario = request.json['usuario']
         contrasena = request.json['contrasena']
         tipo = ""
-     
+        # Recibir contraseña y embeberla entre una cadena de caracteres conocidos almacenados en una variable de entorno
+        # Aplicar hash y compararla en la base de datos
         pregunta = user.find_one({"Código_usuario": usuario, "Contraseña": contrasena})
-
+        print("La Pregunta:")
+        print(pregunta)
+    
+        # Por seguridad cambiar la "key" periodicamente, debe ser una llave extensa creada con un generador de contraseñas seguro
         key = "secret"
 
         if pregunta:
-            tipo = pregunta['Tipo']
-            print(tipo)
+            tipo = pregunta['Tipo']            
             mensaje = "1"
-            self.status = 1
+            self.status = 1     
+            tiempo=0       
 
-            encoded = jwt.encode({"tipo": tipo, "Codigo": usuario, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}, key, algorithm="HS256")
-            encoded = encoded.decode('UTF-8')
-
-            if tipo == "Laboratorista":
-               self.datos = {'token': self.token, 'addr':"HomeLaboratorista", 'kind':"1", 'jwt': encoded}       
+            if tipo == "Laboratorista":                
+                self.datos = {'token': self.token, 'addr':"HomeLaboratorista"} 
+                tiempo=60
             elif tipo == "Administrador":
-                self.datos = {'token': self.token, 'addr':"HomeAdmin", 'kind':"2", 'jwt': encoded}
+                self.datos = {'token': self.token, 'addr':"HomeAdmin"}
+                tiempo=15
             elif tipo == "Estudiante":
-                self.datos = {'token': self.token, 'addr':"agendaadicionalesM", 'kind':"3", 'jwt': encoded}
+                self.datos = {'token': self.token, 'addr':"agendaadicionalesM"}
+                tiempo=15
+
+            encoded = jwt.encode({"tipo": tipo, "Codigo": usuario, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=tiempo)}, key, algorithm="HS256")
+            encoded = encoded.decode('UTF-8')
+            self.datos['jwt']=encoded
         else:  
             mensaje = "0"
             print(mensaje)

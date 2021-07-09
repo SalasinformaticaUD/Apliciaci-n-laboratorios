@@ -522,14 +522,8 @@ export default {
     buscartipo(){
       console.log("TIPO USUARIO I:", this.tipoUsuario);
       let objeto = this;
-      objeto.token = localStorage.cdcb0830cc2dd220;
       
-      var encrypted = objeto.$cookies.get("user_session");      
-      var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
-      var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
-      objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);                  
-      objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
-      console.log("AQUÍ EL CODIGO $: ",objeto.codigoLab);
+
       
       this.axios
         .post(
@@ -539,7 +533,7 @@ export default {
             objeto.$serverPort +
             "/Usuario/consultartipo",
           {
-            codigo: objeto.codigoLab,                        
+                                
           },
           {
             headers: {

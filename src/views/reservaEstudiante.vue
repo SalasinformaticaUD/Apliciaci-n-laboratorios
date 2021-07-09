@@ -402,23 +402,16 @@ export default {
       ){
         // Desencriptar el código del usuario
         let objeto = this;      
-        this.usuario=localStorage.usuario;
-        objeto.token = localStorage.cdcb0830cc2dd220;
-      
-        var encrypted = objeto.$cookies.get("user_session");      
-        var desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
-        var codlab = desen.toString(objeto.$Crypto.enc.Utf8);
-        objeto.codigoLab = objeto.$Crypto.AES.decrypt(objeto.$cookies.get("user_session"), objeto.token);
-        objeto.codigoLab=objeto.codigoLab.toString(objeto.$Crypto.enc.Utf8);
-
+        
+        // La función reserva no existe, fue cambiada
         this.axios
           .post(
             "http://" + objeto.$serverURI + ":" + objeto.$serverPort + "/Usuario/reserva",
             {
               hora: this.form.Hora,
               fecha_adicional: this.dateFormatted,
-              codigo: objeto.codigoLab,
-              usuario: this.usuario,
+              
+             
               sala: this.form.Laboratorio,
               banco: this.form.Banco,
               elemento: this.form.Elemento,

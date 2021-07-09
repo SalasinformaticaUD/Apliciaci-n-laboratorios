@@ -952,10 +952,7 @@ export default {
     },
     formSubmit() {
       let objeto = this
-      objeto.token = localStorage.cdcb0830cc2dd220;
-      let encrypted = objeto.$cookies.get("user_session");
-      let desen = objeto.$Crypto.AES.decrypt(encrypted, objeto.token);
-      let codlab = desen.toString(objeto.$Crypto.enc.Utf8)
+    
       
       objeto.codigoLab = codlab;
       this.errors=[]
@@ -1046,8 +1043,7 @@ export default {
               accesorios: this.accesorios.toUpperCase(),
               documentoFuncionario: this.documentoFuncionario,
               nombreFuncionario: this.nombreFuncionario.toUpperCase(),
-              laboratorista : this.usuario,
-              codigoLaboratorista: this.codlab
+              
             },
             {
               headers: {

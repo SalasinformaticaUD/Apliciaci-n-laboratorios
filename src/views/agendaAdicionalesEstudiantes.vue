@@ -634,15 +634,11 @@ export default {
     },
 
     sendFormReservaToServer(){
-      let cod_encrypted = this.$cookies.get("user_session");
-      let codigoLab = this.$Crypto.AES.decrypt(cod_encrypted, localStorage.cdcb0830cc2dd220);
-      codigoLab = codigoLab.toString(this.$Crypto.enc.Utf8);
+
       this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/addReservaEstudiante",
         { 
-          codigoUser: codigoLab,
-          usuario: localStorage.usuario,
-          datos: this.formReserva,
 
+          datos: this.formReserva,
           dateUser: this.dateNow,
           hourUser: new Date().getHours(),
           minutesUser: new Date().getMinutes()
@@ -695,13 +691,11 @@ export default {
 
     getHorariosAdicionales: async function(){
       // Trae del servidor, los adicionales para la semana actual y hasta ocho días después de la fecha actual
-      let cod_encrypted = this.$cookies.get("user_session");
-      let codigoUser = this.$Crypto.AES.decrypt(cod_encrypted, localStorage.cdcb0830cc2dd220);
-      codigoUser = codigoUser.toString(this.$Crypto.enc.Utf8);
+      
 
       await this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getHorariosAdicionalesEstudiantes",
         {
-          codigoUser: codigoUser,
+        
         },
         {
           headers: {

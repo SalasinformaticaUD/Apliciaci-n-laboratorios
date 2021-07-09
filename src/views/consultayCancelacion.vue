@@ -278,6 +278,7 @@
 </style>
 
 <script>
+import jwt_decode from "jwt-decode";
 import Headerestudiantes from "@/components/Headerestudiantes.vue";
 export default {
   components: {
@@ -479,12 +480,12 @@ export default {
     },
 
     getReservasUser() {
-      let token = localStorage.cdcb0830cc2dd220;
-      let codigoLab = this.$Crypto.AES.decrypt(this.$cookies.get("user_session"), token);
-      codigoLab = codigoLab.toString(this.$Crypto.enc.Utf8);
+  
+      
+
       this.axios.post("http://" + this.$serverURI + ":" + this.$serverPort + "/Usuario/getReservasUser",
         {
-          codigo: codigoLab
+          
         },
         {
           headers: {
